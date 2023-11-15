@@ -47,7 +47,7 @@ func GetMockEventString(val map[string]interface{}, withColor bool) string {
 
 func GetJSONObj(filename string) []interface{} {
 	var result interface{}
-	byteValue := getJSONResultBytes(filename)
+	byteValue := getJSONResultBytes(filename, false)
 
 	err := json.Unmarshal(byteValue, &result)
 	if err != nil {
@@ -62,9 +62,9 @@ func GetJSONObj(filename string) []interface{} {
 	return objArr
 }
 
-func GetJSONObjAsString(filename string) string {
+func GetJSONObjAsString(absoluteFilePath string) string {
 	var result interface{}
-	byteValue := getJSONResultBytes(filename)
+	byteValue := getJSONResultBytes(absoluteFilePath, true)
 	err := json.Unmarshal(byteValue, &result)
 	if err != nil {
 		log.Fatalf("Error occurred during unmarshalling (str): %v", err)
@@ -78,15 +78,28 @@ func GetJSONObjAsString(filename string) string {
 	return string(jsonStr)
 }
 
-func getJSONResultBytes(filename string) []byte {
-	jsonPath, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	// When debugging tests the path could differ? Cleanup
-	jsonPath = strings.ReplaceAll(jsonPath, "/httphandling", "")
+func getJSONResultBytes(filename string, absolutePath bool) []byte {
+	var fullJSONPath string
+	var jsonPath string
+	var err error
 
-	byteValue, _ := readJSONFileWithCache(jsonPath + "/" + filename)
+	if absolutePath {
+		fullJSONPath = filename
+	} else {
+		jsonPath, err = os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+
+		// When debugging tests the path could differ? Cleanup
+		jsonPath = strings.ReplaceAll(jsonPath, "/httphandling", "")
+
+		fullJSONPath = jsonPath + "/" + filename
+	}
+
+	fmt.Println("JSON PATH: " + fullJSONPath)
+
+	byteValue, _ := readJSONFileWithCache(fullJSONPath)
 
 	return byteValue
 }
