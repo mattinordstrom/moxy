@@ -74,5 +74,5 @@ $ pre-commit install
 $ pre-commit run --all-files
 ```  
   
-[mockdef.json]: <https://github.com/mattinordstrom/moxy/mockdef.json>
-[proxydef.json]: <https://github.com/mattinordstrom/moxy/proxydef.json>
+[mockdef.json]: <https://github.com/mattinordstrom/moxy/blob/main/mockdef.json>
+[proxydef.json]: <https://github.com/mattinordstrom/moxy/blob/main/proxydef.json>
