@@ -11,6 +11,8 @@ import (
 	ut "github.com/mattinordstrom/moxy/utils"
 )
 
+var Bullet = "\u2022"
+
 func main() {
 	pFlag := flag.Int("p", hh.Port, "specify port to run on")
 	lFlag := flag.Bool("l", false, "list redirects without starting server")
@@ -24,9 +26,12 @@ func main() {
 	}
 	hh.DefaultRoute = config.AppConfig.Defaults.DefaultRoute
 
-	fmt.Println(ut.ColorBold + "\n:::::::::::: MOXY ::::::::::::\n" + ut.ColorReset)
-	fmt.Println(fmt.Sprint(" \u2022"+" Run on: http://localhost:", hh.Port))
-	fmt.Println(" \u2022" + " Default route: " + hh.DefaultRoute)
+	fmt.Println(ut.ColorBold + "::::::::::::::: MOXY :::::::::::::::" + ut.ColorReset)
+	fmt.Println(ut.ColorGray + "mocking and proxying requests on localhost" + ut.ColorReset)
+	fmt.Println(" ")
+	fmt.Println(Bullet + " Run on:        http://localhost:" + strconv.Itoa(hh.Port))
+	fmt.Println(Bullet + " Default route: " + hh.DefaultRoute)
+	fmt.Println(Bullet + " Admin UI:      http://localhost:9097/moxyadminui")
 	fmt.Println(" ")
 	fmt.Println(" ")
 
