@@ -97,8 +97,6 @@ func getJSONResultBytes(filename string, absolutePath bool) []byte {
 		fullJSONPath = jsonPath + "/" + filename
 	}
 
-	fmt.Println("JSON PATH: " + fullJSONPath)
-
 	byteValue, _ := readJSONFileWithCache(fullJSONPath)
 
 	return byteValue

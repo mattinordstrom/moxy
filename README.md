@@ -40,7 +40,11 @@ Edit proxies: [proxydef.json]
 - If no match is found in Json the "Default route" will be used
 - / will be trimmed from all mock URLs (/api/test/ will match api/test)
   
-      
+
+##
+##
+## WIP admin UI:
+Go to http://localhost:9097/moxyadminui (work in progress)
 ___
 
   
