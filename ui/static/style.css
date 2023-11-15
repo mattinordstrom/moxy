@@ -1,0 +1,135 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-family: monospace;
+}
+
+header {
+    background-color: #f1f1f1;
+    padding: 10px;
+    text-align: left;
+}
+
+.container {
+    flex-grow: 1;
+    display: flex;
+    margin-bottom: 150px;
+}
+
+.left, .right {
+    flex: 1;
+    text-align: left;
+    border: none;
+    margin-left: 6px;
+}
+
+.left {
+    border-right: 2px solid #000;
+}
+
+input {
+    min-height: 22px;
+}
+
+.input-wide {
+    min-width: 320px;
+}
+
+label {
+    min-width: 200px;
+}
+
+footer {
+    background-color: #e1ddc7;
+    padding: 10px;
+    text-align: left;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    height: 100px;
+    overflow-y: auto;
+}
+
+footer.expanded {
+    max-height: 100vh;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+}
+
+.bullet {
+    height: 10px;
+    width: 10px;
+    background-color: green;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.bullet-red {
+    background-color: red;
+}
+
+.header-info {
+    color: #333333;
+}
+
+.expbutton {
+    margin-top: 20px;
+    min-height: 36px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.logextrabutton {
+    position: absolute;
+    right: 2%;
+}
+
+.logextrabutton-btn {
+    margin-top: 20px;
+    min-height: 36px;
+    margin-left: 6px;
+}
+
+#footer-log {
+    margin-top: 20px;
+}
+
+.proxymock-content-container {
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
+.proxymock-content {
+    display: flex;
+    flex-direction: column;
+    background-color: #ccc;
+    margin-left: 30px;
+    width: 70%;
+    padding: 10px;
+}
+
+.proxy-obj, .mock-obj {
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.proxy-obj label, .mock-obj label {
+    margin-right: 10px;
+    min-width: 140px;
+}
+
+.cbox {
+    width: 20px;
+    height: 20px;
+}
+
+.slct {
+    height: 38px;
+    min-width: 130px;
+}

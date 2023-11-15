@@ -1,0 +1,23 @@
+[
+  {
+    "active": true,
+    "comment": "test",
+    "freezetimems": 1000,
+    "matchPathExact": false,
+    "method": "GET",
+    "payload": {
+      "response": "abc123"
+    },
+    "statuscode": 404,
+    "urlpart": "/api/whatever/someendpoint"
+  },
+  {
+    "active": true,
+    "freezetimems": 0,
+    "matchPathExact": true,
+    "method": "GET",
+    "payloadFromFile": "mocks_proxies_archive/payloads/example.json",
+    "statuscode": 200,
+    "urlpart": "/api/entities"
+  }
+]

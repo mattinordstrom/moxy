@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>moxy</title>
+    <link rel="stylesheet" href="/ui/static/style.css">
+    <script src="/ui/static/main.js"></script>
+</head>
+<body onload="initFunc()">
+    <header>
+        <h1>moxy</h1>
+        <h5>mocking and proxying requests on localhost</h5>
+        <br />
+        <div class="header-info"><b>Port:</b> <span id="header-port"></span>&nbsp;&nbsp;|&nbsp;&nbsp;<b>Default route:</b> <span id="header-route"></span>&nbsp;&nbsp;|&nbsp;&nbsp;<b>WS:</b> <span id="header-ws"></span></div>
+    </header>
+
+    <div class="container">
+        <div class="left">
+            <h2>mock definitions</h2>
+            <div id="mock-content-container" class="proxymock-content-container"></div>
+        </div>
+        <div class="right">
+            <h2>proxy definitions</h2>
+            <div id="proxy-content-container" class="proxymock-content-container"></div>
+        </div>
+    </div>
+
+    <footer>
+        <button class="expbutton" id="expand-button">^ Toggle fullscreen log ^</button>
+        <div class="logextrabutton">
+            <button class="logextrabutton-btn" id="clear-log-button">Clear log</button>
+            <button class="logextrabutton-btn" id="add-lines-button">Add 5 empty lines</button>
+        </div>
+        <div id="footer-log"></div>
+    </footer>
+</body>
+</html>
