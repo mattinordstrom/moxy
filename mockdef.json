@@ -16,7 +16,7 @@
     "freezetimems": 0,
     "matchPathExact": true,
     "method": "GET",
-    "payloadFromFile": "/home/matti/projects/moxy/mocks_proxies_archive/payloads/example.json",
+    "payloadFromFile": "/home/matti/projects/moxy/archive/example.json",
     "statuscode": 200,
     "urlpart": "/api/entities"
   }
