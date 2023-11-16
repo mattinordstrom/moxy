@@ -49,8 +49,7 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 	switch reqURL {
 	case "/moxyadminui/mockdef":
 		if req.Method == "POST" {
-			// TODO implement json update from admin
-			fmt.Println("----------- mockdef POST -------------")
+			// fmt.Println("----------- mockdef POST -------------")
 			jsonData, err := io.ReadAll(req.Body)
 			if err != nil {
 				http.Error(resWriter, err.Error(), http.StatusInternalServerError)
