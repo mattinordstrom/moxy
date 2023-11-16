@@ -14,6 +14,12 @@ alias moxy="cd /home/matti/projects/moxy && go run main.go"
 ```
 
 ##  
+#### Dont track config
+```sh
+git update-index --assume-unchanged config.yml
+```  
+  
+##  
 ##  
 ## Run:  
 #### Run (on default port 9097)  
