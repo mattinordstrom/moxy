@@ -75,6 +75,10 @@ footer.expanded {
     color: #333333;
 }
 
+.fixed-textarea {
+    resize: none;
+}
+
 .expbutton {
     margin-top: 20px;
     min-height: 36px;

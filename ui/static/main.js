@@ -48,13 +48,13 @@ function renderMockdef(data) {
             '</select></div>';
 
             if(mockEntityData['payload']) {
-                mockEntity += '<div class="mock-obj"><label for="payload'+i+'">payload:</label><textarea rows="8" cols="36" name="payload'+i+'" id="payload'+i+'">' + JSON.stringify(mockEntityData['payload'], null, 2) + '</textarea></div>';
+                mockEntity += '<div class="mock-obj"><label for="payload'+i+'">payload:</label><textarea spellcheck="false" rows="8" cols="36" name="payload'+i+'" id="payload'+i+'">' + JSON.stringify(mockEntityData['payload'], null, 2) + '</textarea></div>';
             } else if (mockEntityData['payloadFromFile']) {
-                mockEntity += '<div class="mock-obj"><label for="payloadFromFile'+i+'">payloadFromFile:</label><input class="input-wide" type="text" name="payloadFromFile'+i+'" id="payloadFromFile'+i+'" value="' + mockEntityData['payloadFromFile'] + '"></input></div>';
+                mockEntity += '<div class="mock-obj"><label for="payloadFromFile'+i+'">payloadFromFile:</label><textarea spellcheck="false" rows="3" cols="36" class="fixed-textarea" name="payloadFromFile'+i+'" id="payloadFromFile'+i+'">' + mockEntityData['payloadFromFile'] + '</textarea></div>';
             }
 
             mockEntity += '<div class="mock-obj"><label for="statuscode'+i+'">statuscode:</label><input type="text" name="statuscode'+i+'" id="statuscode'+i+'" value="' + mockEntityData['statuscode'] + '"></input></div>' +
-            '<div class="mock-obj"><label for="urlpart_mock'+i+'"><b>urlpart:</b></label><input class="input-wide" type="text" name="urlpart_mock'+i+'" id="urlpart_mock'+i+'" value="' + mockEntityData['urlpart'] + '"></input></div>' +
+            '<div class="mock-obj"><label for="urlpart_mock'+i+'"><b>urlpart:</b></label><input spellcheck="false" class="input-wide" type="text" name="urlpart_mock'+i+'" id="urlpart_mock'+i+'" value="' + mockEntityData['urlpart'] + '"></input></div>' +
             '</div>';
 
             document.getElementById('mock-content-container').innerHTML += mockEntity + "<br />";
@@ -67,8 +67,8 @@ function renderProxydef(data) {
         const proxyEntityData = data[i];
         let proxyEntity = '<div class="proxymock-content">' +
             '<div class="proxy-obj"><label for="active_proxy'+i+'">active:</label><input class="cbox" type="checkbox" name="active_proxy'+i+'" id="active_proxy'+i+'" ' + (proxyEntityData['active'] ? "checked" : "") + '></input></div>' +    
-            '<div class="proxy-obj"><label for="target'+i+'">target:</label><input class="input-wide" type="text" name="target'+i+'" id="target'+i+'" value="' + proxyEntityData['target'] + '"></input></div>' +
-            '<div class="proxy-obj"><label for="urlpart_proxy'+i+'"><b>urlpart:</b></label><input class="input-wide" type="text" name="urlpart_proxy'+i+'" id="urlpart_proxy'+i+'" value="' + proxyEntityData['urlpart'] + '"></input></div>' +
+            '<div class="proxy-obj"><label for="target'+i+'">target:</label><input spellcheck="false" class="input-wide" type="text" name="target'+i+'" id="target'+i+'" value="' + proxyEntityData['target'] + '"></input></div>' +
+            '<div class="proxy-obj"><label for="urlpart_proxy'+i+'"><b>urlpart:</b></label><input spellcheck="false" class="input-wide" type="text" name="urlpart_proxy'+i+'" id="urlpart_proxy'+i+'" value="' + proxyEntityData['urlpart'] + '"></input></div>' +
             '<div class="proxy-obj"><label for="verbose'+i+'">verbose:</label><input class="cbox" type="checkbox" name="verbose'+i+'" id="verbose'+i+'" ' + (proxyEntityData['verbose'] ? "checked" : "") + '></input></div>' +    
             '</div>';
 
