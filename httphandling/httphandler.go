@@ -19,6 +19,8 @@ var MockFile = "mockdef.json"
 var Port = 9097
 var DefaultRoute = ""
 
+var htmlBreak = "<br />"
+
 func CreateHTTPListener() {
 	// Start listening
 	fmt.Printf("Now listening on port %s...\n", strconv.Itoa(Port))
@@ -164,6 +166,15 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 				}
 				if bodyStr := string(bodyBytes); bodyStr != "" {
 					fmt.Println(bodyStr)
+
+					updateAdminWithLatest(htmlBreak +
+						req.Method + " " + reqURL + utils.RightArrow + newURL +
+						htmlBreak + headerString +
+						htmlBreak + bodyStr + htmlBreak)
+				} else {
+					updateAdminWithLatest(htmlBreak +
+						req.Method + " " + reqURL + utils.RightArrow + newURL +
+						htmlBreak + headerString + htmlBreak)
 				}
 
 				// Restore the body for further processing

@@ -11,7 +11,7 @@ import (
 	ut "github.com/mattinordstrom/moxy/utils"
 )
 
-var Bullet = "\u2022"
+var bullet = "\u2022"
 
 func main() {
 	pFlag := flag.Int("p", hh.Port, "specify port to run on")
@@ -29,9 +29,9 @@ func main() {
 	fmt.Println(ut.ColorBold + "::::::::::::::: MOXY :::::::::::::::" + ut.ColorReset)
 	fmt.Println(ut.ColorGray + "mocking and proxying requests on localhost" + ut.ColorReset)
 	fmt.Println(" ")
-	fmt.Println(Bullet + " Run on:        http://localhost:" + strconv.Itoa(hh.Port))
-	fmt.Println(Bullet + " Default route: " + hh.DefaultRoute)
-	fmt.Println(Bullet + " Admin UI:      http://localhost:9097/moxyadminui")
+	fmt.Println(bullet + " Run on:        http://localhost:" + strconv.Itoa(hh.Port))
+	fmt.Println(bullet + " Default route: " + hh.DefaultRoute)
+	fmt.Println(bullet + " Admin UI:      http://localhost:9097/moxyadminui")
 	fmt.Println(" ")
 	fmt.Println(" ")
 

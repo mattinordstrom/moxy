@@ -51,7 +51,7 @@ func GetJSONObj(filename string) []interface{} {
 
 	err := json.Unmarshal(byteValue, &result)
 	if err != nil {
-		log.Fatalf("Error occurred during unmarshalling (obj): %v", err)
+		log.Fatalf("Error occurred during unmarshalling (obj) in file %s: %v", filename, err)
 	}
 
 	objArr, ok := result.([]interface{})
@@ -67,7 +67,7 @@ func GetJSONObjAsString(absoluteFilePath string) string {
 	byteValue := getJSONResultBytes(absoluteFilePath, true)
 	err := json.Unmarshal(byteValue, &result)
 	if err != nil {
-		log.Fatalf("Error occurred during unmarshalling (str): %v", err)
+		log.Fatalf("Error occurred during unmarshalling (str) in file %s: %v", absoluteFilePath, err)
 	}
 
 	jsonStr, err := json.Marshal(result)

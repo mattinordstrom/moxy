@@ -44,7 +44,6 @@ label {
 
 footer {
     background-color: #e1ddc7;
-    padding: 10px;
     text-align: left;
     position: fixed;
     width: 100%;
@@ -97,6 +96,7 @@ footer.expanded {
 
 #footer-log {
     margin-top: 20px;
+    margin-left: 10px;
 }
 
 .proxymock-content-container {

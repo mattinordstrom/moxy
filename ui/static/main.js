@@ -34,12 +34,13 @@ function initFunc() {
 }
 
 function renderMockdef(data) {
-    data.forEach((mockEntityData) => {
+    for (let i = 0; i < data.length; i++) {
+        const mockEntityData = data[i];
         let mockEntity = '<div class="proxymock-content">' +
-            '<div class="mock-obj"><label for="active_mock1">active:</label><input class="cbox" type="checkbox" name="active_mock1" id="active_mock1" ' + (mockEntityData['active'] ? "checked" : "") + '></input></div>' +
-            '<div class="mock-obj"><label for="freezetime1">freezetimems:</label><input type="text" name="freezetime1" id="freezetime1" value="' + mockEntityData['freezetimems'] + '"></input></div>' +
-            '<div class="mock-obj"><label for="matchpathexact1">matchPathExact:</label><input class="cbox" type="checkbox" name="matchpathexact1" id="matchpathexact1" ' + (mockEntityData['matchPathExact'] ? "checked" : "") + '></input></div>' +
-            '<div class="mock-obj"><label for="method1">method:</label><select class="slct" name="method1" id="method1">' +
+            '<div class="mock-obj"><label for="active_mock'+i+'">active:</label><input class="cbox" type="checkbox" name="active_mock'+i+'" id="active_mock'+i+'" ' + (mockEntityData['active'] ? "checked" : "") + '></input></div>' +
+            '<div class="mock-obj"><label for="freezetime'+i+'">freezetimems:</label><input type="text" name="freezetime'+i+'" id="freezetime'+i+'" value="' + mockEntityData['freezetimems'] + '"></input></div>' +
+            '<div class="mock-obj"><label for="matchpathexact'+i+'">matchPathExact:</label><input class="cbox" type="checkbox" name="matchpathexact'+i+'" id="matchpathexact'+i+'" ' + (mockEntityData['matchPathExact'] ? "checked" : "") + '></input></div>' +
+            '<div class="mock-obj"><label for="method'+i+'">method:</label><select class="slct" name="method'+i+'" id="method'+i+'">' +
             '<option value="GET" ' + (mockEntityData['method'] === "GET" ? "selected" : "") + '>GET</option>' +
             '<option value="POST" ' + (mockEntityData['method'] === "POST" ? "selected" : "") + '>POST</option>' +
             '<option value="PUT" ' + (mockEntityData['method'] === "PUT" ? "selected" : "") + '>PUT</option>' +
@@ -47,33 +48,34 @@ function renderMockdef(data) {
             '</select></div>';
 
             if(mockEntityData['payload']) {
-                mockEntity += '<div class="mock-obj"><label for="payload1">payload:</label><textarea rows="8" cols="40" name="payload1" id="payload1">' + JSON.stringify(mockEntityData['payload'], null, 2) + '</textarea></div>';
+                mockEntity += '<div class="mock-obj"><label for="payload'+i+'">payload:</label><textarea rows="8" cols="40" name="payload'+i+'" id="payload'+i+'">' + JSON.stringify(mockEntityData['payload'], null, 2) + '</textarea></div>';
             } else if (mockEntityData['payloadFromFile']) {
-                mockEntity += '<div class="mock-obj"><label for="payloadFromFile1">payloadFromFile:</label><input class="input-wide" type="text" name="payloadFromFile1" id="payloadFromFile1" value="' + mockEntityData['payloadFromFile'] + '"></input></div>';
+                mockEntity += '<div class="mock-obj"><label for="payloadFromFile'+i+'">payloadFromFile:</label><input class="input-wide" type="text" name="payloadFromFile'+i+'" id="payloadFromFile'+i+'" value="' + mockEntityData['payloadFromFile'] + '"></input></div>';
             }
 
-            mockEntity += '<div class="mock-obj"><label for="statuscode1">statuscode:</label><input type="text" name="statuscode1" id="statuscode1" value="' + mockEntityData['statuscode'] + '"></input></div>' +
-            '<div class="mock-obj"><label for="urlpart_mock1">urlpart:</label><input class="input-wide" type="text" name="urlpart_mock1" id="urlpart_mock1" value="' + mockEntityData['urlpart'] + '"></input></div>' +
+            mockEntity += '<div class="mock-obj"><label for="statuscode'+i+'">statuscode:</label><input type="text" name="statuscode'+i+'" id="statuscode'+i+'" value="' + mockEntityData['statuscode'] + '"></input></div>' +
+            '<div class="mock-obj"><label for="urlpart_mock'+i+'">urlpart:</label><input class="input-wide" type="text" name="urlpart_mock'+i+'" id="urlpart_mock'+i+'" value="' + mockEntityData['urlpart'] + '"></input></div>' +
             '</div>';
 
             document.getElementById('mock-content-container').innerHTML += mockEntity + "<br />";
-    });
+    };
 
     // Add some space to between last entity and the footer
     document.getElementById('mock-content-container').innerHTML += '<div style="margin-bottom:200px"></div>';
 }
 
 function renderProxydef(data) {
-    data.forEach((proxyEntityData) => {
+    for (let i = 0; i < data.length; i++) {
+        const proxyEntityData = data[i];
         let proxyEntity = '<div class="proxymock-content">' +
-            '<div class="proxy-obj"><label for="active_proxy1">active:</label><input class="cbox" type="checkbox" name="active_proxy1" id="active_proxy1" ' + (proxyEntityData['active'] ? "checked" : "") + '></input></div>' +    
-            '<div class="proxy-obj"><label for="target1">target:</label><input class="input-wide" type="text" name="target1" id="target1" value="' + proxyEntityData['target'] + '"></input></div>' +
-            '<div class="proxy-obj"><label for="urlpart_proxy1">urlpart:</label><input class="input-wide" type="text" name="urlpart_proxy1" id="urlpart_proxy1" value="' + proxyEntityData['urlpart'] + '"></input></div>' +
-            '<div class="proxy-obj"><label for="verbose1">verbose:</label><input class="cbox" type="checkbox" name="verbose1" id="verbose1" ' + (proxyEntityData['verbose'] ? "checked" : "") + '></input></div>' +    
+            '<div class="proxy-obj"><label for="active_proxy'+i+'">active:</label><input class="cbox" type="checkbox" name="active_proxy'+i+'" id="active_proxy'+i+'" ' + (proxyEntityData['active'] ? "checked" : "") + '></input></div>' +    
+            '<div class="proxy-obj"><label for="target'+i+'">target:</label><input class="input-wide" type="text" name="target'+i+'" id="target'+i+'" value="' + proxyEntityData['target'] + '"></input></div>' +
+            '<div class="proxy-obj"><label for="urlpart_proxy'+i+'">urlpart:</label><input class="input-wide" type="text" name="urlpart_proxy'+i+'" id="urlpart_proxy'+i+'" value="' + proxyEntityData['urlpart'] + '"></input></div>' +
+            '<div class="proxy-obj"><label for="verbose'+i+'">verbose:</label><input class="cbox" type="checkbox" name="verbose'+i+'" id="verbose'+i+'" ' + (proxyEntityData['verbose'] ? "checked" : "") + '></input></div>' +    
             '</div>';
 
         document.getElementById('proxy-content-container').innerHTML += proxyEntity + "<br />";
-    });
+    };
 
     // Add some space to between last entity and the footer
     document.getElementById('proxy-content-container').innerHTML += '<div style="margin-bottom:200px"></div>';
