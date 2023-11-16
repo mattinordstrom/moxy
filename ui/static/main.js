@@ -47,7 +47,7 @@ function renderMockdef(data) {
             '</select></div>';
 
             if(mockEntityData['payload']) {
-                mockEntity += '<div class="mock-obj"><label for="payload1">payload:</label><textarea rows="8" cols="40" name="payload1" id="payload1">' + JSON.stringify(mockEntityData['payload']) + '</textarea></div>';
+                mockEntity += '<div class="mock-obj"><label for="payload1">payload:</label><textarea rows="8" cols="40" name="payload1" id="payload1">' + JSON.stringify(mockEntityData['payload'], null, 2) + '</textarea></div>';
             } else if (mockEntityData['payloadFromFile']) {
                 mockEntity += '<div class="mock-obj"><label for="payloadFromFile1">payloadFromFile:</label><input class="input-wide" type="text" name="payloadFromFile1" id="payloadFromFile1" value="' + mockEntityData['payloadFromFile'] + '"></input></div>';
             }

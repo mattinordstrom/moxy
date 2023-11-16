@@ -35,6 +35,19 @@ func main() {
 	fmt.Println(" ")
 	fmt.Println(" ")
 
+	// Mockdef
+	mockObjArr := ut.GetJSONObj("mockdef.json")
+	fmt.Println(ut.ColorPurple + "-------- Mockdef --------" + ut.ColorReset)
+	for _, val := range mockObjArr {
+		val, ok := val.(map[string]interface{})
+		if !ok {
+			log.Fatalln("mockdef. expected type map[string]interface{} (init)")
+		}
+
+		fmt.Println(ut.GetMockEventString(val, true) + getInactiveStr(fmt.Sprint(val["active"])))
+	}
+	fmt.Println(ut.ColorPurple + "-------------------------\n" + ut.ColorReset)
+
 	// Proxydef
 	objArr := ut.GetJSONObj("proxydef.json")
 	fmt.Println(ut.ColorGreen + "-------- Proxydef --------" + ut.ColorReset)
@@ -50,19 +63,6 @@ func main() {
 			getInactiveStr(fmt.Sprint(val["active"])))
 	}
 	fmt.Println(ut.ColorGreen + "--------------------------\n" + ut.ColorReset)
-
-	// Mockdef
-	mockObjArr := ut.GetJSONObj("mockdef.json")
-	fmt.Println(ut.ColorPurple + "-------- Mockdef --------" + ut.ColorReset)
-	for _, val := range mockObjArr {
-		val, ok := val.(map[string]interface{})
-		if !ok {
-			log.Fatalln("mockdef. expected type map[string]interface{} (init)")
-		}
-
-		fmt.Println(ut.GetMockEventString(val, true) + getInactiveStr(fmt.Sprint(val["active"])))
-	}
-	fmt.Println(ut.ColorPurple + "-------------------------\n" + ut.ColorReset)
 
 	if !*lFlag {
 		// INIT HTTP HANDLING
