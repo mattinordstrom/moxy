@@ -51,8 +51,8 @@ Edit proxies: [proxydef.json]
 
 ##
 ##
-## WIP admin UI:
-Go to http://localhost:9097/moxyadminui (work in progress)
+## Admin UI:
+Go to http://localhost:9097/moxyadminui
 ___
 
   
