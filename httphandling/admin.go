@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -47,9 +48,10 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 	reqURL := fmt.Sprint(req.URL)
 
 	switch reqURL {
-	case "/moxyadminui/mockdef":
+	case "/moxyadminui/mockdef", "/moxyadminui/proxydef":
+		jsonName := reqURL[strings.LastIndex(reqURL, "/")+1:]
 		if req.Method == "POST" {
-			// fmt.Println("----------- mockdef POST -------------")
+			// fmt.Println("----------- mockdef proxydef POST -------------")
 			jsonData, err := io.ReadAll(req.Body)
 			if err != nil {
 				http.Error(resWriter, err.Error(), http.StatusInternalServerError)
@@ -73,17 +75,15 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 				return
 			}
 
-			errr := os.WriteFile("mockdef.json", jsonData, 0644)
+			errr := os.WriteFile(jsonName+".json", jsonData, 0644)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
 
 				return
 			}
 		} else {
-			http.ServeFile(resWriter, req, "mockdef.json")
+			http.ServeFile(resWriter, req, jsonName+".json")
 		}
-	case "/moxyadminui/proxydef":
-		http.ServeFile(resWriter, req, "proxydef.json")
 	case "/moxyadminui/settings":
 		data := Settings{
 			Port:         Port,

@@ -66,10 +66,10 @@ function renderProxydef(data) {
     for (let i = 0; i < data.length; i++) {
         const proxyEntityData = data[i];
         let proxyEntity = '<div class="proxymock-content">' +
-            '<div class="proxy-obj"><label for="active_proxy_'+i+'">active:</label><input class="cbox" type="checkbox" name="active_proxy_'+i+'" id="active_proxy_'+i+'" ' + (proxyEntityData['active'] ? "checked" : "") + '></input></div>' +    
-            '<div class="proxy-obj"><label for="target_'+i+'">target:</label><input spellcheck="false" class="input-wide" type="text" name="target_'+i+'" id="target_'+i+'" value="' + proxyEntityData['target'] + '"></input></div>' +
-            '<div class="proxy-obj"><label for="urlpart_proxy_'+i+'"><b>urlpart:</b></label><input spellcheck="false" class="input-wide" type="text" name="urlpart_proxy_'+i+'" id="urlpart_proxy_'+i+'" value="' + proxyEntityData['urlpart'] + '"></input></div>' +
-            '<div class="proxy-obj"><label for="verbose_'+i+'">verbose:</label><input class="cbox" type="checkbox" name="verbose_'+i+'" id="verbose_'+i+'" ' + (proxyEntityData['verbose'] ? "checked" : "") + '></input></div>' +    
+            '<div class="proxy-obj"><label for="active_proxy_'+i+'">active:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="active_proxy_'+i+'" id="active_proxy_'+i+'" ' + (proxyEntityData['active'] ? "checked" : "") + '></input></div>' +    
+            '<div class="proxy-obj"><label for="target_'+i+'">target:</label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="target_'+i+'" id="target_'+i+'" value="' + proxyEntityData['target'] + '"></input></div>' +
+            '<div class="proxy-obj"><label for="urlpart_proxy_'+i+'"><b>urlpart:</b></label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_proxy_'+i+'" id="urlpart_proxy_'+i+'" value="' + proxyEntityData['urlpart'] + '"></input></div>' +
+            '<div class="proxy-obj"><label for="verbose_'+i+'">verbose:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="verbose_'+i+'" id="verbose_'+i+'" ' + (proxyEntityData['verbose'] ? "checked" : "") + '></input></div>' +    
             '</div>';
 
         document.getElementById('proxy-content-container').innerHTML += proxyEntity + "<br />";
@@ -141,9 +141,33 @@ function updateMockdef(evt) {
         body: JSON.stringify(globalMockdefObj),
     })
     .then(data => {
-        console.log("Success POST");
+        console.log("Success POST mockdef");
     })
     .catch(error => {
-        console.error('POST error:', error);
+        console.error('POST error mockdef:', error);
+    });
+}
+
+function updateProxydef(evt) {
+    const index = Number(evt.id.split('_').slice(-1)[0]);
+    const name = evt.id.split('_')[0];
+
+    if(evt.tagName.toLowerCase() === "input") {
+        if(evt.type === "checkbox") {
+            globalProxydefObj[index][name] = evt.checked;
+        } else if(evt.type === "text") {
+            globalProxydefObj[index][name] = evt.value;
+        } 
+    }
+
+    fetch('/moxyadminui/proxydef', {
+        method: "POST",
+        body: JSON.stringify(globalProxydefObj),
+    })
+    .then(data => {
+        console.log("Success POST proxydef");
+    })
+    .catch(error => {
+        console.error('POST error proxydef:', error);
     });
 }
