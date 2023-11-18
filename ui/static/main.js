@@ -33,13 +33,14 @@ function initFunc() {
     wsSetup();
 }
 
-function renderMockdef(data) {
+function renderMockdef() {
+    const data = globalMockdefObj;
     for (let i = 0; i < data.length; i++) {
         const mockEntityData = data[i];
-        let mockEntity = '<div class="proxymock-content">' +
+        let mockEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1)+'<div style="margin-right:4px"><button onclick="removeMock(this)" id="x_btn_'+i+'">X</button></div></div>' +
             '<div class="mock-obj"><label for="active_mock_'+i+'">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_'+i+'" id="active_mock_'+i+'" ' + (mockEntityData['active'] ? "checked" : "") + '></input></div>' +
-            '<div class="mock-obj"><label for="freezetime_'+i+'">freezetimems:</label><input onchange="updateMockdef(this)" type="text" name="freezetimems_'+i+'" id="freezetimems_'+i+'" value="' + mockEntityData['freezetimems'] + '"></input></div>' +
-            '<div class="mock-obj"><label for="matchpathexact_'+i+'">matchPathExact:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="matchPathExact_'+i+'" id="matchPathExact_'+i+'" ' + (mockEntityData['matchPathExact'] ? "checked" : "") + '></input></div>' +
+            '<div class="mock-obj"><label for="freezetimems_'+i+'">freezetimems:</label><input onchange="updateMockdef(this)" type="text" name="freezetimems_'+i+'" id="freezetimems_'+i+'" value="' + mockEntityData['freezetimems'] + '"></input></div>' +
+            '<div class="mock-obj"><label for="matchPathExact_'+i+'">matchPathExact:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="matchPathExact_'+i+'" id="matchPathExact_'+i+'" ' + (mockEntityData['matchPathExact'] ? "checked" : "") + '></input></div>' +
             '<div class="mock-obj"><label for="method_'+i+'">method:</label><select onchange="updateMockdef(this)" class="slct" name="method_'+i+'" id="method_'+i+'">' +
             '<option value="GET" ' + (mockEntityData['method'] === "GET" ? "selected" : "") + '>GET</option>' +
             '<option value="POST" ' + (mockEntityData['method'] === "POST" ? "selected" : "") + '>POST</option>' +
@@ -62,10 +63,11 @@ function renderMockdef(data) {
 
 }
 
-function renderProxydef(data) {
+function renderProxydef() {
+    const data = globalProxydefObj;
     for (let i = 0; i < data.length; i++) {
         const proxyEntityData = data[i];
-        let proxyEntity = '<div class="proxymock-content">' +
+        let proxyEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1)+'<div style="margin-right:4px"><button onclick="removeProxy(this)" id="x_btn_'+i+'">X</button></div></div>' +
             '<div class="proxy-obj"><label for="active_proxy_'+i+'">active:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="active_proxy_'+i+'" id="active_proxy_'+i+'" ' + (proxyEntityData['active'] ? "checked" : "") + '></input></div>' +    
             '<div class="proxy-obj"><label for="target_'+i+'">target:</label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="target_'+i+'" id="target_'+i+'" value="' + proxyEntityData['target'] + '"></input></div>' +
             '<div class="proxy-obj"><label for="urlpart_proxy_'+i+'"><b>urlpart:</b></label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_proxy_'+i+'" id="urlpart_proxy_'+i+'" value="' + proxyEntityData['urlpart'] + '"></input></div>' +
@@ -112,6 +114,55 @@ function wsSetup() {
         console.log("WebSocket Close: " + event);
         document.getElementById('header-ws').innerHTML = 'closed <span class="bullet bullet-red"></span>';
     };
+}
+
+function addMock() {
+    const mock = {
+        "active": true,
+        "freezetimems": 0,
+        "matchPathExact": false,
+        "method": "GET",
+        "payload": {
+            "response": "abc123"
+        },
+        "statuscode": 200,
+        "urlpart": "/api/whatever/someendpoint"
+    };
+
+    globalMockdefObj.push(mock);
+
+    document.getElementById('mock-content-container').innerHTML = "";
+    renderMockdef();
+}
+
+function addProxy() {
+    const proxy = {
+        "active": true,
+        "target": "http://localhost:8080",
+        "urlpart": "/api/test123",
+        "verbose": false
+    };
+
+      globalProxydefObj.push(proxy);
+
+    document.getElementById('proxy-content-container').innerHTML = "";
+    renderProxydef();
+}
+
+function removeMock(evt) {
+    const index = Number(evt.id.split('_').slice(-1)[0]);
+    globalMockdefObj.splice(index, 1);
+
+    document.getElementById('mock-content-container').innerHTML = "";
+    renderMockdef();
+}
+
+function removeProxy(evt) {
+    const index = Number(evt.id.split('_').slice(-1)[0]);
+    globalProxydefObj.splice(index, 1);
+
+    document.getElementById('proxy-content-container').innerHTML = "";
+    renderProxydef();
 }
 
 function updateMockdef(evt) {
