@@ -49,7 +49,7 @@ function renderMockdef() {
             '<div><button onclick="removeMock(this)" id="x_btn_'+i+'">X</button></div>' +
             '</div></div>' +
             '<div class="mock-obj"><label for="active_mock_'+i+'">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_'+i+'" id="active_mock_'+i+'" ' + (mockEntityData['active'] ? "checked" : "") + '></input></div>' +
-            '<div class="mock-obj"><label for="freezetimems_'+i+'">freezetimems:</label><input onchange="updateMockdef(this)" type="text" name="freezetimems_'+i+'" id="freezetimems_'+i+'" value="' + mockEntityData['freezetimems'] + '"></input></div>' +
+            '<div class="mock-obj"><label for="freezetimems_'+i+'">freezetimems:</label><input onchange="updateMockdef(this)" type="number" name="freezetimems_'+i+'" id="freezetimems_'+i+'" value="' + mockEntityData['freezetimems'] + '"></input></div>' +
             '<div class="mock-obj"><label for="method_'+i+'">method:</label><select onchange="updateMockdef(this)" class="slct" name="method_'+i+'" id="method_'+i+'">' +
             '<option value="GET" ' + (mockEntityData['method'] === "GET" ? "selected" : "") + '>GET</option>' +
             '<option value="POST" ' + (mockEntityData['method'] === "POST" ? "selected" : "") + '>POST</option>' +
@@ -67,7 +67,7 @@ function renderMockdef() {
 
             mockEntity += '<div class="mock-obj"><label for="payloadFromFile_'+i+'">payloadFromFile:</label><textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="32" class="fixed-textarea" name="payloadFromFile_'+i+'" id="payloadFromFile_'+i+'">' + mockEntityData['payloadFromFile'] + '</textarea></div>';
 
-            mockEntity += '<div class="mock-obj"><label for="statuscode_'+i+'">statuscode:</label><input onchange="updateMockdef(this)" type="text" name="statuscode_'+i+'" id="statuscode_'+i+'" value="' + mockEntityData['statuscode'] + '"></input></div>' +
+            mockEntity += '<div class="mock-obj"><label for="statuscode_'+i+'">statuscode:</label><input onchange="updateMockdef(this)" type="number" name="statuscode_'+i+'" id="statuscode_'+i+'" value="' + mockEntityData['statuscode'] + '"></input></div>' +
             '<div class="mock-obj"><label for="urlpart_mock_'+i+'"><b>urlpart:</b></label><input onchange="updateMockdef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_mock_'+i+'" id="urlpart_mock_'+i+'" value="' + mockEntityData['urlpart'] + '"></input></div>' +
             '</div>';
 
@@ -202,7 +202,7 @@ function updateMockdef(evt) {
         if(evt.tagName.toLowerCase() === "input") {
             if(evt.type === "checkbox") {
                 globalMockdefObj[index][name] = evt.checked;
-            } else if(name === "freezetimems" || name === "statuscode") { // TODO set input type=number on these and css hide arrows
+            } else if(evt.type === "number") { 
                 globalMockdefObj[index][name] = Number(evt.value);
             } else if(evt.type === "text") {
                 globalMockdefObj[index][name] = evt.value;
