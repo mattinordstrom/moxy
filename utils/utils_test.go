@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"encoding/json"
+	"log"
 	"testing"
 )
 
@@ -14,7 +16,12 @@ func TestGetMockEventString(t *testing.T) {
 	}
 	testData["freezetimems"] = 500
 
-	testStr := GetMockEventString(testData, true)
+	payloadM, err := json.Marshal(testData["payload"])
+	if err != nil {
+		log.Fatalf("Error occurred during marshalling in test: %v", err)
+	}
+
+	testStr := GetMockEventString(testData, true, string(payloadM))
 
 	expected := ColorPurple + "GET /api/test/someendpoint  \u2794  [500 ms] 404 {\"response\":\"test123\"}" + ColorReset
 	if testStr != expected {

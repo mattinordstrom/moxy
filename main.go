@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -44,7 +45,11 @@ func main() {
 			log.Fatalln("mockdef. expected type map[string]interface{} (init)")
 		}
 
-		fmt.Println(ut.GetMockEventString(val, true) + getInactiveStr(fmt.Sprint(val["active"])))
+		payloadM, err := json.Marshal(val["payload"])
+		if err != nil {
+			log.Fatalf("Error occurred during marshalling in main: %v", err)
+		}
+		fmt.Println(ut.GetMockEventString(val, true, string(payloadM)) + getInactiveStr(fmt.Sprint(val["active"])))
 	}
 	fmt.Println(ut.ColorPurple + "-------------------------\n" + ut.ColorReset)
 

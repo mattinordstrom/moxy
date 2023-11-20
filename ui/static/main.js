@@ -48,11 +48,15 @@ function renderMockdef() {
             '<option value="DELETE" ' + (mockEntityData['method'] === "DELETE" ? "selected" : "") + '>DELETE</option>' + 
             '</select></div>';
 
-            if(mockEntityData['payload']) {
-                mockEntity += '<div class="mock-obj"><label for="payload_'+i+'">payload:</label><textarea onchange="updateMockdef(this)" spellcheck="false" rows="8" cols="32" name="payload_'+i+'" id="payload_'+i+'">' + JSON.stringify(mockEntityData['payload'], null, 2) + '</textarea></div>';
-            } else if (mockEntityData['payloadFromFile']) {
-                mockEntity += '<div class="mock-obj"><label for="payloadFromFile_'+i+'">payloadFromFile:</label><textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="32" class="fixed-textarea" name="payloadFromFile_'+i+'" id="payloadFromFile_'+i+'">' + mockEntityData['payloadFromFile'] + '</textarea></div>';
+            let payload = mockEntityData['payload'];
+            if (typeof payload === 'object') {
+                payload = JSON.stringify(mockEntityData['payload'], null, 2);
             }
+
+            mockEntity += '<div class="mock-obj"><label for="payload_'+i+'">payload:</label><textarea onchange="updateMockdef(this)" spellcheck="false" rows="8" cols="32" name="payload_'+i+'" id="payload_'+i+'">' + 
+                payload + '</textarea></div>';
+
+            mockEntity += '<div class="mock-obj"><label for="payloadFromFile_'+i+'">payloadFromFile:</label><textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="32" class="fixed-textarea" name="payloadFromFile_'+i+'" id="payloadFromFile_'+i+'">' + mockEntityData['payloadFromFile'] + '</textarea></div>';
 
             mockEntity += '<div class="mock-obj"><label for="statuscode_'+i+'">statuscode:</label><input onchange="updateMockdef(this)" type="text" name="statuscode_'+i+'" id="statuscode_'+i+'" value="' + mockEntityData['statuscode'] + '"></input></div>' +
             '<div class="mock-obj"><label for="urlpart_mock_'+i+'"><b>urlpart:</b></label><input onchange="updateMockdef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_mock_'+i+'" id="urlpart_mock_'+i+'" value="' + mockEntityData['urlpart'] + '"></input></div>' +
@@ -125,6 +129,7 @@ function addMock() {
         "payload": {
             "response": "abc123"
         },
+        "payloadFromFile": "",
         "statuscode": 200,
         "urlpart": "/api/whatever/someendpoint"
     };
@@ -133,6 +138,8 @@ function addMock() {
 
     document.getElementById('mock-content-container').innerHTML = "";
     renderMockdef();
+
+    updateMockdef();
 }
 
 function addProxy() {
@@ -147,6 +154,8 @@ function addProxy() {
 
     document.getElementById('proxy-content-container').innerHTML = "";
     renderProxydef();
+
+    updateProxydef();
 }
 
 function removeMock(evt) {
@@ -155,6 +164,8 @@ function removeMock(evt) {
 
     document.getElementById('mock-content-container').innerHTML = "";
     renderMockdef();
+
+    updateMockdef();
 }
 
 function removeProxy(evt) {
@@ -163,27 +174,38 @@ function removeProxy(evt) {
 
     document.getElementById('proxy-content-container').innerHTML = "";
     renderProxydef();
+
+    updateProxydef();
 }
 
 function updateMockdef(evt) {
-    const index = Number(evt.id.split('_').slice(-1)[0]);
-    const name = evt.id.split('_')[0];
+    if(evt){
+        const index = Number(evt.id.split('_').slice(-1)[0]);
+        const name = evt.id.split('_')[0];
 
-    if(evt.tagName.toLowerCase() === "input") {
-        if(evt.type === "checkbox") {
-            globalMockdefObj[index][name] = evt.checked;
-        } else if(name === "freezetimems" || name === "statuscode") { // TODO set input type=number on these and css hide arrows
-            globalMockdefObj[index][name] = Number(evt.value);
-        } else if(evt.type === "text") {
+        if(evt.tagName.toLowerCase() === "input") {
+            if(evt.type === "checkbox") {
+                globalMockdefObj[index][name] = evt.checked;
+            } else if(name === "freezetimems" || name === "statuscode") { // TODO set input type=number on these and css hide arrows
+                globalMockdefObj[index][name] = Number(evt.value);
+            } else if(evt.type === "text") {
+                globalMockdefObj[index][name] = evt.value;
+            } 
+        } else if(evt.tagName.toLowerCase() === "select") {
             globalMockdefObj[index][name] = evt.value;
-        } 
-    } else if(evt.tagName.toLowerCase() === "select") {
-        globalMockdefObj[index][name] = evt.value;
-    } else if(evt.tagName.toLowerCase() === "textarea") {
-        if(name === "payload") {
-            globalMockdefObj[index][name] = JSON.parse(evt.value);
-        } else {
-            globalMockdefObj[index][name] = evt.value;
+        } else if(evt.tagName.toLowerCase() === "textarea") {
+            if(name === "payload") {
+                let value = evt.value;
+                try {
+                    value = JSON.parse(value);
+                } catch (e) {
+                    value = evt.value;
+                }
+
+                globalMockdefObj[index][name] = value;
+            } else {
+                globalMockdefObj[index][name] = evt.value;
+            }
         }
     }
 
@@ -200,15 +222,17 @@ function updateMockdef(evt) {
 }
 
 function updateProxydef(evt) {
-    const index = Number(evt.id.split('_').slice(-1)[0]);
-    const name = evt.id.split('_')[0];
+    if(evt){
+        const index = Number(evt.id.split('_').slice(-1)[0]);
+        const name = evt.id.split('_')[0];
 
-    if(evt.tagName.toLowerCase() === "input") {
-        if(evt.type === "checkbox") {
-            globalProxydefObj[index][name] = evt.checked;
-        } else if(evt.type === "text") {
-            globalProxydefObj[index][name] = evt.value;
-        } 
+        if(evt.tagName.toLowerCase() === "input") {
+            if(evt.type === "checkbox") {
+                globalProxydefObj[index][name] = evt.checked;
+            } else if(evt.type === "text") {
+                globalProxydefObj[index][name] = evt.value;
+            } 
+        }
     }
 
     fetch('/moxyadminui/proxydef', {

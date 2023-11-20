@@ -17,17 +17,7 @@ var ColorReset = "\033[0m"
 
 var RightArrow = "  \u2794  "
 
-func GetMockEventString(val map[string]interface{}, withColor bool) string {
-	payload := val["payloadFromFile"]
-	if payload == nil {
-		payloadM, err := json.Marshal(val["payload"])
-		if err != nil {
-			log.Fatalf("Error occurred during marshalling: %v", err)
-		}
-
-		payload = string(payloadM)
-	}
-
+func GetMockEventString(val map[string]interface{}, withColor bool, payload string) string {
 	rawString := fmt.Sprint(val["method"]) +
 		" " +
 		fmt.Sprint(val["urlpart"]) +
@@ -35,8 +25,7 @@ func GetMockEventString(val map[string]interface{}, withColor bool) string {
 		fmt.Sprint(val["freezetimems"]) +
 		" ms] " +
 		fmt.Sprint(val["statuscode"]) +
-		" " +
-		fmt.Sprint(payload)
+		" " + payload
 
 	if withColor {
 		return ColorPurple + rawString + ColorReset

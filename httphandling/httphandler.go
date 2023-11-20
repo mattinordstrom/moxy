@@ -81,7 +81,17 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 			resWriter.Header().Set("Content-Type", "application/json")
 			resWriter.WriteHeader(statuscode)
 
-			if _, ok := val["payload"]; ok {
+			payload := val["payload"]
+			payloadFromFile := val["payloadFromFile"]
+
+			usePayloadFromFile := false
+			payloadFromFileSet := payloadFromFile != nil && payloadFromFile != ""
+
+			if (payload == nil || payload == "") && payloadFromFileSet {
+				usePayloadFromFile = true
+			}
+
+			if !usePayloadFromFile {
 				if payload, ok := val["payload"].(map[string]interface{}); ok {
 					// Payload is a json
 					if jsonPayload, err := json.Marshal(payload); err == nil {
@@ -95,25 +105,32 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 				} else {
 					// Payload is not a json
 					payload := val["payload"]
-					if payload != nil {
-						_, err := resWriter.Write([]byte(fmt.Sprint(payload)))
-						if err != nil {
-							log.Fatalf("Error occurred during write (non json payload): %v", err)
-						}
+					_, err := resWriter.Write([]byte(fmt.Sprint(payload)))
+					if err != nil {
+						log.Fatalf("Error occurred during write (non json payload): %v", err)
 					}
 				}
+
+				payloadM, err := json.Marshal(val["payload"])
+				if err != nil {
+					log.Fatalf("Error occurred during marshalling: %v", err)
+				}
+
+				updateAdminWithLatest(utils.GetMockEventString(val, false, string(payloadM)))
+				fmt.Println(utils.GetMockEventString(val, true, string(payloadM)))
 			} else {
 				// Payload is a json from separate file
 				payloadPath := val["payloadFromFile"]
+
 				payloadFromFile := utils.GetJSONObjAsString(fmt.Sprint(payloadPath))
 				_, err := resWriter.Write([]byte(payloadFromFile))
 				if err != nil {
 					log.Fatalf("Error occurred during write: %v", err)
 				}
-			}
 
-			updateAdminWithLatest(utils.GetMockEventString(val, false))
-			fmt.Println(utils.GetMockEventString(val, true))
+				updateAdminWithLatest(utils.GetMockEventString(val, false, payloadFromFile))
+				fmt.Println(utils.GetMockEventString(val, true, payloadFromFile))
+			}
 
 			return
 		}
@@ -121,6 +138,10 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 	////////////////////////////////////////
 	// Loop proxydef json obj
+	useProxyForReq(resWriter, req, objArr, reqURL)
+}
+
+func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []interface{}, reqURL string) {
 	newURL := ""
 	for _, val := range objArr {
 		val, ok := val.(map[string]interface{})
