@@ -37,7 +37,12 @@ function renderMockdef() {
     const data = globalMockdefObj;
     for (let i = 0; i < data.length; i++) {
         const mockEntityData = data[i];
-        let mockEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1)+'<div style="margin-right:4px"><button onclick="removeMock(this)" id="x_btn_'+i+'">X</button></div></div>' +
+        let mockEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1) + 
+            '<div style="display:flex">' +
+            '<div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_up_btn_'+i+'">&#8593;</button></div>' +
+            '<div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_down_btn_'+i+'">&#8595;</button></div>' +
+            '<div><button onclick="removeMock(this)" id="x_btn_'+i+'">X</button></div>' +
+            '</div></div>' +
             '<div class="mock-obj"><label for="active_mock_'+i+'">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_'+i+'" id="active_mock_'+i+'" ' + (mockEntityData['active'] ? "checked" : "") + '></input></div>' +
             '<div class="mock-obj"><label for="freezetimems_'+i+'">freezetimems:</label><input onchange="updateMockdef(this)" type="text" name="freezetimems_'+i+'" id="freezetimems_'+i+'" value="' + mockEntityData['freezetimems'] + '"></input></div>' +
             '<div class="mock-obj"><label for="method_'+i+'">method:</label><select onchange="updateMockdef(this)" class="slct" name="method_'+i+'" id="method_'+i+'">' +
@@ -70,7 +75,12 @@ function renderProxydef() {
     const data = globalProxydefObj;
     for (let i = 0; i < data.length; i++) {
         const proxyEntityData = data[i];
-        let proxyEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1)+'<div style="margin-right:4px"><button onclick="removeProxy(this)" id="x_btn_'+i+'">X</button></div></div>' +
+        let proxyEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1) + 
+            '<div style="display:flex">' +
+            '<div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_up_btn_'+i+'">&#8593;</button></div>' +
+            '<div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_down_btn_'+i+'">&#8595;</button></div>' +
+            '<div><button onclick="removeProxy(this)" id="x_btn_'+i+'">X</button></div>' +
+            '</div></div>' +
             '<div class="proxy-obj"><label for="active_proxy_'+i+'">active:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="active_proxy_'+i+'" id="active_proxy_'+i+'" ' + (proxyEntityData['active'] ? "checked" : "") + '></input></div>' +    
             '<div class="proxy-obj"><label for="target_'+i+'">target:</label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="target_'+i+'" id="target_'+i+'" value="' + proxyEntityData['target'] + '"></input></div>' +
             '<div class="proxy-obj"><label for="urlpart_proxy_'+i+'"><b>urlpart:</b></label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_proxy_'+i+'" id="urlpart_proxy_'+i+'" value="' + proxyEntityData['urlpart'] + '"></input></div>' +
@@ -134,10 +144,7 @@ function addMock() {
 
     globalMockdefObj.push(mock);
 
-    document.getElementById('mock-content-container').innerHTML = "";
-    renderMockdef();
-
-    updateMockdef();
+    resetAndSync("mock");
 }
 
 function addProxy() {
@@ -150,30 +157,21 @@ function addProxy() {
 
       globalProxydefObj.push(proxy);
 
-    document.getElementById('proxy-content-container').innerHTML = "";
-    renderProxydef();
-
-    updateProxydef();
+      resetAndSync("proxy");
 }
 
 function removeMock(evt) {
     const index = Number(evt.id.split('_').slice(-1)[0]);
     globalMockdefObj.splice(index, 1);
 
-    document.getElementById('mock-content-container').innerHTML = "";
-    renderMockdef();
-
-    updateMockdef();
+    resetAndSync("mock");
 }
 
 function removeProxy(evt) {
     const index = Number(evt.id.split('_').slice(-1)[0]);
     globalProxydefObj.splice(index, 1);
 
-    document.getElementById('proxy-content-container').innerHTML = "";
-    renderProxydef();
-
-    updateProxydef();
+    resetAndSync("proxy");
 }
 
 function updateMockdef(evt) {
@@ -243,4 +241,50 @@ function updateProxydef(evt) {
     .catch(error => {
         console.error('POST error proxydef:', error);
     });
+}
+
+function moveMock(evt) {
+    if(moveEntity(evt, globalMockdefObj)) {
+        resetAndSync("mock");
+    }
+}
+
+function moveProxy(evt) {
+    if(moveEntity(evt, globalProxydefObj)) {
+        resetAndSync("proxy");
+    }
+}
+
+function moveEntity(evt, arr) {
+    const index = Number(evt.id.split('_').slice(-1)[0]);
+    const way = evt.id.split('_')[1];
+    let changed = false;
+
+    if(way === 'up') {
+        if (index > 0 && index < arr.length) {
+            [arr[index], arr[index - 1]] = [arr[index - 1], arr[index]];
+            changed = true;
+        }
+    } else if (way === 'down') {
+        if (index >= 0 && index < arr.length - 1) {
+            [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
+            changed = true;
+        }
+    }
+
+    return changed;
+}
+
+function resetAndSync(type) {
+    if(type === "mock") {
+        document.getElementById('mock-content-container').innerHTML = "";
+        renderMockdef();
+        updateMockdef();
+
+        return;
+    }
+
+    document.getElementById('proxy-content-container').innerHTML = "";
+    renderProxydef();
+    updateProxydef();
 }
