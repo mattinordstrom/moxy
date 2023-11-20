@@ -3,7 +3,6 @@
     "active": true,
     "comment": "test",
     "freezetimems": 1000,
-    "matchPathExact": false,
     "method": "GET",
     "payload": {
       "response": "abc123"
@@ -13,8 +12,18 @@
   },
   {
     "active": true,
+    "comment": "Regex example",
     "freezetimems": 0,
-    "matchPathExact": true,
+    "method": "GET",
+    "payload": {
+      "response": "abc123"
+    },
+    "statuscode": 200,
+    "urlpart": "/api/whatever/someendpoint/.*/meta"
+  },
+  {
+    "active": true,
+    "freezetimems": 0,
     "method": "GET",
     "payloadFromFile": "/home/matti/projects/moxy/archive/example.json",
     "statuscode": 200,

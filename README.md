@@ -1,86 +1,91 @@
 # moxy
 ##### mocking and proxying requests on localhost  
-  
+<br>
 
 ## Setup:
 #### Install go
 Follow instructions here: https://go.dev/doc/install  
   
-##  
+
 #### Add alias
 Add to ~/.zshrc: 
 ```sh
 alias moxy="cd /home/matti/projects/moxy && go run main.go"
 ```
-
-##  
-#### Dont track config
-```sh
-git update-index --assume-unchanged config.yml
-```  
+<br>
   
-##  
-##  
+  
 ## Run:  
 #### Run (on default port 9097)  
 ```sh
 $ moxy
 ```
     
-##  
+  
 #### Run on another port    
 ```sh
 $ moxy -p 9098
 ```
+<br>
   
-##  
-##  
-## Edit proxies and mocks:
+  
+## Admin UI:
+Go to http://localhost:9097/moxyadminui
+  
+  
+  
+  
+## Edit proxies and mocks directly:
 Edit mocks: [mockdef.json]  
 Edit proxies: [proxydef.json]  
 
-##  
-##  
+<br>
+
+  
 ## Quick notes:
-- Json files will be read for every request, so no need to restart moxy after change in json file
+- Json files will be read for every request (cached 3 sec), so no need to restart moxy after change in json file
 - Mocks will always go before proxies.  
 - Json files are read from top to bottom and request is processed at first match.
 - If no match is found in Json the "Default route" will be used
-- / will be trimmed from all mock URLs (/api/test/ will match api/test)
+- URLs will be matched "if contains", so the order and precision in the json urlpart is important
+- If payload and payloadFromFile are both defined payload will be used
+- .* can be used in urlpart in mocks and proxies
   
+<br>  
+<br>
+_______________________
+<br>  
+<br>
 
-##
-##
-## Admin UI:
-Go to http://localhost:9097/moxyadminui
-___
-
+## For developers:
+### Dont track config
+```sh
+git update-index --assume-unchanged config.yml
+```  
   
-##  
-##  
-## Run tests:  
+  
+### Run tests:  
 ```sh
 $ go test ./... -v
 ```  
   
 
-##  
-##  
-## Run lint:  
+  
+### Run lint:  
 ```sh  
 $ golangci-lint run -v
 ```  
   
 
-##  
-##  
-## Precommit hook:  
+  
+  
+### Precommit hook:  
 ```sh
 $ pip3 install pre-commit
 $ pre-commit install
 ```  
   
-##  
+  
 #### Run precommit manually    
 ```sh
 $ pre-commit run --all-files

@@ -40,7 +40,6 @@ function renderMockdef() {
         let mockEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1)+'<div style="margin-right:4px"><button onclick="removeMock(this)" id="x_btn_'+i+'">X</button></div></div>' +
             '<div class="mock-obj"><label for="active_mock_'+i+'">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_'+i+'" id="active_mock_'+i+'" ' + (mockEntityData['active'] ? "checked" : "") + '></input></div>' +
             '<div class="mock-obj"><label for="freezetimems_'+i+'">freezetimems:</label><input onchange="updateMockdef(this)" type="text" name="freezetimems_'+i+'" id="freezetimems_'+i+'" value="' + mockEntityData['freezetimems'] + '"></input></div>' +
-            '<div class="mock-obj"><label for="matchPathExact_'+i+'">matchPathExact:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="matchPathExact_'+i+'" id="matchPathExact_'+i+'" ' + (mockEntityData['matchPathExact'] ? "checked" : "") + '></input></div>' +
             '<div class="mock-obj"><label for="method_'+i+'">method:</label><select onchange="updateMockdef(this)" class="slct" name="method_'+i+'" id="method_'+i+'">' +
             '<option value="GET" ' + (mockEntityData['method'] === "GET" ? "selected" : "") + '>GET</option>' +
             '<option value="POST" ' + (mockEntityData['method'] === "POST" ? "selected" : "") + '>POST</option>' +
@@ -124,7 +123,6 @@ function addMock() {
     const mock = {
         "active": true,
         "freezetimems": 0,
-        "matchPathExact": false,
         "method": "GET",
         "payload": {
             "response": "abc123"

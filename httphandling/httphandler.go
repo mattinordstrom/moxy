@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -62,13 +63,18 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		matchPathExact, _ := strconv.ParseBool(fmt.Sprint(val["matchPathExact"]))
-
 		isMatch := active && (req.Method == fmt.Sprint(val["method"]))
-		if matchPathExact {
-			isMatch = isMatch && (strings.Trim(reqURL, "/") == strings.Trim(urlpart, "/"))
-		} else {
-			isMatch = isMatch && strings.Contains(reqURL, urlpart)
+		isMatch = isMatch && strings.Contains(reqURL, urlpart)
+
+		if strings.Contains(urlpart, ".*") && !isMatch {
+			regex, err := regexp.Compile(urlpart)
+			if err != nil {
+				fmt.Println("Error compiling regex:", err)
+
+				return
+			}
+
+			isMatch = regex.MatchString(reqURL)
 		}
 
 		if isMatch {
@@ -159,7 +165,19 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []i
 			log.Fatalln("parseError verbose flag")
 		}
 
-		if active && strings.Contains(reqURL, urlpart) {
+		isMatch := active && strings.Contains(reqURL, urlpart)
+		if strings.Contains(urlpart, ".*") && !isMatch {
+			regex, err := regexp.Compile(urlpart)
+			if err != nil {
+				fmt.Println("Error compiling regex (proxy):", err)
+
+				return
+			}
+
+			isMatch = regex.MatchString(reqURL)
+		}
+
+		if isMatch {
 			newURL = fmt.Sprint(val["target"]) + reqURL
 
 			if verbose {

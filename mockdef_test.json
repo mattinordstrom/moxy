@@ -3,7 +3,6 @@
     "active": true,
     "comment": "This is used only for tests in httphandler_test.go",
     "freezetimems": 0,
-    "matchPathExact": false,
     "method": "GET",
     "payload": {
       "response": "mocktest"
