@@ -1,6 +1,11 @@
 let globalMockdefObj = {};
 let globalProxydefObj = {};
 
+let wSocket;
+let wsAttempts = 0;
+const wsMaxAttempts = 3;
+const wsReconnectDelay = 5000;
+
 function initFunc() {
     fetch('/moxyadminui/mockdef')
     .then(response => response.json())
@@ -107,26 +112,41 @@ function clickEvtSetup() {
 }
 
 function wsSetup() {
-    var socket = new WebSocket("ws://localhost:9097/ws");
+    wSocket = new WebSocket("ws://localhost:9097/ws");
 
-    socket.onmessage = function(event) {
+    wSocket.onmessage = function(event) {
         document.getElementById("footer-log").insertAdjacentHTML('afterbegin', event.data + "<br />");
     };
 
-    socket.onopen = function() {
+    wSocket.onopen = function() {
         console.log("WebSocket Connected");
         document.getElementById('header-ws').innerHTML = 'connected <span class="bullet"></span>';
+
+        wsAttempts = 0;
     };
 
-    socket.onerror = function(error) {
+    wSocket.onerror = function(error) {
         console.log("WebSocket Error: " + error);
         document.getElementById('header-ws').innerHTML = 'error <span class="bullet bullet-red"></span>';
     };
 
-    socket.onclose = function(event) {
+    wSocket.onclose = function(event) {
         console.log("WebSocket Close: " + event);
-        document.getElementById('header-ws').innerHTML = 'closed <span class="bullet bullet-red"></span>';
+        document.getElementById('header-ws').innerHTML = 'reconnecting... <span class="bullet bullet-red"></span>';
+
+        if (wsAttempts < wsMaxAttempts) {
+            setTimeout(reconnectWebSocket, wsReconnectDelay);
+        } else {
+            console.log("WebSocket reconnection failed after maximum attempts");
+            document.getElementById('header-ws').innerHTML = 'closed <span class="bullet bullet-red"></span>';
+        }
     };
+}
+
+function reconnectWebSocket() {
+    wsAttempts++;
+    console.log(`Attempting to reconnect... (${wsAttempts}/${wsMaxAttempts})`);
+    wsSetup();
 }
 
 function addMock() {
