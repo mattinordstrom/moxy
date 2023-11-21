@@ -17,6 +17,20 @@ var ColorReset = "\033[0m"
 
 var RightArrow = "  \u2794  "
 
+func UsePayloadFromFile(val map[string]interface{}) bool {
+	payload := val["payload"]
+	payloadFromFile := val["payloadFromFile"]
+
+	usePayloadFromFile := false
+	payloadFromFileSet := payloadFromFile != nil && payloadFromFile != ""
+
+	if (payload == nil || payload == "") && payloadFromFileSet {
+		usePayloadFromFile = true
+	}
+
+	return usePayloadFromFile
+}
+
 func GetMockEventString(val map[string]interface{}, withColor bool, payload string) string {
 	rawString := fmt.Sprint(val["method"]) +
 		" " +

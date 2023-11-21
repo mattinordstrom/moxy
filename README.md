@@ -66,7 +66,7 @@ git update-index --assume-unchanged config.yml
   
 ### Run tests:  
 ```sh
-$ go test ./... -v
+$ go test ./... -v | sed -e 's/PASS/\x1b[32m&\x1b[0m/' -e 's/FAIL/\x1b[31m&\x1b[0m/'
 ```  
   
 

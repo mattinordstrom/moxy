@@ -89,17 +89,7 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 			resWriter.Header().Set("Content-Type", "application/json")
 			resWriter.WriteHeader(statuscode)
 
-			payload := val["payload"]
-			payloadFromFile := val["payloadFromFile"]
-
-			usePayloadFromFile := false
-			payloadFromFileSet := payloadFromFile != nil && payloadFromFile != ""
-
-			if (payload == nil || payload == "") && payloadFromFileSet {
-				usePayloadFromFile = true
-			}
-
-			if !usePayloadFromFile {
+			if !utils.UsePayloadFromFile(val) {
 				if payload, ok := val["payload"].(map[string]interface{}); ok {
 					// Payload is a json
 					if jsonPayload, err := json.Marshal(payload); err == nil {

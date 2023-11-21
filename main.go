@@ -45,11 +45,17 @@ func main() {
 			log.Fatalln("mockdef. expected type map[string]interface{} (init)")
 		}
 
-		payloadM, err := json.Marshal(val["payload"])
-		if err != nil {
-			log.Fatalf("Error occurred during marshalling in main: %v", err)
+		payloadStr := fmt.Sprint(val["payloadFromFile"])
+		if !ut.UsePayloadFromFile(val) {
+			payloadM, err := json.Marshal(val["payload"])
+			if err != nil {
+				log.Fatalf("Error occurred during marshalling in main: %v", err)
+			}
+
+			payloadStr = string(payloadM)
 		}
-		fmt.Println(ut.GetMockEventString(val, true, string(payloadM)) + getInactiveStr(fmt.Sprint(val["active"])))
+
+		fmt.Println(ut.GetMockEventString(val, true, payloadStr) + getInactiveStr(fmt.Sprint(val["active"])))
 	}
 	fmt.Println(ut.ColorPurple + "-------------------------\n" + ut.ColorReset)
 
