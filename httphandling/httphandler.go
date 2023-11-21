@@ -14,8 +14,10 @@ import (
 	"github.com/mattinordstrom/moxy/utils"
 )
 
-var ProxyFile = "proxydef.json"
 var MockFile = "mockdef.json"
+var ProxyFile = "proxydef.json"
+var mock = "mock"
+var proxy = "proxy"
 
 var Port = 9097
 var DefaultRoute = ""
@@ -122,7 +124,7 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 					log.Fatalf("Error occurred during marshalling: %v", err)
 				}
 
-				updateAdminWithLatest(utils.GetMockEventString(val, false, string(payloadM)))
+				updateAdminWithLatest(utils.GetMockEventString(val, false, string(payloadM)), mock)
 				fmt.Println(utils.GetMockEventString(val, true, string(payloadM)))
 			} else {
 				// Payload is a json from separate file
@@ -134,8 +136,8 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 					log.Fatalf("Error occurred during write: %v", err)
 				}
 
-				updateAdminWithLatest(utils.GetMockEventString(val, false, payloadFromFile))
-				fmt.Println(utils.GetMockEventString(val, true, payloadFromFile))
+				updateAdminWithLatest(utils.GetMockEventString(val, false, fmt.Sprint(payloadPath)), mock)
+				fmt.Println(utils.GetMockEventString(val, true, fmt.Sprint(payloadPath)))
 			}
 
 			return
@@ -206,14 +208,14 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []i
 				if bodyStr := string(bodyBytes); bodyStr != "" {
 					fmt.Println(bodyStr)
 
-					updateAdminWithLatest(htmlBreak +
-						req.Method + " " + reqURL + utils.RightArrow + newURL +
-						htmlBreak + headerString +
-						htmlBreak + bodyStr + htmlBreak)
+					updateAdminWithLatest(htmlBreak+
+						req.Method+" "+reqURL+utils.RightArrow+newURL+
+						htmlBreak+headerString+
+						htmlBreak+bodyStr+htmlBreak, proxy)
 				} else {
-					updateAdminWithLatest(htmlBreak +
-						req.Method + " " + reqURL + utils.RightArrow + newURL +
-						htmlBreak + headerString + htmlBreak)
+					updateAdminWithLatest(htmlBreak+
+						req.Method+" "+reqURL+utils.RightArrow+newURL+
+						htmlBreak+headerString+htmlBreak, proxy)
 				}
 
 				// Restore the body for further processing
@@ -221,7 +223,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []i
 
 				fmt.Println(" ")
 			} else {
-				updateAdminWithLatest(reqURL + utils.RightArrow + newURL)
+				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, proxy)
 				fmt.Println(utils.ColorGreen + reqURL + utils.RightArrow + newURL + utils.ColorReset)
 			}
 
@@ -231,7 +233,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []i
 
 	if newURL == "" {
 		newURL = DefaultRoute + reqURL
-		updateAdminWithLatest(reqURL + utils.RightArrow + newURL)
+		updateAdminWithLatest(reqURL+utils.RightArrow+newURL, proxy)
 		fmt.Println(utils.ColorGray + reqURL + utils.RightArrow + newURL + utils.ColorReset)
 	}
 

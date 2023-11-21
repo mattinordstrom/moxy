@@ -12,6 +12,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type WebSocketMessage struct {
+	Type    string `json:"type"`
+	Message string `json:"message"`
+}
+
 type Settings struct {
 	Port         int    `json:"port"`
 	DefaultRoute string `json:"defaultRoute"`
@@ -109,9 +114,19 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 	}
 }
 
-func updateAdminWithLatest(evtStr string) {
+func updateAdminWithLatest(evtStr string, evtType string) {
 	if updateClient != nil {
-		err := updateClient.WriteMessage(websocket.TextMessage, []byte(evtStr))
+		msg := WebSocketMessage{
+			Type:    evtType,
+			Message: evtStr,
+		}
+
+		jsonMsg, jErr := json.Marshal(msg)
+		if jErr != nil {
+			fmt.Println("Error: json marshal websocket msg")
+		}
+
+		err := updateClient.WriteMessage(websocket.TextMessage, jsonMsg)
 		if err != nil {
 			fmt.Println("Error: WriteMessage websocket")
 		}

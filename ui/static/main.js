@@ -115,7 +115,13 @@ function wsSetup() {
     wSocket = new WebSocket("ws://localhost:9097/ws");
 
     wSocket.onmessage = function(event) {
-        document.getElementById("footer-log").insertAdjacentHTML('afterbegin', event.data + "<br />");
+        const evtJson = JSON.parse(event.data);
+        let logMsg = '<span class="square"></span> ' + evtJson.message + '<br />';
+        if(evtJson.type === 'mock') {
+            logMsg = '<span class="square square-purple"></span> ' + evtJson.message + '<br />';
+        }
+
+        document.getElementById("footer-log").insertAdjacentHTML('afterbegin', logMsg);
     };
 
     wSocket.onopen = function() {
