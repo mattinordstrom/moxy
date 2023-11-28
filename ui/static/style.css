@@ -23,6 +23,7 @@ input[type=number] {
 header {
     background-color: #f1f1f1;
     padding: 10px;
+    padding-left: 20px;
     text-align: left;
 }
 
@@ -36,7 +37,6 @@ header {
     flex: 1;
     text-align: left;
     border: none;
-    margin-left: 6px;
 }
 
 .left {
@@ -97,6 +97,8 @@ footer.expanded {
 
 .header-info {
     color: #666666;
+    display: flex;
+    justify-content: space-between;
 }
 
 .fixed-textarea {
@@ -132,6 +134,7 @@ footer.expanded {
     margin-right: 6px;
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .proxymock-content {

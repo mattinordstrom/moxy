@@ -6,25 +6,35 @@
     <title>moxy</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="/ui/static/style.css">
+    <link id="darkModeStylesheet" rel="stylesheet" href="/ui/static/style_dark.css">
     <script src="/ui/static/main.js"></script>
 </head>
 <body onload="initFunc()">
     <header>
         <h1 style="color:#7f6017">MOXY</h1>
         <h5>mocking and proxying requests on localhost</h5>
-        <div class="header-info"><b>Port:</b> <span id="header-port"></span>&nbsp;&nbsp;|&nbsp;&nbsp;<b>Default route:</b> <span id="header-route"></span>&nbsp;&nbsp;|&nbsp;&nbsp;<b>WS:</b> <span id="header-ws"></span></div>
+        <div class="header-info">
+            <div>
+                <b>Port:</b> <span id="header-port"></span>&nbsp;&nbsp;|&nbsp;&nbsp;<b>Default route:</b> <span id="header-route"></span>&nbsp;&nbsp;|&nbsp;&nbsp;<b>WS:</b> <span id="header-ws"></span>
+            </div>
+            <div><button id="toggleDarkMode">Toggle Dark mode</button></div>
+        </div>
     </header>
 
     <div class="container">
         <div id="left" class="left">
-            <h2>mock definitions</h2>
-            <button style="min-width: 60px; min-height: 30px;" onclick="addMock()">Add</button><br /><br />
+            <div style="margin-left: 20px;">
+                <h2>mock definitions</h2>
+                <button style="min-width: 60px; min-height: 30px;" onclick="addMock()">Add</button><br /><br />
+            </div>
             <div id="mock-content-container" class="proxymock-content-container"></div>
             <div style="margin-bottom:200px"></div>
         </div>
         <div class="right">
-            <h2>proxy definitions</h2>
-            <button style="min-width: 60px; min-height: 30px;" onclick="addProxy()">Add</button><br /><br />
+            <div style="margin-left: 20px;">
+                <h2>proxy definitions</h2>
+                <button style="min-width: 60px; min-height: 30px;" onclick="addProxy()">Add</button><br /><br />
+            </div>
             <div id="proxy-content-container" class="proxymock-content-container"></div>
             <div style="margin-bottom:200px"></div>
         </div>

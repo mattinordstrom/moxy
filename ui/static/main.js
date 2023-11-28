@@ -31,6 +31,8 @@ function initFunc() {
     })
     .catch(error => { console.error('Fetch error settings:', error); });
 
+    darkModeSetup();
+
     //click events setup
     clickEvtSetup();
 
@@ -95,6 +97,29 @@ function renderProxydef() {
         document.getElementById('proxy-content-container').innerHTML += proxyEntity + "<br />";
     };
 
+}
+
+function toggleDarkMode() {
+    var darkModeLink = document.getElementById('darkModeStylesheet');
+        if (darkModeLink) {
+            darkModeLink.remove();
+            localStorage.setItem('moxyDarkMode', 'false');
+        } else {
+            darkModeLink = document.createElement('link');
+            darkModeLink.id = 'darkModeStylesheet';
+            darkModeLink.rel = 'stylesheet';
+            darkModeLink.href = '/ui/static/style_dark.css';
+            document.head.appendChild(darkModeLink);
+            localStorage.setItem('moxyDarkMode', 'true');
+        }
+}
+
+function darkModeSetup() {
+    document.getElementById('toggleDarkMode').addEventListener('click', toggleDarkMode);
+
+    if (localStorage.getItem('moxyDarkMode') === 'false') {
+        toggleDarkMode();
+    }
 }
 
 function clickEvtSetup() {
