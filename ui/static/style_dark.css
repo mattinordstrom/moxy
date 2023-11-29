@@ -3,10 +3,18 @@ body, html {
 }
 
 footer {
-    background-color: #757261;
+    background-color: #3d3b32;
     color: #FFFFFF;
 }
 
-h2 {
+h2, h5 {
     color:#cccccc;
+}
+
+header {
+    background-color: #1a1a1a;
+}
+
+.header-info {
+    color: #9f9d9d;
 }

@@ -27,6 +27,13 @@ header {
     text-align: left;
 }
 
+.header-info {
+    color: #666666;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 32px;
+}
+
 .container {
     flex-grow: 1;
     display: flex;
@@ -80,7 +87,7 @@ footer.expanded {
 }
 
 .square-purple {
-    background-color: purple;
+    background-color: #b15fb1;
 }
 
 .bullet {
@@ -93,12 +100,6 @@ footer.expanded {
 
 .bullet-red {
     background-color: red;
-}
-
-.header-info {
-    color: #666666;
-    display: flex;
-    justify-content: space-between;
 }
 
 .fixed-textarea {
