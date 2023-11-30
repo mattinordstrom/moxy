@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
+
+	"github.com/mattinordstrom/moxy/models"
 )
 
 var ColorRed = "\033[31m"
@@ -17,12 +20,12 @@ var ColorReset = "\033[0m"
 
 var RightArrow = "  \u2794  "
 
-func UsePayloadFromFile(val map[string]interface{}) bool {
-	payload := val["payload"]
-	payloadFromFile := val["payloadFromFile"]
+func UsePayloadFromFile(mockEntity models.Mock) bool {
+	payload := mockEntity.Payload
+	payloadFromFile := mockEntity.PayloadFromFile
 
 	usePayloadFromFile := false
-	payloadFromFileSet := payloadFromFile != nil && payloadFromFile != ""
+	payloadFromFileSet := payloadFromFile != ""
 
 	if (payload == nil || payload == "") && payloadFromFileSet {
 		usePayloadFromFile = true
@@ -31,14 +34,14 @@ func UsePayloadFromFile(val map[string]interface{}) bool {
 	return usePayloadFromFile
 }
 
-func GetMockEventString(val map[string]interface{}, withColor bool, payload string) string {
-	rawString := fmt.Sprint(val["method"]) +
+func GetMockEventString(mockEntity models.Mock, withColor bool, payload string) string {
+	rawString := mockEntity.Method +
 		" " +
-		fmt.Sprint(val["urlpart"]) +
+		mockEntity.URLPart +
 		"  \u2794  [" +
-		fmt.Sprint(val["freezetimems"]) +
+		strconv.Itoa(mockEntity.FreezeTimeMS) +
 		" ms] " +
-		fmt.Sprint(val["statuscode"]) +
+		strconv.Itoa(mockEntity.StatusCode) +
 		" " + payload
 
 	if withColor {

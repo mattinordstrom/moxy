@@ -5,6 +5,8 @@ import (
 	"log"
 	"strconv"
 	"testing"
+
+	"github.com/mattinordstrom/moxy/models"
 )
 
 func printAssertError(t *testing.T, expected string, actual string) {
@@ -13,16 +15,16 @@ func printAssertError(t *testing.T, expected string, actual string) {
 }
 
 func TestGetMockEventString(t *testing.T) {
-	testData := make(map[string]interface{})
-	testData["method"] = "GET"
-	testData["urlpart"] = "/api/test/someendpoint"
-	testData["statuscode"] = 404
-	testData["payload"] = map[string]interface{}{
+	var testData models.Mock
+	testData.Method = "GET"
+	testData.URLPart = "/api/test/someendpoint"
+	testData.StatusCode = 404
+	testData.Payload = map[string]interface{}{
 		"response": "test123",
 	}
-	testData["freezetimems"] = 500
+	testData.FreezeTimeMS = 500
 
-	payloadM, err := json.Marshal(testData["payload"])
+	payloadM, err := json.Marshal(testData.Payload)
 	if err != nil {
 		log.Fatalf("Error occurred during marshalling in test: %v", err)
 	}
@@ -36,14 +38,14 @@ func TestGetMockEventString(t *testing.T) {
 }
 
 func TestUsePayloadFromFile(t *testing.T) {
-	testData := make(map[string]interface{})
-	testData["method"] = "GET"
-	testData["urlpart"] = "/api/test/someendpoint"
-	testData["statuscode"] = 200
-	testData["freezetimems"] = 0
+	var testData models.Mock
+	testData.Method = "GET"
+	testData.URLPart = "/api/test/someendpoint"
+	testData.StatusCode = 200
+	testData.FreezeTimeMS = 0
 
 	// Test with only payloadFromFile
-	testData["payloadFromFile"] = "/home/test/archive/somefile.json"
+	testData.PayloadFromFile = "/home/test/archive/somefile.json"
 	res := UsePayloadFromFile(testData)
 	expected := true
 	if res != expected {
@@ -51,7 +53,7 @@ func TestUsePayloadFromFile(t *testing.T) {
 	}
 
 	// Test with both
-	testData["payload"] = map[string]interface{}{
+	testData.Payload = map[string]interface{}{
 		"response": "test123",
 	}
 	res = UsePayloadFromFile(testData)

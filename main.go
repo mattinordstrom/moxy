@@ -9,6 +9,7 @@ import (
 
 	"github.com/mattinordstrom/moxy/config"
 	hh "github.com/mattinordstrom/moxy/httphandling"
+	"github.com/mattinordstrom/moxy/models"
 	ut "github.com/mattinordstrom/moxy/utils"
 )
 
@@ -40,22 +41,33 @@ func main() {
 	mockObjArr := ut.GetJSONObj("mockdef.json")
 	fmt.Println(ut.ColorPurple + "-------- Mockdef --------" + ut.ColorReset)
 	for _, val := range mockObjArr {
-		val, ok := val.(map[string]interface{})
-		if !ok {
-			log.Fatalln("mockdef. expected type map[string]interface{} (init)")
-		}
+		// Create struct
+		jsonData, err := json.Marshal(val)
+		if err != nil {
+			fmt.Println("error marshalling map:", err)
 
-		payloadStr := fmt.Sprint(val["payloadFromFile"])
-		if !ut.UsePayloadFromFile(val) {
-			payloadM, err := json.Marshal(val["payload"])
+			return
+		}
+		var mockEntity models.Mock
+		err = json.Unmarshal(jsonData, &mockEntity)
+		if err != nil {
+			fmt.Println("error unmarshalling JSON:", err)
+
+			return
+		}
+		///////////
+
+		payloadStr := mockEntity.PayloadFromFile
+		if !ut.UsePayloadFromFile(mockEntity) {
+			jsonPayload, err := json.Marshal(mockEntity.Payload)
 			if err != nil {
 				log.Fatalf("Error occurred during marshalling in main: %v", err)
 			}
 
-			payloadStr = string(payloadM)
+			payloadStr = string(jsonPayload)
 		}
 
-		fmt.Println(ut.GetMockEventString(val, true, payloadStr) + getInactiveStr(fmt.Sprint(val["active"])))
+		fmt.Println(ut.GetMockEventString(mockEntity, true, payloadStr) + getInactiveStr(mockEntity.Active))
 	}
 	fmt.Println(ut.ColorPurple + "-------------------------\n" + ut.ColorReset)
 
@@ -68,10 +80,15 @@ func main() {
 			log.Fatalln("proxydef. expected type map[string]interface{} (init)")
 		}
 
+		active, parseError := strconv.ParseBool(fmt.Sprint(val["active"]))
+		if parseError != nil {
+			log.Fatalln("parseError active flag")
+		}
+
 		fmt.Println(ut.ColorGreen +
 			fmt.Sprint(val["urlpart"]) + ut.RightArrow + fmt.Sprint(val["target"]) +
 			ut.ColorReset +
-			getInactiveStr(fmt.Sprint(val["active"])))
+			getInactiveStr(active))
 	}
 	fmt.Println(ut.ColorGreen + "--------------------------\n" + ut.ColorReset)
 
@@ -81,12 +98,9 @@ func main() {
 	}
 }
 
-func getInactiveStr(a string) string {
+func getInactiveStr(active bool) string {
 	activeStr := ""
-	active, parseError := strconv.ParseBool(a)
-	if parseError != nil {
-		log.Fatalln("parseError active flag")
-	} else if !active {
+	if !active {
 		activeStr = ut.ColorRed + " [INACTIVE]" + ut.ColorReset
 	}
 

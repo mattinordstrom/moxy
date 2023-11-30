@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mattinordstrom/moxy/models"
 	"github.com/mattinordstrom/moxy/utils"
 )
 
@@ -37,8 +38,8 @@ func CreateHTTPListener() {
 }
 
 func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
-	objArr := utils.GetJSONObj(ProxyFile)
 	mockObjArr := utils.GetJSONObj(MockFile)
+	proxyObjArr := utils.GetJSONObj(ProxyFile)
 	reqURL := fmt.Sprint(req.URL)
 
 	if strings.HasPrefix(reqURL, "/moxyadminui") {
@@ -50,26 +51,27 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 	////////////////////////////////////////
 	// Loop mockdef json obj
 	for _, val := range mockObjArr {
-		val, ok := val.(map[string]interface{})
-		if !ok {
-			log.Println("mockdef. expected type map[string]interface{}")
+		// Create struct
+		jsonData, err := json.Marshal(val)
+		if err != nil {
+			fmt.Println("error marshalling map:", err)
 
 			return
 		}
-
-		urlpart := fmt.Sprint(val["urlpart"])
-		active, parseError := strconv.ParseBool(fmt.Sprint(val["active"]))
-		if parseError != nil {
-			log.Println("parseError active flag")
+		var mockEntity models.Mock
+		err = json.Unmarshal(jsonData, &mockEntity)
+		if err != nil {
+			fmt.Println("error unmarshalling JSON:", err)
 
 			return
 		}
+		///////////
 
-		isMatch := active && (req.Method == fmt.Sprint(val["method"]))
-		isMatch = isMatch && strings.Contains(reqURL, urlpart)
+		isMatch := mockEntity.Active && (req.Method == mockEntity.Method)
+		isMatch = isMatch && strings.Contains(reqURL, mockEntity.URLPart)
 
-		if strings.Contains(urlpart, ".*") && !isMatch {
-			regex, err := regexp.Compile(urlpart)
+		if strings.Contains(mockEntity.URLPart, ".*") && !isMatch {
+			regex, err := regexp.Compile(mockEntity.URLPart)
 			if err != nil {
 				fmt.Println("Error compiling regex:", err)
 
@@ -80,54 +82,39 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 		}
 
 		if isMatch {
-			freezetime := fmt.Sprint(val["freezetimems"])
-			if freezetime != "0" {
-				dur, _ := time.ParseDuration(freezetime + "ms")
+			freezetime := mockEntity.FreezeTimeMS
+			if freezetime != 0 {
+				dur, _ := time.ParseDuration(strconv.Itoa(freezetime) + "ms")
 				time.Sleep(dur)
 			}
-			statuscode, _ := strconv.Atoi(fmt.Sprint(val["statuscode"]))
 			resWriter.Header().Set("Content-Type", "application/json")
-			resWriter.WriteHeader(statuscode)
+			resWriter.WriteHeader(mockEntity.StatusCode)
 
-			if !utils.UsePayloadFromFile(val) {
-				if payload, ok := val["payload"].(map[string]interface{}); ok {
-					// Payload is a json
-					if jsonPayload, err := json.Marshal(payload); err == nil {
-						_, wErr := resWriter.Write(jsonPayload)
-						if wErr != nil {
-							log.Fatalf("Error occurred during write: %v", wErr)
-						}
-					} else {
-						log.Fatalf("Error couldnt marshal payload to JSON: %v", err)
-					}
-				} else {
-					// Payload is not a json
-					payload := val["payload"]
-					_, err := resWriter.Write([]byte(fmt.Sprint(payload)))
-					if err != nil {
-						log.Fatalf("Error occurred during write (non json payload): %v", err)
-					}
-				}
-
-				payloadM, err := json.Marshal(val["payload"])
+			if !utils.UsePayloadFromFile(mockEntity) {
+				jsonPayload, err := json.Marshal(mockEntity.Payload)
 				if err != nil {
-					log.Fatalf("Error occurred during marshalling: %v", err)
+					fmt.Println("Error occurred during marshalling: ", err)
+				} else {
+					_, wErr := resWriter.Write(jsonPayload)
+					if wErr != nil {
+						fmt.Println("Error occurred during write: ", wErr)
+					}
 				}
 
-				updateAdminWithLatest(utils.GetMockEventString(val, false, string(payloadM)), mock)
-				fmt.Println(utils.GetMockEventString(val, true, string(payloadM)))
+				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, string(jsonPayload)), mock)
+				fmt.Println(utils.GetMockEventString(mockEntity, true, string(jsonPayload)))
 			} else {
 				// Payload is a json from separate file
-				payloadPath := val["payloadFromFile"]
+				payloadPath := mockEntity.PayloadFromFile
 
-				payloadFromFile := utils.GetJSONObjAsString(fmt.Sprint(payloadPath))
+				payloadFromFile := utils.GetJSONObjAsString(payloadPath)
 				_, err := resWriter.Write([]byte(payloadFromFile))
 				if err != nil {
 					log.Fatalf("Error occurred during write: %v", err)
 				}
 
-				updateAdminWithLatest(utils.GetMockEventString(val, false, fmt.Sprint(payloadPath)), mock)
-				fmt.Println(utils.GetMockEventString(val, true, fmt.Sprint(payloadPath)))
+				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, payloadPath), mock)
+				fmt.Println(utils.GetMockEventString(mockEntity, true, payloadPath))
 			}
 
 			return
@@ -136,7 +123,7 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 	////////////////////////////////////////
 	// Loop proxydef json obj
-	useProxyForReq(resWriter, req, objArr, reqURL)
+	useProxyForReq(resWriter, req, proxyObjArr, reqURL)
 }
 
 func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []interface{}, reqURL string) {
