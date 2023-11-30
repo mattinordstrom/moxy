@@ -46,6 +46,7 @@ function renderMockdef() {
         const mockEntityData = data[i];
         let mockEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1) + 
             '<div style="display:flex">' +
+            '<div><input onchange="updateMockdef(this)" class="comment-input" type="text" spellcheck="false" name="comment_mock_'+i+'" id="comment_mock_'+i+'" value="' + (mockEntityData['comment'] || "") + '"></input></div>' +
             '<div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_up_btn_'+i+'">&#8593;</button></div>' +
             '<div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_down_btn_'+i+'">&#8595;</button></div>' +
             '<div><button onclick="removeMock(this)" id="x_btn_'+i+'">X</button></div>' +
@@ -84,6 +85,7 @@ function renderProxydef() {
         const proxyEntityData = data[i];
         let proxyEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1) + 
             '<div style="display:flex">' +
+            '<div><input onchange="updateProxydef(this)" class="comment-input" type="text" spellcheck="false" name="comment_proxy_'+i+'" id="comment_proxy_'+i+'" value="' + (proxyEntityData['comment'] || "") + '"></input></div>' +
             '<div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_up_btn_'+i+'">&#8593;</button></div>' +
             '<div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_down_btn_'+i+'">&#8595;</button></div>' +
             '<div><button onclick="removeProxy(this)" id="x_btn_'+i+'">X</button></div>' +

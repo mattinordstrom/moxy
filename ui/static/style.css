@@ -167,3 +167,10 @@ footer.expanded {
     height: 38px;
     min-width: 130px;
 }
+
+.comment-input {
+    min-height: 16px;
+    margin-right: 60px;
+    margin-bottom: 7px;
+    background-color: #ccc;
+}
