@@ -75,20 +75,26 @@ func main() {
 	objArr := ut.GetJSONObj("proxydef.json")
 	fmt.Println(ut.ColorGreen + "-------- Proxydef --------" + ut.ColorReset)
 	for _, val := range objArr {
-		val, ok := val.(map[string]interface{})
-		if !ok {
-			log.Fatalln("proxydef. expected type map[string]interface{} (init)")
-		}
+		// Create struct
+		jsonData, err := json.Marshal(val)
+		if err != nil {
+			fmt.Println("error marshalling map:", err)
 
-		active, parseError := strconv.ParseBool(fmt.Sprint(val["active"]))
-		if parseError != nil {
-			log.Fatalln("parseError active flag")
+			return
 		}
+		var proxyEntity models.Proxy
+		err = json.Unmarshal(jsonData, &proxyEntity)
+		if err != nil {
+			fmt.Println("error unmarshalling proxy JSON:", err)
+
+			return
+		}
+		///////////
 
 		fmt.Println(ut.ColorGreen +
-			fmt.Sprint(val["urlpart"]) + ut.RightArrow + fmt.Sprint(val["target"]) +
+			proxyEntity.URLPart + ut.RightArrow + proxyEntity.Target +
 			ut.ColorReset +
-			getInactiveStr(active))
+			getInactiveStr(proxyEntity.Active))
 	}
 	fmt.Println(ut.ColorGreen + "--------------------------\n" + ut.ColorReset)
 

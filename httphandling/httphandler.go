@@ -61,7 +61,7 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 		var mockEntity models.Mock
 		err = json.Unmarshal(jsonData, &mockEntity)
 		if err != nil {
-			fmt.Println("error unmarshalling JSON:", err)
+			fmt.Println("error unmarshalling mock JSON:", err)
 
 			return
 		}
@@ -129,24 +129,25 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []interface{}, reqURL string) {
 	newURL := ""
 	for _, val := range objArr {
-		val, ok := val.(map[string]interface{})
-		if !ok {
-			log.Fatalln("proxydef. expected type map[string]interface{}")
-		}
+		// Create struct
+		jsonData, err := json.Marshal(val)
+		if err != nil {
+			fmt.Println("error marshalling map:", err)
 
-		urlpart := fmt.Sprint(val["urlpart"])
-		active, parseError := strconv.ParseBool(fmt.Sprint(val["active"]))
-		if parseError != nil {
-			log.Fatalln("parseError active flag")
+			return
 		}
-		verbose, parseError := strconv.ParseBool(fmt.Sprint(val["verbose"]))
-		if parseError != nil {
-			log.Fatalln("parseError verbose flag")
-		}
+		var proxyEntity models.Proxy
+		err = json.Unmarshal(jsonData, &proxyEntity)
+		if err != nil {
+			fmt.Println("error unmarshalling proxy JSON:", err)
 
-		isMatch := active && strings.Contains(reqURL, urlpart)
-		if strings.Contains(urlpart, ".*") && !isMatch {
-			regex, err := regexp.Compile(urlpart)
+			return
+		}
+		///////////
+
+		isMatch := proxyEntity.Active && strings.Contains(reqURL, proxyEntity.URLPart)
+		if strings.Contains(proxyEntity.URLPart, ".*") && !isMatch {
+			regex, err := regexp.Compile(proxyEntity.URLPart)
 			if err != nil {
 				fmt.Println("Error compiling regex (proxy):", err)
 
@@ -157,9 +158,9 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []i
 		}
 
 		if isMatch {
-			newURL = fmt.Sprint(val["target"]) + reqURL
+			newURL = proxyEntity.Target + reqURL
 
-			if verbose {
+			if proxyEntity.Verbose {
 				fmt.Println(" ")
 				fmt.Println(utils.ColorGreen + req.Method + " " + reqURL + utils.RightArrow + newURL + utils.ColorReset)
 
