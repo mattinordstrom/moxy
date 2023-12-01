@@ -51,11 +51,12 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 	for _, val := range mockObjArr {
 		mockEntity := val
 
+		trimmedURL := strings.TrimRight(strings.TrimLeft(mockEntity.URLPart, "/"), "/")
 		isMatch := mockEntity.Active && (req.Method == mockEntity.Method)
-		isMatch = isMatch && strings.Contains(reqURL, mockEntity.URLPart)
+		isMatch = isMatch && strings.Contains(reqURL, trimmedURL)
 
-		if strings.Contains(mockEntity.URLPart, ".*") && !isMatch {
-			regex, err := regexp.Compile(mockEntity.URLPart)
+		if strings.Contains(trimmedURL, ".*") && !isMatch {
+			regex, err := regexp.Compile(trimmedURL)
 			if err != nil {
 				fmt.Println("Error compiling regex:", err)
 
@@ -115,9 +116,11 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 	for _, val := range objArr {
 		proxyEntity := val
 
-		isMatch := proxyEntity.Active && strings.Contains(reqURL, proxyEntity.URLPart)
-		if strings.Contains(proxyEntity.URLPart, ".*") && !isMatch {
-			regex, err := regexp.Compile(proxyEntity.URLPart)
+		trimmedURL := strings.TrimRight(strings.TrimLeft(proxyEntity.URLPart, "/"), "/")
+		isMatch := proxyEntity.Active && strings.Contains(reqURL, trimmedURL)
+
+		if strings.Contains(trimmedURL, ".*") && !isMatch {
+			regex, err := regexp.Compile(trimmedURL)
 			if err != nil {
 				fmt.Println("Error compiling regex (proxy):", err)
 

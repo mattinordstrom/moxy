@@ -182,6 +182,11 @@ function reconnectWebSocket() {
     wsSetup();
 }
 
+function maximizeFirst() {
+    document.getElementById('payload_0').style.height = '470px';
+    document.getElementById('payload_0').style.width = '970px';
+}
+
 function addMock() {
     const mock = {
         "active": true,
