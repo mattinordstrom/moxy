@@ -15,8 +15,10 @@ import (
 	"github.com/mattinordstrom/moxy/utils"
 )
 
-var Port = 9097
-var DefaultRoute = ""
+var (
+	Port         = 9097
+	DefaultRoute = ""
+)
 
 var htmlBreak = "<br />"
 

@@ -15,6 +15,8 @@ func printAssertError(t *testing.T, expected string, actual string) {
 }
 
 func TestGetMockEventString(t *testing.T) {
+	t.Parallel()
+
 	var testData models.Mock
 	testData.Method = "GET"
 	testData.URLPart = "/api/test/someendpoint"
@@ -38,6 +40,8 @@ func TestGetMockEventString(t *testing.T) {
 }
 
 func TestUsePayloadFromFile(t *testing.T) {
+	t.Parallel()
+
 	var testData models.Mock
 	testData.Method = "GET"
 	testData.URLPart = "/api/test/someendpoint"

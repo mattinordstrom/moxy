@@ -11,7 +11,9 @@ import (
 )
 
 func TestMockedResponse(t *testing.T) {
-	req, err := http.NewRequest("GET", "/api/test/mocktesting", nil)
+	t.Parallel()
+
+	req, err := http.NewRequest(http.MethodGet, "/api/test/mocktesting", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,10 +37,12 @@ func TestMockedResponse(t *testing.T) {
 }
 
 func TestCreateReqFromReq(t *testing.T) {
+	t.Parallel()
+
 	expectedReqBody := `{ "id": "123" }`
 	expectedReqHeaderUA := "PostmanRuntime/7.30.0"
 
-	req, err := http.NewRequest("GET", "/api/test/mocktesting", bytes.NewReader([]byte(expectedReqBody)))
+	req, err := http.NewRequest(http.MethodGet, "/api/test/mocktesting", bytes.NewReader([]byte(expectedReqBody)))
 	if err != nil {
 		t.Fatal(err)
 	}

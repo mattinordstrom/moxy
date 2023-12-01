@@ -10,21 +10,27 @@ import (
 	"github.com/mattinordstrom/moxy/models"
 )
 
-var ColorRed = "\033[31m"
-var ColorGreen = "\033[32m"
-var ColorPurple = "\033[35m"
-var ColorGray = "\033[37m"
-var ColorBold = "\033[1m"
-var ColorReset = "\033[0m"
+var (
+	ColorRed    = "\033[31m"
+	ColorGreen  = "\033[32m"
+	ColorPurple = "\033[35m"
+	ColorGray   = "\033[37m"
+	ColorBold   = "\033[1m"
+	ColorReset  = "\033[0m"
+)
 
 var RightArrow = "  \u2794  "
 
-var MockFile = "mockdef.json"
-var ProxyFile = "proxydef.json"
+var (
+	MockFile  = "mockdef.json"
+	ProxyFile = "proxydef.json"
+)
 
-var EventTypeMock = "mock"
-var EventTypeProxy = "proxy"
-var EventTypeError = "error"
+var (
+	EventTypeMock  = "mock"
+	EventTypeProxy = "proxy"
+	EventTypeError = "error"
+)
 
 func UsePayloadFromFile(mockEntity models.Mock) bool {
 	payload := mockEntity.Payload

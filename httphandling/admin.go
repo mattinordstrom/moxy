@@ -59,7 +59,7 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 	switch reqURL {
 	case "/moxyadminui/mockdef", "/moxyadminui/proxydef":
 		jsonName := reqURL[strings.LastIndex(reqURL, "/")+1:]
-		if req.Method == "POST" {
+		if req.Method == http.MethodPost {
 			// fmt.Println("----------- mockdef proxydef POST -------------")
 			jsonData, err := io.ReadAll(req.Body)
 			if err != nil {
@@ -84,7 +84,8 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 				return
 			}
 
-			errr := os.WriteFile(jsonName+".json", jsonData, 0644)
+			const filePermission = 0o644
+			errr := os.WriteFile(jsonName+".json", jsonData, filePermission)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
 
