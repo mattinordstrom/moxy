@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -22,6 +21,10 @@ var RightArrow = "  \u2794  "
 
 var MockFile = "mockdef.json"
 var ProxyFile = "proxydef.json"
+
+var EventTypeMock = "mock"
+var EventTypeProxy = "proxy"
+var EventTypeError = "error"
 
 func UsePayloadFromFile(mockEntity models.Mock) bool {
 	payload := mockEntity.Payload
@@ -106,9 +109,6 @@ func getJSONResultBytes(filename string, absolutePath bool) ([]byte, error) {
 	return byteValue, err
 }
 
-func LogError(err error) {
-	const red = "\033[31m"
-	const reset = "\033[0m"
-
-	fmt.Println(red, "Error:", err, reset)
+func LogError(str string, err error) {
+	log.Println(ColorRed + str + err.Error() + ColorReset)
 }

@@ -29,7 +29,18 @@ function initFunc() {
     .catch(error => { console.error('Fetch error proxydef:', error); });
 
     fetch('/moxyadminui/settings')
-    .then(response => response.json())
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.text().then(text => {
+                const logMsg = '<span class="square square-red"></span> ' + text + '<br />';
+                document.getElementById("footer-log").insertAdjacentHTML('afterbegin', logMsg);
+
+                throw new Error('Error ' + response.status + ': ' + text);
+            });
+        }
+    })
     .then(data => {
         document.getElementById('header-port').innerHTML = data['port'];
         document.getElementById('header-route').innerHTML = data['defaultRoute'];
@@ -42,7 +53,9 @@ function initFunc() {
         //websocket setup
         wsSetup();
     })
-    .catch(error => { console.error('Fetch error settings:', error); });
+    .catch(error => { 
+        console.error('Fetch error settings:', error);
+     });
 
     darkModeSetup();
 
@@ -113,17 +126,17 @@ function renderProxydef() {
 
 function toggleDarkMode() {
     var darkModeLink = document.getElementById('darkModeStylesheet');
-        if (darkModeLink) {
-            darkModeLink.remove();
-            localStorage.setItem('moxyDarkMode', 'false');
-        } else {
-            darkModeLink = document.createElement('link');
-            darkModeLink.id = 'darkModeStylesheet';
-            darkModeLink.rel = 'stylesheet';
-            darkModeLink.href = '/ui/static/style_dark.css';
-            document.head.appendChild(darkModeLink);
-            localStorage.setItem('moxyDarkMode', 'true');
-        }
+    if (darkModeLink) {
+        darkModeLink.remove();
+        localStorage.setItem('moxyDarkMode', 'false');
+    } else {
+        darkModeLink = document.createElement('link');
+        darkModeLink.id = 'darkModeStylesheet';
+        darkModeLink.rel = 'stylesheet';
+        darkModeLink.href = '/ui/static/style_dark.css';
+        document.head.appendChild(darkModeLink);
+        localStorage.setItem('moxyDarkMode', 'true');
+    }
 }
 
 function darkModeSetup() {

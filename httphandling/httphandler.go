@@ -15,9 +15,6 @@ import (
 	"github.com/mattinordstrom/moxy/utils"
 )
 
-var mock = "mock"
-var proxy = "proxy"
-
 var Port = 9097
 var DefaultRoute = ""
 
@@ -58,7 +55,7 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 		if strings.Contains(trimmedURL, ".*") && !isMatch {
 			regex, err := regexp.Compile(trimmedURL)
 			if err != nil {
-				fmt.Println("Error compiling regex:", err)
+				utils.LogError("Error compiling regex: ", err)
 
 				return
 			}
@@ -78,15 +75,19 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 			if !utils.UsePayloadFromFile(mockEntity) {
 				jsonPayload, err := json.Marshal(mockEntity.Payload)
 				if err != nil {
-					fmt.Println("Error occurred during marshalling: ", err)
-				} else {
-					_, wErr := resWriter.Write(jsonPayload)
-					if wErr != nil {
-						fmt.Println("Error occurred during write: ", wErr)
-					}
+					utils.LogError("Error occurred during marshalling: ", err)
+
+					return
 				}
 
-				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, string(jsonPayload)), mock)
+				_, wErr := resWriter.Write(jsonPayload)
+				if wErr != nil {
+					utils.LogError("Error occurred during write: ", wErr)
+
+					return
+				}
+
+				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, string(jsonPayload)), utils.EventTypeMock)
 				fmt.Println(utils.GetMockEventString(mockEntity, true, string(jsonPayload)))
 			} else {
 				// Payload is a json from separate file
@@ -94,18 +95,20 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 				payloadFromFile, err := utils.GetJSONPayloadFromAbsolutePath(payloadPath)
 				if err != nil {
-					utils.LogError(err)
-					updateAdminWithLatest(err.Error(), "error")
+					utils.LogError("Error: ", err)
+					updateAdminWithLatest(err.Error(), utils.EventTypeError)
 
 					return
 				}
 
 				_, wErr := resWriter.Write(payloadFromFile)
 				if wErr != nil {
-					log.Fatalf("Error occurred during write: %v", wErr)
+					utils.LogError("Error occurred during write (payloadFromFile): ", wErr)
+
+					return
 				}
 
-				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, payloadPath), mock)
+				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, payloadPath), utils.EventTypeMock)
 				fmt.Println(utils.GetMockEventString(mockEntity, true, payloadPath))
 			}
 
@@ -129,7 +132,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 		if strings.Contains(trimmedURL, ".*") && !isMatch {
 			regex, err := regexp.Compile(trimmedURL)
 			if err != nil {
-				fmt.Println("Error compiling regex (proxy):", err)
+				utils.LogError("Error compiling regex (proxy): ", err)
 
 				return
 			}
@@ -159,7 +162,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 				// body
 				bodyBytes, err := io.ReadAll(req.Body)
 				if err != nil {
-					fmt.Println("Error reading body for logging:", err)
+					utils.LogError("Error reading body for logging:", err)
 
 					return
 				}
@@ -169,11 +172,11 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 					updateAdminWithLatest(htmlBreak+
 						req.Method+" "+reqURL+utils.RightArrow+newURL+
 						htmlBreak+headerString+
-						htmlBreak+bodyStr+htmlBreak, proxy)
+						htmlBreak+bodyStr+htmlBreak, utils.EventTypeProxy)
 				} else {
 					updateAdminWithLatest(htmlBreak+
 						req.Method+" "+reqURL+utils.RightArrow+newURL+
-						htmlBreak+headerString+htmlBreak, proxy)
+						htmlBreak+headerString+htmlBreak, utils.EventTypeProxy)
 				}
 
 				// Restore the body for further processing
@@ -181,7 +184,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 
 				fmt.Println(" ")
 			} else {
-				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, proxy)
+				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy)
 				fmt.Println(utils.ColorGreen + reqURL + utils.RightArrow + newURL + utils.ColorReset)
 			}
 
@@ -191,7 +194,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 
 	if newURL == "" {
 		newURL = DefaultRoute + reqURL
-		updateAdminWithLatest(reqURL+utils.RightArrow+newURL, proxy)
+		updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy)
 		fmt.Println(utils.ColorGray + reqURL + utils.RightArrow + newURL + utils.ColorReset)
 	}
 
@@ -203,8 +206,9 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 
 	fresp, resperr := client.Do(freq)
 	if resperr != nil {
-		log.Println(utils.ColorRed, resperr, utils.ColorReset)
-		fmt.Fprintf(resWriter, "Error. No response")
+		utils.LogError("", resperr)
+		fmt.Fprintf(resWriter, "Error: No response from "+newURL)
+		updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError)
 
 		return
 	}
@@ -218,8 +222,9 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 
 	body, ioerr := io.ReadAll(fresp.Body)
 	if ioerr != nil {
-		log.Println(utils.ColorRed, ioerr, utils.ColorReset)
+		utils.LogError("", ioerr)
 		fmt.Fprintf(resWriter, "IO Error (Response body)")
+		updateAdminWithLatest("IO Error (Response body)", utils.EventTypeError)
 
 		return
 	}
@@ -228,6 +233,6 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 	resWriter.WriteHeader(fresp.StatusCode)
 
 	if _, err := resWriter.Write(body); err != nil {
-		log.Printf("Failed to write response: %v", err)
+		utils.LogError("Failed to write response: ", err)
 	}
 }

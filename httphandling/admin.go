@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/gorilla/websocket"
 	"github.com/mattinordstrom/moxy/config"
+	"github.com/mattinordstrom/moxy/utils"
 )
 
 type WebSocketMessage struct {
@@ -27,19 +27,20 @@ type Settings struct {
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		return true // Adjust this as needed
+		return true
 	},
 }
 
-var updateClient *websocket.Conn // The client to receive updates
+var updateClient *websocket.Conn
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		// handle error
+		utils.LogError("WS connection error: ", err)
+
 		return
 	}
-	updateClient = conn // Store the connection
+	updateClient = conn
 
 	// Keep the connection alive, handle incoming messages or disconnection
 	for {
@@ -95,8 +96,13 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 	case "/moxyadminui/settings":
 		payloadFilesInDir, err := os.ReadDir(config.AppConfig.Defaults.PayloadArchivePath)
 		if err != nil {
-			log.Printf("Error reading dir: %v", err)
+			utils.LogError("Error reading Payload Archive Path: ", err)
+
+			http.Error(resWriter, err.Error(), http.StatusInternalServerError)
+
+			return
 		}
+
 		var payloadFiles []string
 		for _, entry := range payloadFilesInDir {
 			payloadFiles = append(payloadFiles, entry.Name())
@@ -119,7 +125,7 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 		if _, err := resWriter.Write(jsonResponse); err != nil {
 			// Since headers are already sent, we can't send a new HTTP status code.
 			// Log the error instead.
-			log.Printf("Error writing response: %v", err)
+			utils.LogError("Error writing response: ", err)
 		}
 	case "/moxyadminui":
 		http.ServeFile(resWriter, req, "ui/index.html")
@@ -137,12 +143,12 @@ func updateAdminWithLatest(evtStr string, evtType string) {
 
 		jsonMsg, jErr := json.Marshal(msg)
 		if jErr != nil {
-			fmt.Println("Error: json marshal websocket msg")
+			utils.LogError("Error: json marshal websocket msg ", jErr)
 		}
 
 		err := updateClient.WriteMessage(websocket.TextMessage, jsonMsg)
 		if err != nil {
-			fmt.Println("Error: WriteMessage websocket")
+			utils.LogError("Error: WriteMessage websocket ", err)
 		}
 	}
 }
