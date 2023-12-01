@@ -15,8 +15,6 @@ import (
 	"github.com/mattinordstrom/moxy/utils"
 )
 
-var MockFile = "mockdef.json"
-var ProxyFile = "proxydef.json"
 var mock = "mock"
 var proxy = "proxy"
 
@@ -38,8 +36,8 @@ func CreateHTTPListener() {
 }
 
 func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
-	mockObjArr := utils.GetJSONObj(MockFile)
-	proxyObjArr := utils.GetJSONObj(ProxyFile)
+	mockObjArr := utils.GetMockJSON()
+	proxyObjArr := utils.GetProxyJSON()
 	reqURL := fmt.Sprint(req.URL)
 
 	if strings.HasPrefix(reqURL, "/moxyadminui") {
@@ -51,21 +49,7 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 	////////////////////////////////////////
 	// Loop mockdef json obj
 	for _, val := range mockObjArr {
-		// Create struct
-		jsonData, err := json.Marshal(val)
-		if err != nil {
-			fmt.Println("error marshalling map:", err)
-
-			return
-		}
-		var mockEntity models.Mock
-		err = json.Unmarshal(jsonData, &mockEntity)
-		if err != nil {
-			fmt.Println("error unmarshalling mock JSON:", err)
-
-			return
-		}
-		///////////
+		mockEntity := val
 
 		isMatch := mockEntity.Active && (req.Method == mockEntity.Method)
 		isMatch = isMatch && strings.Contains(reqURL, mockEntity.URLPart)
@@ -126,24 +110,10 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 	useProxyForReq(resWriter, req, proxyObjArr, reqURL)
 }
 
-func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []interface{}, reqURL string) {
+func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []models.Proxy, reqURL string) {
 	newURL := ""
 	for _, val := range objArr {
-		// Create struct
-		jsonData, err := json.Marshal(val)
-		if err != nil {
-			fmt.Println("error marshalling map:", err)
-
-			return
-		}
-		var proxyEntity models.Proxy
-		err = json.Unmarshal(jsonData, &proxyEntity)
-		if err != nil {
-			fmt.Println("error unmarshalling proxy JSON:", err)
-
-			return
-		}
-		///////////
+		proxyEntity := val
 
 		isMatch := proxyEntity.Active && strings.Contains(reqURL, proxyEntity.URLPart)
 		if strings.Contains(proxyEntity.URLPart, ".*") && !isMatch {

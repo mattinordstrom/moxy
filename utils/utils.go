@@ -20,6 +20,9 @@ var ColorReset = "\033[0m"
 
 var RightArrow = "  \u2794  "
 
+var MockFile = "mockdef.json"
+var ProxyFile = "proxydef.json"
+
 func UsePayloadFromFile(mockEntity models.Mock) bool {
 	payload := mockEntity.Payload
 	payloadFromFile := mockEntity.PayloadFromFile
@@ -51,21 +54,28 @@ func GetMockEventString(mockEntity models.Mock, withColor bool, payload string) 
 	return rawString
 }
 
-func GetJSONObj(filename string) []interface{} {
-	var result interface{}
-	byteValue := getJSONResultBytes(filename, false)
+func GetMockJSON() []models.Mock {
+	var result []models.Mock
+	byteValue := getJSONResultBytes(MockFile, false)
 
 	err := json.Unmarshal(byteValue, &result)
 	if err != nil {
-		log.Fatalf("Error occurred during unmarshalling (obj) in file %s: %v", filename, err)
+		log.Fatalf("Error occurred during unmarshalling (obj) in file %s: %v", MockFile, err)
 	}
 
-	objArr, ok := result.([]interface{})
-	if !ok {
-		log.Fatalln("ERROR expected an array of objects from json")
+	return result
+}
+
+func GetProxyJSON() []models.Proxy {
+	var result []models.Proxy
+	byteValue := getJSONResultBytes(ProxyFile, false)
+
+	err := json.Unmarshal(byteValue, &result)
+	if err != nil {
+		log.Fatalf("Error occurred during unmarshalling (obj) in file %s: %v", ProxyFile, err)
 	}
 
-	return objArr
+	return result
 }
 
 func GetJSONObjAsString(absoluteFilePath string) string {

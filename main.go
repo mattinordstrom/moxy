@@ -9,7 +9,6 @@ import (
 
 	"github.com/mattinordstrom/moxy/config"
 	hh "github.com/mattinordstrom/moxy/httphandling"
-	"github.com/mattinordstrom/moxy/models"
 	ut "github.com/mattinordstrom/moxy/utils"
 )
 
@@ -24,7 +23,10 @@ func main() {
 
 	err := config.LoadConfig("config.yml")
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		err := config.LoadConfig("config_template.yml")
+		if err != nil {
+			log.Fatalf("Failed to load config: %v", err)
+		}
 	}
 	hh.DefaultRoute = config.AppConfig.Defaults.DefaultRoute
 
@@ -38,24 +40,10 @@ func main() {
 	fmt.Println(" ")
 
 	// Mockdef
-	mockObjArr := ut.GetJSONObj("mockdef.json")
+	mockObjArr := ut.GetMockJSON()
 	fmt.Println(ut.ColorPurple + "-------- Mockdef --------" + ut.ColorReset)
 	for _, val := range mockObjArr {
-		// Create struct
-		jsonData, err := json.Marshal(val)
-		if err != nil {
-			fmt.Println("error marshalling map:", err)
-
-			return
-		}
-		var mockEntity models.Mock
-		err = json.Unmarshal(jsonData, &mockEntity)
-		if err != nil {
-			fmt.Println("error unmarshalling JSON:", err)
-
-			return
-		}
-		///////////
+		mockEntity := val
 
 		payloadStr := mockEntity.PayloadFromFile
 		if !ut.UsePayloadFromFile(mockEntity) {
@@ -72,24 +60,10 @@ func main() {
 	fmt.Println(ut.ColorPurple + "-------------------------\n" + ut.ColorReset)
 
 	// Proxydef
-	objArr := ut.GetJSONObj("proxydef.json")
+	objArr := ut.GetProxyJSON()
 	fmt.Println(ut.ColorGreen + "-------- Proxydef --------" + ut.ColorReset)
 	for _, val := range objArr {
-		// Create struct
-		jsonData, err := json.Marshal(val)
-		if err != nil {
-			fmt.Println("error marshalling map:", err)
-
-			return
-		}
-		var proxyEntity models.Proxy
-		err = json.Unmarshal(jsonData, &proxyEntity)
-		if err != nil {
-			fmt.Println("error unmarshalling proxy JSON:", err)
-
-			return
-		}
-		///////////
+		proxyEntity := val
 
 		fmt.Println(ut.ColorGreen +
 			proxyEntity.URLPart + ut.RightArrow + proxyEntity.Target +

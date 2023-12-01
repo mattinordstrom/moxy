@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/mattinordstrom/moxy/utils"
 )
 
 func TestMockedResponse(t *testing.T) {
@@ -14,7 +16,7 @@ func TestMockedResponse(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	MockFile = "mockdef_test.json"
+	utils.MockFile = "mockdef_test.json"
 
 	resRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(httpHandler)

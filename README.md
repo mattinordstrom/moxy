@@ -43,13 +43,14 @@ Edit proxies: [proxydef.json]
 
   
 ## Quick notes:
-- Json files will be read for every request (cached 3 sec), so no need to restart moxy after change in json file
+- Json files will be read for every request (cached 2 sec), so no need to restart moxy after change in json file
 - Mocks will always go before proxies.  
 - Json files are read from top to bottom and request is processed at first match.
 - If no match is found in Json the "Default route" will be used
 - URLs will be matched "if contains", so the order and precision in the json urlpart is important
 - If payload and payloadFromFile are both defined payload will be used
 - .* can be used in urlpart in mocks and proxies
+- Copy config_template.yml to config.yml to use your own config
   
 <br>  
 <br>
@@ -58,12 +59,6 @@ _______________________
 <br>
 
 ## For developers:
-### Dont track config
-```sh
-git update-index --assume-unchanged config.yml
-```  
-  
-  
 ### Run tests:  
 ```sh
 $ go test ./... -v | sed -e 's/PASS/\x1b[32m&\x1b[0m/' -e 's/FAIL/\x1b[31m&\x1b[0m/'
