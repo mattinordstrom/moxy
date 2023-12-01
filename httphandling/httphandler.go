@@ -63,7 +63,7 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			isMatch = regex.MatchString(reqURL)
+			isMatch = mockEntity.Active && regex.MatchString(reqURL)
 		}
 
 		if isMatch {

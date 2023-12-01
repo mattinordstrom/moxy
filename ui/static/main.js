@@ -1,6 +1,9 @@
 let globalMockdefObj = {};
 let globalProxydefObj = {};
 
+let payloadPath = '';
+let payloadFiles = [];
+
 let wSocket;
 let wsAttempts = 0;
 const wsMaxAttempts = 3;
@@ -28,6 +31,9 @@ function initFunc() {
     .then(data => {
         document.getElementById('header-port').innerHTML = data['port'];
         document.getElementById('header-route').innerHTML = data['defaultRoute'];
+
+        payloadPath = data['payloadPath'];
+        payloadFiles = data['payloadFiles'];
     })
     .catch(error => { console.error('Fetch error settings:', error); });
 
@@ -187,6 +193,25 @@ function reconnectWebSocket() {
 function maximizeFirst() {
     document.getElementById('payload_0').style.height = '470px';
     document.getElementById('payload_0').style.width = '970px';
+}
+
+function listPayloadFiles() {
+    document.getElementById('payloadFiles').style.display = 'block';
+    document.getElementById('payloadFilesContent').innerHTML = '<br />' + payloadPath + '<hr /><br />';
+
+    let filesListHtml = '';
+    for (let i = 0; i < payloadFiles.length; i++) {
+        filesListHtml += '<div style="display:flex"><div style="min-width:225px">' + payloadFiles[i] + '</div>';
+        filesListHtml += '&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'' + payloadFiles[i] + '\')">Copy file name</button>';
+        filesListHtml += '&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'' + payloadPath + payloadFiles[i] + '\')">Copy full path</button>';
+        filesListHtml += '</div><br />';
+    }
+
+    document.getElementById('payloadFilesContent').innerHTML += filesListHtml;
+}
+
+function closeListPayloadFiles() {
+    document.getElementById('payloadFiles').style.display = 'none';
 }
 
 function addMock() {

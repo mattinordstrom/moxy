@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
+	"github.com/mattinordstrom/moxy/config"
 )
 
 type WebSocketMessage struct {
@@ -18,8 +19,10 @@ type WebSocketMessage struct {
 }
 
 type Settings struct {
-	Port         int    `json:"port"`
-	DefaultRoute string `json:"defaultRoute"`
+	Port         int      `json:"port"`
+	DefaultRoute string   `json:"defaultRoute"`
+	PayloadFiles []string `json:"payloadFiles"`
+	PayloadPath  string   `json:"payloadPath"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -90,9 +93,20 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 			http.ServeFile(resWriter, req, jsonName+".json")
 		}
 	case "/moxyadminui/settings":
+		payloadFilesInDir, err := os.ReadDir(config.AppConfig.Defaults.PayloadArchivePath)
+		if err != nil {
+			log.Printf("Error reading dir: %v", err)
+		}
+		var payloadFiles []string
+		for _, entry := range payloadFilesInDir {
+			payloadFiles = append(payloadFiles, entry.Name())
+		}
+
 		data := Settings{
 			Port:         Port,
 			DefaultRoute: DefaultRoute,
+			PayloadFiles: payloadFiles,
+			PayloadPath:  config.AppConfig.Defaults.PayloadArchivePath,
 		}
 		jsonResponse, err := json.Marshal(data)
 		if err != nil {

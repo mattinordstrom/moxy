@@ -22,11 +22,19 @@
     </header>
 
     <div class="container">
+        <div id="payloadFiles" class="payload-files">
+            <div style="display: flex; justify-content: end; margin-bottom: 10px">
+                <button style="min-width: 30px; min-height: 24px;" onclick="closeListPayloadFiles()">X</button>
+            </div>
+            <div id="payloadFilesContent"></div>
+        </div>
         <div id="left" class="left">
             <div style="margin-left: 20px;">
                 <h2>mock definitions</h2>
                 <button style="min-width: 60px; min-height: 30px;" onclick="addMock()">Add</button>
-                <button style="min-width: 60px; min-height: 30px;" onclick="maximizeFirst()">Maximize first</button><br /><br />
+                <button style="min-width: 60px; min-height: 30px;" onclick="maximizeFirst()">Maximize first</button>
+                <button style="min-width: 60px; min-height: 30px;" onclick="listPayloadFiles()">Payload files</button>
+                <br /><br />
             </div>
             <div id="mock-content-container" class="proxymock-content-container"></div>
             <div style="margin-bottom:200px"></div>

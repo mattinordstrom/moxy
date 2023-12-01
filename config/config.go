@@ -13,7 +13,8 @@ type Config struct {
 }
 
 type DefaultConfig struct {
-	DefaultRoute string `yaml:"route"`
+	DefaultRoute       string `yaml:"route"`
+	PayloadArchivePath string `yaml:"payloadArchivePath"`
 }
 
 var AppConfig Config
