@@ -1,6 +1,8 @@
 let globalMockdefObj = {};
 let globalProxydefObj = {};
 
+let globalPort = 9097;
+
 let payloadPath = '';
 let payloadFiles = [];
 
@@ -34,6 +36,11 @@ function initFunc() {
 
         payloadPath = data['payloadPath'];
         payloadFiles = data['payloadFiles'];
+
+        globalPort = data['port'];
+
+        //websocket setup
+        wsSetup();
     })
     .catch(error => { console.error('Fetch error settings:', error); });
 
@@ -41,9 +48,6 @@ function initFunc() {
 
     //click events setup
     clickEvtSetup();
-
-    //websocket setup
-    wsSetup();
 }
 
 function renderMockdef() {
@@ -145,7 +149,7 @@ function clickEvtSetup() {
 }
 
 function wsSetup() {
-    wSocket = new WebSocket("ws://localhost:9097/ws");
+    wSocket = new WebSocket("ws://localhost:"+globalPort+"/ws");
 
     wSocket.onmessage = function(event) {
         const evtJson = JSON.parse(event.data);

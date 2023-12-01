@@ -35,7 +35,7 @@ func main() {
 	fmt.Println(" ")
 	fmt.Println(bullet + " Run on:        http://localhost:" + strconv.Itoa(hh.Port))
 	fmt.Println(bullet + " Default route: " + hh.DefaultRoute)
-	fmt.Println(bullet + " Admin UI:      http://localhost:9097/moxyadminui")
+	fmt.Println(bullet + " Admin UI:      http://localhost:" + strconv.Itoa(hh.Port) + "/moxyadminui")
 	fmt.Println(" ")
 	fmt.Println(" ")
 
