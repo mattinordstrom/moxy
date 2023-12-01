@@ -92,10 +92,17 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 				// Payload is a json from separate file
 				payloadPath := mockEntity.PayloadFromFile
 
-				payloadFromFile := utils.GetJSONObjAsString(payloadPath)
-				_, err := resWriter.Write([]byte(payloadFromFile))
+				payloadFromFile, err := utils.GetJSONPayloadFromAbsolutePath(payloadPath)
 				if err != nil {
-					log.Fatalf("Error occurred during write: %v", err)
+					utils.LogError(err)
+					updateAdminWithLatest(err.Error(), "error")
+
+					return
+				}
+
+				_, wErr := resWriter.Write(payloadFromFile)
+				if wErr != nil {
+					log.Fatalf("Error occurred during write: %v", wErr)
 				}
 
 				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, payloadPath), mock)

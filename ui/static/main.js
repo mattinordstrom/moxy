@@ -146,6 +146,8 @@ function wsSetup() {
         let logMsg = '<span class="square"></span> ' + evtJson.message + '<br />';
         if(evtJson.type === 'mock') {
             logMsg = '<span class="square square-purple"></span> ' + evtJson.message + '<br />';
+        } else if(evtJson.type === 'error') {
+            logMsg = '<span class="square square-red"></span> ' + evtJson.message + '<br />';
         }
 
         document.getElementById("footer-log").insertAdjacentHTML('afterbegin', logMsg);
@@ -257,6 +259,9 @@ function updateMockdef(evt) {
                 }
 
                 globalMockdefObj[index][name] = value;
+            } else if(name === "payloadFromFile" && evt.value.startsWith('~')) {
+                alert('Absolute path cannot start with ~');
+                return;
             } else {
                 globalMockdefObj[index][name] = evt.value;
             }

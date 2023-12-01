@@ -56,7 +56,7 @@ func GetMockEventString(mockEntity models.Mock, withColor bool, payload string) 
 
 func GetMockJSON() []models.Mock {
 	var result []models.Mock
-	byteValue := getJSONResultBytes(MockFile, false)
+	byteValue, _ := getJSONResultBytes(MockFile, false)
 
 	err := json.Unmarshal(byteValue, &result)
 	if err != nil {
@@ -68,7 +68,7 @@ func GetMockJSON() []models.Mock {
 
 func GetProxyJSON() []models.Proxy {
 	var result []models.Proxy
-	byteValue := getJSONResultBytes(ProxyFile, false)
+	byteValue, _ := getJSONResultBytes(ProxyFile, false)
 
 	err := json.Unmarshal(byteValue, &result)
 	if err != nil {
@@ -78,23 +78,11 @@ func GetProxyJSON() []models.Proxy {
 	return result
 }
 
-func GetJSONObjAsString(absoluteFilePath string) string {
-	var result interface{}
-	byteValue := getJSONResultBytes(absoluteFilePath, true)
-	err := json.Unmarshal(byteValue, &result)
-	if err != nil {
-		log.Fatalf("Error occurred during unmarshalling (str) in file %s: %v", absoluteFilePath, err)
-	}
-
-	jsonStr, err := json.Marshal(result)
-	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
-	}
-
-	return string(jsonStr)
+func GetJSONPayloadFromAbsolutePath(absoluteFilePath string) ([]byte, error) {
+	return getJSONResultBytes(absoluteFilePath, true)
 }
 
-func getJSONResultBytes(filename string, absolutePath bool) []byte {
+func getJSONResultBytes(filename string, absolutePath bool) ([]byte, error) {
 	var fullJSONPath string
 	var jsonPath string
 	var err error
@@ -113,7 +101,14 @@ func getJSONResultBytes(filename string, absolutePath bool) []byte {
 		fullJSONPath = jsonPath + "/" + filename
 	}
 
-	byteValue, _ := readJSONFileWithCache(fullJSONPath)
+	byteValue, err := readJSONFileWithCache(fullJSONPath)
 
-	return byteValue
+	return byteValue, err
+}
+
+func LogError(err error) {
+	const red = "\033[31m"
+	const reset = "\033[0m"
+
+	fmt.Println(red, "Error:", err, reset)
 }
