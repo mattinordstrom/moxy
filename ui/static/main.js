@@ -52,35 +52,54 @@ const renderMockdef = () => {
     const data = MockDefModule.get();
     for (let i = 0; i < data.length; i++) {
         const mockEntityData = data[i];
-        let mockEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1) + 
-            '<div style="display:flex">' +
-            '<div><input onchange="updateMockdef(this)" class="comment-input" type="text" spellcheck="false" name="comment_mock_'+i+'" id="comment_mock_'+i+'" value="' + (mockEntityData['comment'] || "") + '"></input></div>' +
-            '<div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_up_btn_'+i+'">&#8593;</button></div>' +
-            '<div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_down_btn_'+i+'">&#8595;</button></div>' +
-            '<div><button onclick="removeMock(this)" id="x_btn_'+i+'">X</button></div>' +
-            '</div></div>' +
-            '<div class="mock-obj"><label for="active_mock_'+i+'">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_'+i+'" id="active_mock_'+i+'" ' + (mockEntityData['active'] ? "checked" : "") + '></input></div>' +
-            '<div class="mock-obj"><label for="freezetimems_'+i+'">freezetimems:</label><input onchange="updateMockdef(this)" type="number" name="freezetimems_'+i+'" id="freezetimems_'+i+'" value="' + mockEntityData['freezetimems'] + '"></input></div>' +
-            '<div class="mock-obj"><label for="method_'+i+'">method:</label><select onchange="updateMockdef(this)" class="slct" name="method_'+i+'" id="method_'+i+'">' +
-            '<option value="GET" ' + (mockEntityData['method'] === "GET" ? "selected" : "") + '>GET</option>' +
-            '<option value="POST" ' + (mockEntityData['method'] === "POST" ? "selected" : "") + '>POST</option>' +
-            '<option value="PUT" ' + (mockEntityData['method'] === "PUT" ? "selected" : "") + '>PUT</option>' +
-            '<option value="DELETE" ' + (mockEntityData['method'] === "DELETE" ? "selected" : "") + '>DELETE</option>' + 
-            '</select></div>';
+        let mockEntity = `
+            <div class="proxymock-content">
+                <div style="color:#999999; display: flex; justify-content: space-between;">
+                    ${(i+1)} 
+                    <div style="display:flex">
+                        <div><input onchange="updateMockdef(this)" class="comment-input" type="text" spellcheck="false" name="comment_mock_${i}" id="comment_mock_${i}" value="${mockEntityData['comment'] || ""}"></input></div>
+                        <div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_up_btn_${i}">&#8593;</button></div>
+                        <div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_down_btn_${i}">&#8595;</button></div>
+                        <div><button onclick="removeMock(this)" id="x_btn_${i}">X</button></div>
+                    </div>
+                </div>
+                <div class="mock-obj"><label for="active_mock_${i}">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_${i}" id="active_mock_${i}" ${mockEntityData['active'] ? "checked" : ""}></input></div>
+                <div class="mock-obj"><label for="freezetimems_${i}">freezetimems:</label><input onchange="updateMockdef(this)" type="number" name="freezetimems_${i}" id="freezetimems_${i}" value="${mockEntityData['freezetimems']}"></input></div>
+                <div class="mock-obj"><label for="method_${i}">method:</label><select onchange="updateMockdef(this)" class="slct" name="method_${i}" id="method_${i}">
+                    <option value="GET" ${mockEntityData['method'] === "GET" ? "selected" : ""}>GET</option>
+                    <option value="POST" ${mockEntityData['method'] === "POST" ? "selected" : ""}>POST</option>
+                    <option value="PUT" ${mockEntityData['method'] === "PUT" ? "selected" : ""}>PUT</option>
+                    <option value="DELETE" ${mockEntityData['method'] === "DELETE" ? "selected" : ""}>DELETE</option>
+                    </select>
+                </div>`;
 
             let payload = mockEntityData['payload'];
             if (typeof payload === 'object') {
                 payload = JSON.stringify(mockEntityData['payload'], null, 2);
             }
 
-            mockEntity += '<div class="mock-obj"><label for="payload_'+i+'">payload:</label><textarea onchange="updateMockdef(this)" spellcheck="false" rows="8" cols="32" name="payload_'+i+'" id="payload_'+i+'">' + 
-                payload + '</textarea></div>';
+            mockEntity += `
+                <div class="mock-obj">
+                    <label for="payload_${i}">payload:</label>
+                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="8" cols="32" name="payload_${i}" id="payload_${i}">${payload}</textarea>
+                </div>`;
 
-            mockEntity += '<div class="mock-obj"><label for="payloadFromFile_'+i+'">payloadFromFile:</label><textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="32" class="fixed-textarea" name="payloadFromFile_'+i+'" id="payloadFromFile_'+i+'">' + mockEntityData['payloadFromFile'] + '</textarea></div>';
+            mockEntity += `
+                <div class="mock-obj">
+                    <label for="payloadFromFile_${i}">payloadFromFile:</label>
+                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="32" class="fixed-textarea" name="payloadFromFile_${i}" id="payloadFromFile_${i}">${mockEntityData['payloadFromFile']}</textarea>
+                </div>`;
 
-            mockEntity += '<div class="mock-obj"><label for="statuscode_'+i+'">statuscode:</label><input onchange="updateMockdef(this)" type="number" name="statuscode_'+i+'" id="statuscode_'+i+'" value="' + mockEntityData['statuscode'] + '"></input></div>' +
-            '<div class="mock-obj"><label for="urlpart_mock_'+i+'"><b>urlpart:</b></label><input onchange="updateMockdef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_mock_'+i+'" id="urlpart_mock_'+i+'" value="' + mockEntityData['urlpart'] + '"></input></div>' +
-            '</div>';
+            mockEntity += `
+                <div class="mock-obj">
+                    <label for="statuscode_${i}">statuscode:</label>
+                    <input onchange="updateMockdef(this)" type="number" name="statuscode_${i}" id="statuscode_${i}" value="${mockEntityData['statuscode']}"></input>
+                </div>
+                <div class="mock-obj">
+                    <label for="urlpart_mock_${i}"><b>urlpart:</b></label>
+                    <input onchange="updateMockdef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_mock_${i}" id="urlpart_mock_${i}" value="${mockEntityData['urlpart']}"></input>
+                </div>
+            </div>`;
 
             document.getElementById('mock-content-container').innerHTML += mockEntity + "<br />";
     };
@@ -91,18 +110,22 @@ const renderProxydef = () => {
     const data = ProxyDefModule.get();
     for (let i = 0; i < data.length; i++) {
         const proxyEntityData = data[i];
-        let proxyEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1) + 
-            '<div style="display:flex">' +
-            '<div><input onchange="updateProxydef(this)" class="comment-input" type="text" spellcheck="false" name="comment_proxy_'+i+'" id="comment_proxy_'+i+'" value="' + (proxyEntityData['comment'] || "") + '"></input></div>' +
-            '<div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_up_btn_'+i+'">&#8593;</button></div>' +
-            '<div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_down_btn_'+i+'">&#8595;</button></div>' +
-            '<div><button onclick="removeProxy(this)" id="x_btn_'+i+'">X</button></div>' +
-            '</div></div>' +
-            '<div class="proxy-obj"><label for="active_proxy_'+i+'">active:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="active_proxy_'+i+'" id="active_proxy_'+i+'" ' + (proxyEntityData['active'] ? "checked" : "") + '></input></div>' +    
-            '<div class="proxy-obj"><label for="target_'+i+'">target:</label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="target_'+i+'" id="target_'+i+'" value="' + proxyEntityData['target'] + '"></input></div>' +
-            '<div class="proxy-obj"><label for="urlpart_proxy_'+i+'"><b>urlpart:</b></label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_proxy_'+i+'" id="urlpart_proxy_'+i+'" value="' + proxyEntityData['urlpart'] + '"></input></div>' +
-            '<div class="proxy-obj"><label for="verbose_'+i+'">verbose:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="verbose_'+i+'" id="verbose_'+i+'" ' + (proxyEntityData['verbose'] ? "checked" : "") + '></input></div>' +    
-            '</div>';
+        let proxyEntity = `
+            <div class="proxymock-content">
+                <div style="color:#999999; display: flex; justify-content: space-between;">
+                    ${(i+1)} 
+                    <div style="display:flex">
+                        <div><input onchange="updateProxydef(this)" class="comment-input" type="text" spellcheck="false" name="comment_proxy_${i}" id="comment_proxy_${i}" value="${proxyEntityData['comment'] || ""}"></input></div>
+                        <div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_up_btn_${i}">&#8593;</button></div>
+                        <div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_down_btn_${i}">&#8595;</button></div>
+                        <div><button onclick="removeProxy(this)" id="x_btn_${i}">X</button></div>
+                    </div>
+                </div>
+                <div class="proxy-obj"><label for="active_proxy_${i}">active:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="active_proxy_${i}" id="active_proxy_${i}" ${proxyEntityData['active'] ? "checked" : ""}></input></div>    
+                <div class="proxy-obj"><label for="target_${i}">target:</label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="target_${i}" id="target_${i}" value="${proxyEntityData['target']}"></input></div>
+                <div class="proxy-obj"><label for="urlpart_proxy_${i}"><b>urlpart:</b></label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_proxy_${i}" id="urlpart_proxy_${i}" value="${proxyEntityData['urlpart']}"></input></div>
+                <div class="proxy-obj"><label for="verbose_${i}">verbose:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="verbose_${i}" id="verbose_${i}" ${proxyEntityData['verbose'] ? "checked" : ""}></input></div> 
+            </div>`;
 
         document.getElementById('proxy-content-container').innerHTML += proxyEntity + "<br />";
     };
@@ -200,7 +223,7 @@ const maximizeFirst = () => {
 
 const listPayloadFiles = () => {
     document.getElementById('payloadFiles').style.display = 'block';
-    document.getElementById('payloadFilesContent').innerHTML = '<br />' + PayloadFromFileModule.getPayloadPath() + '<hr /><br />';
+    document.getElementById('payloadFilesContent').innerHTML = `<br />${PayloadFromFileModule.getPayloadPath()}<hr /><br />`;
 
     let filesListHtml = '';
     const files = PayloadFromFileModule.getPayloadFiles();
