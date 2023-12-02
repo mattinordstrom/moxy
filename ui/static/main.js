@@ -1,19 +1,8 @@
-let globalMockdefObj = {};
-let globalProxydefObj = {};
-
-let payloadPath = '';
-let payloadFiles = [];
-
-let wSocket;
-let wsAttempts = 0;
-const wsMaxAttempts = 3;
-const wsReconnectDelay = 5000;
-
 const initFunc = () => {
     fetch('/moxyadminui/mockdef')
     .then(response => response.json())
     .then(data => {
-        globalMockdefObj = data;
+        MockDefModule.set(data);
         renderMockdef(data);
     })
     .catch(error => { console.error('Fetch error mockdef:', error); });
@@ -21,7 +10,7 @@ const initFunc = () => {
     fetch('/moxyadminui/proxydef')
     .then(response => response.json())
     .then(data => {
-        globalProxydefObj = data;
+        ProxyDefModule.set(data);
         renderProxydef(data);
     })
     .catch(error => { console.error('Fetch error proxydef:', error); });
@@ -43,8 +32,8 @@ const initFunc = () => {
         document.getElementById('header-port').innerHTML = data['port'];
         document.getElementById('header-route').innerHTML = data['defaultRoute'];
 
-        payloadPath = data['payloadPath'];
-        payloadFiles = data['payloadFiles'];
+        PayloadFromFileModule.setPayloadPath(data['payloadPath']);
+        PayloadFromFileModule.setPayloadFiles(data['payloadFiles']);
     })
     .catch(error => { 
         console.error('Fetch error settings:', error);
@@ -60,7 +49,7 @@ const initFunc = () => {
 }
 
 const renderMockdef = () => {
-    const data = globalMockdefObj;
+    const data = MockDefModule.get();
     for (let i = 0; i < data.length; i++) {
         const mockEntityData = data[i];
         let mockEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1) + 
@@ -99,7 +88,7 @@ const renderMockdef = () => {
 }
 
 const renderProxydef = () => {
-    const data = globalProxydefObj;
+    const data = ProxyDefModule.get();
     for (let i = 0; i < data.length; i++) {
         const proxyEntityData = data[i];
         let proxyEntity = '<div class="proxymock-content"><div style="color:#999999; display: flex; justify-content: space-between;">'+(i+1) + 
@@ -158,7 +147,8 @@ const clickEvtSetup = () => {
 }
 
 const wsSetup = () => {
-    wSocket = new WebSocket("ws://localhost:"+Number(location.port)+"/moxyws");
+    WSModule.createWSocket();
+    const wSocket = WSModule.getWSocket();
 
     wSocket.onmessage = (event) => {
         const evtJson = JSON.parse(event.data);
@@ -176,7 +166,7 @@ const wsSetup = () => {
         console.log("WebSocket Connected");
         document.getElementById('header-ws').innerHTML = 'connected <span class="bullet"></span>';
 
-        wsAttempts = 0;
+        WSModule.setWSAttempts(0);
     };
 
     wSocket.onerror = (error)  => {
@@ -188,8 +178,8 @@ const wsSetup = () => {
         console.log("WebSocket Close: " + event);
         document.getElementById('header-ws').innerHTML = 'reconnecting... <span class="bullet bullet-red"></span>';
 
-        if (wsAttempts < wsMaxAttempts) {
-            setTimeout(reconnectWebSocket, wsReconnectDelay);
+        if (WSModule.getWSAttempts() < WSModule.getWSMaxAttempts()) {
+            setTimeout(reconnectWebSocket, WSModule.getWSReconnectDelay());
         } else {
             console.log("WebSocket reconnection failed after maximum attempts");
             document.getElementById('header-ws').innerHTML = 'closed <span class="bullet bullet-red"></span>';
@@ -198,8 +188,8 @@ const wsSetup = () => {
 }
 
 const reconnectWebSocket = () => {
-    wsAttempts++;
-    console.log(`Attempting to reconnect... (${wsAttempts}/${wsMaxAttempts})`);
+    WSModule.setWSAttempts(WSModule.getWSAttempts()+1);
+    console.log(`Attempting to reconnect... (${WSModule.getWSAttempts()}/${WSModule.getWSMaxAttempts()})`);
     wsSetup();
 }
 
@@ -210,12 +200,13 @@ const maximizeFirst = () => {
 
 const listPayloadFiles = () => {
     document.getElementById('payloadFiles').style.display = 'block';
-    document.getElementById('payloadFilesContent').innerHTML = '<br />' + payloadPath + '<hr /><br />';
+    document.getElementById('payloadFilesContent').innerHTML = '<br />' + PayloadFromFileModule.getPayloadPath() + '<hr /><br />';
 
     let filesListHtml = '';
-    for (let i = 0; i < payloadFiles.length; i++) {
-        filesListHtml += '<div style="display:flex"><div style="min-width:225px">' + payloadFiles[i] + '</div>';
-        filesListHtml += '&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'' + payloadPath + payloadFiles[i] + '\')">Copy full path</button>';
+    const files = PayloadFromFileModule.getPayloadFiles();
+    for (let i = 0; i < files.length; i++) {
+        filesListHtml += '<div style="display:flex"><div style="min-width:225px">' + files[i] + '</div>';
+        filesListHtml += '&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'' + PayloadFromFileModule.getPayloadPath() + files[i] + '\')">Copy full path</button>';
         filesListHtml += '</div><br />';
     }
 
@@ -239,7 +230,7 @@ const addMock = () => {
         "urlpart": "/api/whatever/someendpoint"
     };
 
-    globalMockdefObj.push(mock);
+    MockDefModule.set([...MockDefModule.get(), mock]);
 
     resetAndSync("mock");
 }
@@ -252,21 +243,21 @@ const addProxy = () => {
         "verbose": false
     };
 
-      globalProxydefObj.push(proxy);
+    ProxyDefModule.set([...ProxyDefModule.get(), proxy]);
 
-      resetAndSync("proxy");
+    resetAndSync("proxy");
 }
 
 const removeMock = (evt) => {
     const index = Number(evt.id.split('_').slice(-1)[0]);
-    globalMockdefObj.splice(index, 1);
+    MockDefModule.remove(index);
 
     resetAndSync("mock");
 }
 
 const removeProxy = (evt) => {
     const index = Number(evt.id.split('_').slice(-1)[0]);
-    globalProxydefObj.splice(index, 1);
+    ProxyDefModule.remove(index);
 
     resetAndSync("proxy");
 }
@@ -276,16 +267,18 @@ const updateMockdef = (evt) => {
         const index = Number(evt.id.split('_').slice(-1)[0]);
         const name = evt.id.split('_')[0];
 
+        let mocks = MockDefModule.get();
+
         if(evt.tagName.toLowerCase() === "input") {
             if(evt.type === "checkbox") {
-                globalMockdefObj[index][name] = evt.checked;
+                mocks[index][name] = evt.checked;
             } else if(evt.type === "number") { 
-                globalMockdefObj[index][name] = Number(evt.value);
+                mocks[index][name] = Number(evt.value);
             } else if(evt.type === "text") {
-                globalMockdefObj[index][name] = evt.value;
+                mocks[index][name] = evt.value;
             } 
         } else if(evt.tagName.toLowerCase() === "select") {
-            globalMockdefObj[index][name] = evt.value;
+            mocks[index][name] = evt.value;
         } else if(evt.tagName.toLowerCase() === "textarea") {
             if(name === "payload") {
                 let value = evt.value;
@@ -295,19 +288,21 @@ const updateMockdef = (evt) => {
                     value = evt.value;
                 }
 
-                globalMockdefObj[index][name] = value;
+                mocks[index][name] = value;
             } else if(name === "payloadFromFile" && evt.value.startsWith('~')) {
                 alert('Absolute path cannot start with ~');
                 return;
             } else {
-                globalMockdefObj[index][name] = evt.value;
+                mocks[index][name] = evt.value;
             }
         }
+
+        MockDefModule.set(mocks);
     }
 
     fetch('/moxyadminui/mockdef', {
         method: "POST",
-        body: JSON.stringify(globalMockdefObj),
+        body: JSON.stringify(MockDefModule.get()),
     })
     .then(data => {
         console.log("Success POST mockdef");
@@ -322,18 +317,22 @@ const updateProxydef = (evt) => {
         const index = Number(evt.id.split('_').slice(-1)[0]);
         const name = evt.id.split('_')[0];
 
+        let proxies = ProxyDefModule.get();
+
         if(evt.tagName.toLowerCase() === "input") {
             if(evt.type === "checkbox") {
-                globalProxydefObj[index][name] = evt.checked;
+                proxies[index][name] = evt.checked;
             } else if(evt.type === "text") {
-                globalProxydefObj[index][name] = evt.value;
+                proxies[index][name] = evt.value;
             } 
         }
+
+        ProxyDefModule.set(proxies);
     }
 
     fetch('/moxyadminui/proxydef', {
         method: "POST",
-        body: JSON.stringify(globalProxydefObj),
+        body: JSON.stringify(ProxyDefModule.get()),
     })
     .then(data => {
         console.log("Success POST proxydef");
@@ -344,13 +343,17 @@ const updateProxydef = (evt) => {
 }
 
 const moveMock = (evt) => {
-    if(moveEntity(evt, globalMockdefObj)) {
+    let mocks = MockDefModule.get();
+    if(moveEntity(evt, mocks)) {
+        MockDefModule.set(mocks);
         resetAndSync("mock");
     }
 }
 
 const moveProxy = (evt) => {
-    if(moveEntity(evt, globalProxydefObj)) {
+    let proxies = ProxyDefModule.get();
+    if(moveEntity(evt, proxies)) {
+        ProxyDefModule.set(proxies);
         resetAndSync("proxy");
     }
 }
