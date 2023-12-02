@@ -1,8 +1,6 @@
 let globalMockdefObj = {};
 let globalProxydefObj = {};
 
-let globalPort = 9097;
-
 let payloadPath = '';
 let payloadFiles = [];
 
@@ -11,7 +9,7 @@ let wsAttempts = 0;
 const wsMaxAttempts = 3;
 const wsReconnectDelay = 5000;
 
-function initFunc() {
+const initFunc = () => {
     fetch('/moxyadminui/mockdef')
     .then(response => response.json())
     .then(data => {
@@ -47,11 +45,6 @@ function initFunc() {
 
         payloadPath = data['payloadPath'];
         payloadFiles = data['payloadFiles'];
-
-        globalPort = data['port'];
-
-        //websocket setup
-        wsSetup();
     })
     .catch(error => { 
         console.error('Fetch error settings:', error);
@@ -59,11 +52,14 @@ function initFunc() {
 
     darkModeSetup();
 
+    //websocket setup
+    wsSetup();
+
     //click events setup
     clickEvtSetup();
 }
 
-function renderMockdef() {
+const renderMockdef = () => {
     const data = globalMockdefObj;
     for (let i = 0; i < data.length; i++) {
         const mockEntityData = data[i];
@@ -102,7 +98,7 @@ function renderMockdef() {
 
 }
 
-function renderProxydef() {
+const renderProxydef = () => {
     const data = globalProxydefObj;
     for (let i = 0; i < data.length; i++) {
         const proxyEntityData = data[i];
@@ -124,7 +120,7 @@ function renderProxydef() {
 
 }
 
-function toggleDarkMode() {
+const toggleDarkMode = () => {
     var darkModeLink = document.getElementById('darkModeStylesheet');
     if (darkModeLink) {
         darkModeLink.remove();
@@ -139,7 +135,7 @@ function toggleDarkMode() {
     }
 }
 
-function darkModeSetup() {
+const darkModeSetup = () => {
     document.getElementById('toggleDarkMode').addEventListener('click', toggleDarkMode);
 
     if (localStorage.getItem('moxyDarkMode') === 'false') {
@@ -147,24 +143,24 @@ function darkModeSetup() {
     }
 }
 
-function clickEvtSetup() {
-    document.getElementById('expand-button').addEventListener('click', function() {
+const clickEvtSetup = () => {
+    document.getElementById('expand-button').addEventListener('click', () => {
         document.querySelector('footer').classList.toggle('expanded');
     });
 
-    document.getElementById('clear-log-button').addEventListener('click', function() {
+    document.getElementById('clear-log-button').addEventListener('click', () => {
         document.getElementById('footer-log').innerHTML = "";
     });
 
-    document.getElementById('add-lines-button').addEventListener('click', function() {
+    document.getElementById('add-lines-button').addEventListener('click', () => {
         document.getElementById("footer-log").insertAdjacentHTML('afterbegin', "<br /><br /><br /><br /><br />");
     });
 }
 
-function wsSetup() {
-    wSocket = new WebSocket("ws://localhost:"+globalPort+"/ws");
+const wsSetup = () => {
+    wSocket = new WebSocket("ws://localhost:"+Number(location.port)+"/moxyws");
 
-    wSocket.onmessage = function(event) {
+    wSocket.onmessage = (event) => {
         const evtJson = JSON.parse(event.data);
         let logMsg = '<span class="square"></span> ' + evtJson.message + '<br />';
         if(evtJson.type === 'mock') {
@@ -176,19 +172,19 @@ function wsSetup() {
         document.getElementById("footer-log").insertAdjacentHTML('afterbegin', logMsg);
     };
 
-    wSocket.onopen = function() {
+    wSocket.onopen = () => {
         console.log("WebSocket Connected");
         document.getElementById('header-ws').innerHTML = 'connected <span class="bullet"></span>';
 
         wsAttempts = 0;
     };
 
-    wSocket.onerror = function(error) {
+    wSocket.onerror = (error)  => {
         console.log("WebSocket Error: " + error);
         document.getElementById('header-ws').innerHTML = 'error <span class="bullet bullet-red"></span>';
     };
 
-    wSocket.onclose = function(event) {
+    wSocket.onclose = (event)  => {
         console.log("WebSocket Close: " + event);
         document.getElementById('header-ws').innerHTML = 'reconnecting... <span class="bullet bullet-red"></span>';
 
@@ -201,25 +197,24 @@ function wsSetup() {
     };
 }
 
-function reconnectWebSocket() {
+const reconnectWebSocket = () => {
     wsAttempts++;
     console.log(`Attempting to reconnect... (${wsAttempts}/${wsMaxAttempts})`);
     wsSetup();
 }
 
-function maximizeFirst() {
+const maximizeFirst = () => {
     document.getElementById('payload_0').style.height = '470px';
     document.getElementById('payload_0').style.width = '970px';
 }
 
-function listPayloadFiles() {
+const listPayloadFiles = () => {
     document.getElementById('payloadFiles').style.display = 'block';
     document.getElementById('payloadFilesContent').innerHTML = '<br />' + payloadPath + '<hr /><br />';
 
     let filesListHtml = '';
     for (let i = 0; i < payloadFiles.length; i++) {
         filesListHtml += '<div style="display:flex"><div style="min-width:225px">' + payloadFiles[i] + '</div>';
-        filesListHtml += '&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'' + payloadFiles[i] + '\')">Copy file name</button>';
         filesListHtml += '&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'' + payloadPath + payloadFiles[i] + '\')">Copy full path</button>';
         filesListHtml += '</div><br />';
     }
@@ -227,11 +222,11 @@ function listPayloadFiles() {
     document.getElementById('payloadFilesContent').innerHTML += filesListHtml;
 }
 
-function closeListPayloadFiles() {
+const closeListPayloadFiles = () => {
     document.getElementById('payloadFiles').style.display = 'none';
 }
 
-function addMock() {
+const addMock = () => {
     const mock = {
         "active": true,
         "freezetimems": 0,
@@ -249,7 +244,7 @@ function addMock() {
     resetAndSync("mock");
 }
 
-function addProxy() {
+const addProxy = () => {
     const proxy = {
         "active": true,
         "target": "http://localhost:8080",
@@ -262,21 +257,21 @@ function addProxy() {
       resetAndSync("proxy");
 }
 
-function removeMock(evt) {
+const removeMock = (evt) => {
     const index = Number(evt.id.split('_').slice(-1)[0]);
     globalMockdefObj.splice(index, 1);
 
     resetAndSync("mock");
 }
 
-function removeProxy(evt) {
+const removeProxy = (evt) => {
     const index = Number(evt.id.split('_').slice(-1)[0]);
     globalProxydefObj.splice(index, 1);
 
     resetAndSync("proxy");
 }
 
-function updateMockdef(evt) {
+const updateMockdef = (evt) => {
     if(evt){
         const index = Number(evt.id.split('_').slice(-1)[0]);
         const name = evt.id.split('_')[0];
@@ -322,7 +317,7 @@ function updateMockdef(evt) {
     });
 }
 
-function updateProxydef(evt) {
+const updateProxydef = (evt) => {
     if(evt){
         const index = Number(evt.id.split('_').slice(-1)[0]);
         const name = evt.id.split('_')[0];
@@ -348,19 +343,19 @@ function updateProxydef(evt) {
     });
 }
 
-function moveMock(evt) {
+const moveMock = (evt) => {
     if(moveEntity(evt, globalMockdefObj)) {
         resetAndSync("mock");
     }
 }
 
-function moveProxy(evt) {
+const moveProxy = (evt) => {
     if(moveEntity(evt, globalProxydefObj)) {
         resetAndSync("proxy");
     }
 }
 
-function moveEntity(evt, arr) {
+const moveEntity = (evt, arr) => {
     const index = Number(evt.id.split('_').slice(-1)[0]);
     const way = evt.id.split('_')[1];
     let changed = false;
@@ -380,7 +375,7 @@ function moveEntity(evt, arr) {
     return changed;
 }
 
-function resetAndSync(type) {
+const resetAndSync = (type) => {
     if(type === "mock") {
         document.getElementById('mock-content-container').innerHTML = "";
         renderMockdef();

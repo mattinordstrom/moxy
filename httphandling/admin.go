@@ -97,7 +97,7 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 	case "/moxyadminui/settings":
 		payloadFilesInDir, err := os.ReadDir(config.AppConfig.Defaults.PayloadArchivePath)
 		if err != nil {
-			utils.LogError("Error reading Payload Archive Path: ", err)
+			utils.LogError("Error reading Payload Archive Path:", err)
 
 			http.Error(resWriter, err.Error(), http.StatusInternalServerError)
 

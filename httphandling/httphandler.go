@@ -28,7 +28,7 @@ func CreateHTTPListener() {
 
 	fs := http.FileServer(http.Dir("ui/static"))
 	http.Handle("/ui/static/", http.StripPrefix("/ui/static/", fs))
-	http.HandleFunc("/ws", handleWebSocket)
+	http.HandleFunc("/moxyws", handleWebSocket)
 	http.HandleFunc("/", httpHandler)
 
 	log.Fatal(http.ListenAndServe(fmt.Sprint(":", Port), nil))

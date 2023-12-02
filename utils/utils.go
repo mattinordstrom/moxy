@@ -116,5 +116,5 @@ func getJSONResultBytes(filename string, absolutePath bool) ([]byte, error) {
 }
 
 func LogError(str string, err error) {
-	log.Println(ColorRed + str + err.Error() + ColorReset)
+	log.Println(ColorRed + str + " " + err.Error() + ColorReset)
 }
