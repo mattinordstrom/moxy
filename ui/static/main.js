@@ -1,44 +1,8 @@
 const initFunc = () => {
-    fetch('/moxyadminui/mockdef')
-    .then(response => response.json())
-    .then(data => {
-        MockDefModule.set(data);
-        renderMockdef(data);
-    })
-    .catch(error => { console.error('Fetch error mockdef:', error); });
-
-    fetch('/moxyadminui/proxydef')
-    .then(response => response.json())
-    .then(data => {
-        ProxyDefModule.set(data);
-        renderProxydef(data);
-    })
-    .catch(error => { console.error('Fetch error proxydef:', error); });
-
-    fetch('/moxyadminui/settings')
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            return response.text().then(text => {
-                const logMsg = '<span class="square square-red"></span> ' + text + '<br />';
-                document.getElementById("footer-log").insertAdjacentHTML('afterbegin', logMsg);
-
-                throw new Error('Error ' + response.status + ': ' + text);
-            });
-        }
-    })
-    .then(data => {
-        document.getElementById('header-port').innerHTML = data['port'];
-        document.getElementById('header-route').innerHTML = data['defaultRoute'];
-
-        PayloadFromFileModule.setPayloadPath(data['payloadPath']);
-        PayloadFromFileModule.setPayloadFiles(data['payloadFiles']);
-    })
-    .catch(error => { 
-        console.error('Fetch error settings:', error);
-     });
-
+    fetchMockDef();
+    fetchProxyDef();
+    fetchSettings();
+  
     darkModeSetup();
 
     //websocket setup
@@ -46,6 +10,54 @@ const initFunc = () => {
 
     //click events setup
     clickEvtSetup();
+}
+
+const fetchMockDef = async () => {
+    try {
+        const response = await fetch('/moxyadminui/mockdef');
+        const data = await response.json();
+        
+        MockDefModule.set(data);
+        renderMockdef(data);
+    } catch (error) {
+        console.error('Fetch error mockdef:', error);
+    }
+}
+
+const fetchProxyDef = async () => {
+    try {
+        const response = await fetch('/moxyadminui/proxydef');
+        const data = await response.json();
+        
+        ProxyDefModule.set(data);
+        renderProxydef(data);
+    } catch (error) {
+        console.error('Fetch error proxydef:', error);
+    }
+}
+
+const fetchSettings = async () => {
+    try {
+        const response = await fetch('/moxyadminui/settings');
+        if (!response.ok) {
+            const text = await response.text();
+            
+            const logMsg = '<span class="square square-red"></span> ' + text + '<br />';
+            document.getElementById("footer-log").insertAdjacentHTML('afterbegin', logMsg);
+
+            throw new Error('Error ' + response.status + ': ' + text);
+        }
+
+        const data = await response.json();
+
+        document.getElementById('header-port').innerHTML = data['port'];
+        document.getElementById('header-route').innerHTML = data['defaultRoute'];
+
+        PayloadFromFileModule.setPayloadPath(data['payloadPath']);
+        PayloadFromFileModule.setPayloadFiles(data['payloadFiles']);
+    } catch (error) {
+        console.error('Fetch error settings:', error);
+    }
 }
 
 const renderMockdef = () => {
@@ -285,7 +297,7 @@ const removeProxy = (evt) => {
     resetAndSync("proxy");
 }
 
-const updateMockdef = (evt) => {
+const updateMockdef = async (evt) => {
     if(evt){
         const index = Number(evt.id.split('_').slice(-1)[0]);
         const name = evt.id.split('_')[0];
@@ -323,19 +335,19 @@ const updateMockdef = (evt) => {
         MockDefModule.set(mocks);
     }
 
-    fetch('/moxyadminui/mockdef', {
-        method: "POST",
-        body: JSON.stringify(MockDefModule.get()),
-    })
-    .then(data => {
+    try {
+        const response = await fetch('/moxyadminui/mockdef', {
+            method: "POST",
+            body: JSON.stringify(MockDefModule.get()),
+        });
+
         console.log("Success POST mockdef");
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('POST error mockdef:', error);
-    });
+    }
 }
 
-const updateProxydef = (evt) => {
+const updateProxydef = async (evt) => {
     if(evt){
         const index = Number(evt.id.split('_').slice(-1)[0]);
         const name = evt.id.split('_')[0];
@@ -353,16 +365,16 @@ const updateProxydef = (evt) => {
         ProxyDefModule.set(proxies);
     }
 
-    fetch('/moxyadminui/proxydef', {
-        method: "POST",
-        body: JSON.stringify(ProxyDefModule.get()),
-    })
-    .then(data => {
+    try {
+        const response = await fetch('/moxyadminui/proxydef', {
+            method: "POST",
+            body: JSON.stringify(ProxyDefModule.get()),
+        });
+
         console.log("Success POST proxydef");
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('POST error proxydef:', error);
-    });
+    }
 }
 
 const moveMock = (evt) => {
