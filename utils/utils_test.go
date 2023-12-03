@@ -52,6 +52,7 @@ func TestUsePayloadFromFile(t *testing.T) {
 	testData.PayloadFromFile = "/home/test/archive/somefile.json"
 	res := UsePayloadFromFile(testData)
 	expected := true
+
 	if res != expected {
 		printAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res))
 	}
@@ -62,6 +63,7 @@ func TestUsePayloadFromFile(t *testing.T) {
 	}
 	res = UsePayloadFromFile(testData)
 	expected = false
+
 	if res != expected {
 		printAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res))
 	}

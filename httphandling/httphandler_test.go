@@ -68,6 +68,7 @@ func TestCreateReqFromReq(t *testing.T) {
 	if ioerr != nil {
 		t.Fatal(ioerr)
 	}
+
 	if reqBodyString := string(reqBody); reqBodyString != expectedReqBody {
 		t.Errorf("handler returned wrong body: got %v want %v", reqBodyString, expectedReqBody)
 	}

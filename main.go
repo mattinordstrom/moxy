@@ -19,6 +19,7 @@ func main() {
 	lFlag := flag.Bool("l", false, "list redirects without starting server")
 
 	flag.Parse()
+
 	hh.Port = *pFlag
 
 	err := config.LoadConfig("config.yml")
@@ -28,6 +29,7 @@ func main() {
 			log.Fatalf("Failed to load config: %v", err)
 		}
 	}
+
 	hh.DefaultRoute = config.AppConfig.Defaults.DefaultRoute
 
 	fmt.Println(ut.ColorBold + "::::::::::::::: MOXY :::::::::::::::" + ut.ColorReset)
@@ -42,10 +44,10 @@ func main() {
 	// Mockdef
 	mockObjArr := ut.GetMockJSON()
 	fmt.Println(ut.ColorPurple + "-------- Mockdef --------" + ut.ColorReset)
-	for _, val := range mockObjArr {
-		mockEntity := val
 
+	for _, mockEntity := range mockObjArr {
 		payloadStr := mockEntity.PayloadFromFile
+
 		if !ut.UsePayloadFromFile(mockEntity) {
 			jsonPayload, err := json.Marshal(mockEntity.Payload)
 			if err != nil {
@@ -57,19 +59,20 @@ func main() {
 
 		fmt.Println(ut.GetMockEventString(mockEntity, true, payloadStr) + getInactiveStr(mockEntity.Active))
 	}
+
 	fmt.Println(ut.ColorPurple + "-------------------------\n" + ut.ColorReset)
 
 	// Proxydef
 	objArr := ut.GetProxyJSON()
 	fmt.Println(ut.ColorGreen + "-------- Proxydef --------" + ut.ColorReset)
-	for _, val := range objArr {
-		proxyEntity := val
 
+	for _, proxyEntity := range objArr {
 		fmt.Println(ut.ColorGreen +
 			proxyEntity.URLPart + ut.RightArrow + proxyEntity.Target +
 			ut.ColorReset +
 			getInactiveStr(proxyEntity.Active))
 	}
+
 	fmt.Println(ut.ColorGreen + "--------------------------\n" + ut.ColorReset)
 
 	if !*lFlag {

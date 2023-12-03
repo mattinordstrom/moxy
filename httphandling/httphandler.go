@@ -20,6 +20,12 @@ var (
 	DefaultRoute = ""
 )
 
+var (
+	ServerReadTimeout  = 10
+	ServerWriteTimeout = 10
+	ServerIdleTimeout  = 15
+)
+
 var htmlBreak = "<br />"
 
 func CreateHTTPListener() {
@@ -31,7 +37,14 @@ func CreateHTTPListener() {
 	http.HandleFunc("/moxyws", handleWebSocket)
 	http.HandleFunc("/", httpHandler)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprint(":", Port), nil))
+	server := &http.Server{
+		Addr:         fmt.Sprintf(":%d", Port),
+		ReadTimeout:  time.Duration(ServerReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(ServerWriteTimeout) * time.Second,
+		IdleTimeout:  time.Duration(ServerIdleTimeout) * time.Second,
+	}
+
+	log.Fatal(server.ListenAndServe())
 }
 
 func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
@@ -47,9 +60,7 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 	////////////////////////////////////////
 	// Loop mockdef json obj
-	for _, val := range mockObjArr {
-		mockEntity := val
-
+	for _, mockEntity := range mockObjArr {
 		trimmedURL := strings.TrimRight(strings.TrimLeft(mockEntity.URLPart, "/"), "/")
 		isMatch := mockEntity.Active && (req.Method == mockEntity.Method)
 		isMatch = isMatch && strings.Contains(reqURL, trimmedURL)
@@ -71,6 +82,7 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 				dur, _ := time.ParseDuration(strconv.Itoa(freezetime) + "ms")
 				time.Sleep(dur)
 			}
+
 			resWriter.Header().Set("Content-Type", "application/json")
 			resWriter.WriteHeader(mockEntity.StatusCode)
 
@@ -125,9 +137,8 @@ func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []models.Proxy, reqURL string) {
 	newURL := ""
-	for _, val := range objArr {
-		proxyEntity := val
 
+	for _, proxyEntity := range objArr {
 		trimmedURL := strings.TrimRight(strings.TrimLeft(proxyEntity.URLPart, "/"), "/")
 		isMatch := proxyEntity.Active && strings.Contains(reqURL, trimmedURL)
 
@@ -150,12 +161,13 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 				fmt.Println(utils.ColorGreen + req.Method + " " + reqURL + utils.RightArrow + newURL + utils.ColorReset)
 
 				// headers
-				var sb strings.Builder
+				var sBuilder strings.Builder
 				for name, values := range req.Header {
-					sb.WriteString(fmt.Sprintf("%s: %s, ", name, strings.Join(values, ", ")))
+					sBuilder.WriteString(fmt.Sprintf("%s: %s, ", name, strings.Join(values, ", ")))
 				}
-				headerString := sb.String()
-				if sb.Len() > 0 {
+
+				headerString := sBuilder.String()
+				if sBuilder.Len() > 0 {
 					headerString = headerString[:len(headerString)-2]
 				}
 
@@ -168,6 +180,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 
 					return
 				}
+
 				if bodyStr := string(bodyBytes); bodyStr != "" {
 					fmt.Println(bodyStr)
 

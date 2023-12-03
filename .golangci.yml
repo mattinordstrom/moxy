@@ -9,7 +9,6 @@ linters:
     - funlen
     - gocognit
     - gochecknoglobals
-    - gosec
     - maligned
     - nestif
     - noctx

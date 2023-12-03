@@ -40,12 +40,14 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
 	updateClient = conn
 
 	// Keep the connection alive, handle incoming messages or disconnection
 	for {
 		if _, _, err := conn.ReadMessage(); err != nil {
 			conn.Close()
+
 			updateClient = nil
 
 			break
@@ -59,6 +61,7 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 	switch reqURL {
 	case "/moxyadminui/mockdef", "/moxyadminui/proxydef":
 		jsonName := reqURL[strings.LastIndex(reqURL, "/")+1:]
+
 		if req.Method == http.MethodPost {
 			// fmt.Println("----------- mockdef proxydef POST -------------")
 			jsonData, err := io.ReadAll(req.Body)
@@ -70,6 +73,7 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 			defer req.Body.Close()
 
 			var data interface{}
+
 			err = json.Unmarshal(jsonData, &data)
 			if err != nil {
 				http.Error(resWriter, err.Error(), http.StatusBadRequest)
@@ -85,6 +89,7 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 			}
 
 			const filePermission = 0o644
+
 			errr := os.WriteFile(jsonName+".json", jsonData, filePermission)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
@@ -115,6 +120,7 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 			PayloadFiles: payloadFiles,
 			PayloadPath:  config.AppConfig.Defaults.PayloadArchivePath,
 		}
+
 		jsonResponse, err := json.Marshal(data)
 		if err != nil {
 			http.Error(resWriter, err.Error(), http.StatusInternalServerError)
@@ -123,6 +129,7 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 		}
 
 		resWriter.Header().Set("Content-Type", "application/json")
+
 		if _, err := resWriter.Write(jsonResponse); err != nil {
 			// Since headers are already sent, we can't send a new HTTP status code.
 			// Log the error instead.
