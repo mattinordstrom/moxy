@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func createReqFromReq(req *http.Request, newURL string) (*http.Request, http.Client) {
+func CreateReqFromReq(req *http.Request, newURL string) (*http.Request, http.Client) {
 	client := http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse

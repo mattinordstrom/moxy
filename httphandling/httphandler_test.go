@@ -1,4 +1,4 @@
-package httphandling
+package httphandling_test
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/mattinordstrom/moxy/httphandling"
 	"github.com/mattinordstrom/moxy/utils"
 )
 
@@ -21,7 +22,7 @@ func TestMockedResponse(t *testing.T) {
 	utils.MockFile = "mockdef_test.json"
 
 	resRecorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(httpHandler)
+	handler := http.HandlerFunc(httphandling.HTTPHandler)
 
 	handler.ServeHTTP(resRecorder, req)
 
@@ -51,7 +52,9 @@ func TestCreateReqFromReq(t *testing.T) {
 	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
 
 	newURL := "http://localhost:9098/api/test/mocktesting"
-	freq, _ := createReqFromReq(req, newURL)
+
+	// TODO make it createReqFromReq and rewrite this test
+	freq, _ := httphandling.CreateReqFromReq(req, newURL)
 
 	// Test Accept-Encoding header
 	if acceptEncoding := freq.Header.Get("Accept-Encoding"); acceptEncoding != "" {

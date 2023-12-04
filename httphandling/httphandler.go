@@ -35,7 +35,7 @@ func CreateHTTPListener() {
 	fs := http.FileServer(http.Dir("ui/static"))
 	http.Handle("/ui/static/", http.StripPrefix("/ui/static/", fs))
 	http.HandleFunc("/moxyws", handleWebSocket)
-	http.HandleFunc("/", httpHandler)
+	http.HandleFunc("/", HTTPHandler)
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", Port),
@@ -47,7 +47,7 @@ func CreateHTTPListener() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func httpHandler(resWriter http.ResponseWriter, req *http.Request) {
+func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 	mockObjArr := utils.GetMockJSON()
 	proxyObjArr := utils.GetProxyJSON()
 	reqURL := fmt.Sprint(req.URL)
@@ -217,7 +217,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 }
 
 func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string) {
-	freq, client := createReqFromReq(req, newURL)
+	freq, client := CreateReqFromReq(req, newURL)
 
 	fresp, resperr := client.Do(freq)
 	if resperr != nil {

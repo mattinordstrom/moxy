@@ -9,8 +9,8 @@ linters:
     - funlen
     - gocognit
     - gochecknoglobals
+    - godox
     - maligned
     - nestif
     - noctx
-    - testpackage
     - wsl

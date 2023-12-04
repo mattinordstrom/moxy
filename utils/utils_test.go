@@ -1,4 +1,4 @@
-package utils
+package utils_test
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/mattinordstrom/moxy/models"
+	"github.com/mattinordstrom/moxy/utils"
 )
 
 func printAssertError(t *testing.T, expected string, actual string) {
@@ -31,9 +32,12 @@ func TestGetMockEventString(t *testing.T) {
 		log.Fatalf("Error occurred during marshalling in test: %v", err)
 	}
 
-	testStr := GetMockEventString(testData, true, string(payloadM))
+	testStr := utils.GetMockEventString(testData, true, string(payloadM))
 
-	expected := ColorPurple + "GET /api/test/someendpoint  \u2794  [500 ms] 404 {\"response\":\"test123\"}" + ColorReset
+	expected := utils.ColorPurple +
+		"GET /api/test/someendpoint  \u2794  [500 ms] 404 {\"response\":\"test123\"}" +
+		utils.ColorReset
+
 	if testStr != expected {
 		printAssertError(t, expected, testStr)
 	}
@@ -50,7 +54,7 @@ func TestUsePayloadFromFile(t *testing.T) {
 
 	// Test with only payloadFromFile
 	testData.PayloadFromFile = "/home/test/archive/somefile.json"
-	res := UsePayloadFromFile(testData)
+	res := utils.UsePayloadFromFile(testData)
 	expected := true
 
 	if res != expected {
@@ -61,7 +65,7 @@ func TestUsePayloadFromFile(t *testing.T) {
 	testData.Payload = map[string]interface{}{
 		"response": "test123",
 	}
-	res = UsePayloadFromFile(testData)
+	res = utils.UsePayloadFromFile(testData)
 	expected = false
 
 	if res != expected {
