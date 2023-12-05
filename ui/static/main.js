@@ -144,9 +144,21 @@ const renderProxydef = () => {
 
 }
 
-const maximizeFirst = () => {
-    document.getElementById('payload_0').style.height = '470px';
-    document.getElementById('payload_0').style.width = '970px';
+const maximizeMock = (index) => {
+    document.getElementById('payload_'+index).style.height = '470px';
+    document.getElementById('payload_'+index).style.width = '680px';
+}
+
+const showOnlyMocks = () => {
+    if(document.getElementsByClassName('right')[0].style.display === 'none') {
+        document.getElementsByClassName('right')[0].style.display = 'block';
+        return;
+    }
+
+    document.getElementsByClassName('right')[0].style.display = 'none';
+
+    maximizeMock(0);
+    maximizeMock(1);
 }
 
 const listPayloadFiles = () => {
