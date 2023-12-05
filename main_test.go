@@ -37,7 +37,7 @@ func TestGetEventString(t *testing.T) {
 	}
 
 	// Test proxy - should be green color
-	expected = utils.ColorGreen + "/api/test123  ➔  http://localhost:8088" + utils.ColorReset
+	expected = utils.ColorGreen + "/api/test123  ➔  http://localhost:8088/api/test123" + utils.ColorReset
 	test = strings.Contains(output, expected)
 
 	if !test {
@@ -45,7 +45,7 @@ func TestGetEventString(t *testing.T) {
 	}
 
 	// Test proxy - INACTIVE
-	expected = utils.ColorGreen + "/api/test456  ➔  http://localhost:8089" + utils.ColorReset +
+	expected = utils.ColorGreen + "/api/test456  ➔  http://localhost:8089/api/test456" + utils.ColorReset +
 		utils.ColorRed + " [INACTIVE]" + utils.ColorReset
 	test = strings.Contains(output, expected)
 

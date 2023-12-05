@@ -154,7 +154,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 		}
 
 		if isMatch {
-			newURL = proxyEntity.Target + reqURL
+			newURL = strings.TrimRight(proxyEntity.Target, "/") + "/" + strings.TrimLeft(reqURL, "/")
 
 			if proxyEntity.Verbose {
 				fmt.Println(" ")

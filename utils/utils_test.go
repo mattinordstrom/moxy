@@ -31,7 +31,24 @@ func TestGetMockEventString(t *testing.T) {
 	testStr := utils.GetMockEventString(testData, true, string(payloadM))
 
 	expected := utils.ColorPurple +
-		"GET /api/test/someendpoint  \u2794  [500 ms] 404 {\"response\":\"test123\"}" +
+		"GET /api/test/someendpoint  ➔  [500 ms] 404 {\"response\":\"test123\"}" +
+		utils.ColorReset
+
+	if testStr != expected {
+		testhelper.PrintAssertError(t, expected, testStr)
+	}
+}
+
+func TestGetProxyEventString(t *testing.T) {
+	t.Parallel()
+
+	var testData models.Proxy
+	testData.URLPart = "/api/someendpoint"
+
+	testStr := utils.GetProxyEventString("/api/someendpoint", "http://localhost:8088/api/someendpoint", "")
+
+	expected := utils.ColorGreen +
+		"/api/someendpoint  ➔  http://localhost:8088/api/someendpoint" +
 		utils.ColorReset
 
 	if testStr != expected {

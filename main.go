@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/mattinordstrom/moxy/config"
 	hh "github.com/mattinordstrom/moxy/httphandling"
@@ -75,7 +76,10 @@ func PrintInitSetup() {
 	fmt.Println(ut.ColorGreen + "-------- Proxydef --------" + ut.ColorReset)
 
 	for _, proxyEntity := range proxyObjArr {
-		fmt.Println(ut.GetProxyEventString(proxyEntity.URLPart, proxyEntity.Target, "") + getInactiveStr(proxyEntity.Active))
+		newURL := strings.TrimRight(proxyEntity.Target, "/") + "/" + strings.TrimLeft(proxyEntity.URLPart, "/")
+
+		fmt.Println(ut.GetProxyEventString(proxyEntity.URLPart, newURL, "") +
+			getInactiveStr(proxyEntity.Active))
 	}
 
 	fmt.Println(ut.ColorGreen + "--------------------------\n" + ut.ColorReset)
