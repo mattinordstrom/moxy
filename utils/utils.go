@@ -63,8 +63,10 @@ func GetMockEventString(mockEntity models.Mock, withColor bool, payload string) 
 	return rawString
 }
 
-func GetProxyEventString(url string, newURL string, extraInfo string) string {
-	if newURL == "" {
+func GetProxyEventString(url string, target string, extraInfo string, defaultRoute bool) string {
+	newURL := strings.TrimRight(target, "/") + "/" + strings.TrimLeft(url, "/")
+
+	if defaultRoute {
 		return ColorGray + extraInfo + url + RightArrow + newURL + ColorReset
 	}
 

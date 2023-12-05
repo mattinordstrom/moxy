@@ -42,10 +42,7 @@ func TestGetMockEventString(t *testing.T) {
 func TestGetProxyEventString(t *testing.T) {
 	t.Parallel()
 
-	var testData models.Proxy
-	testData.URLPart = "/api/someendpoint"
-
-	testStr := utils.GetProxyEventString("/api/someendpoint", "http://localhost:8088/api/someendpoint", "")
+	testStr := utils.GetProxyEventString("/api/someendpoint", "http://localhost:8088/", "", false)
 
 	expected := utils.ColorGreen +
 		"/api/someendpoint  ➔  http://localhost:8088/api/someendpoint" +
