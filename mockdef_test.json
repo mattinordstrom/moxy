@@ -1,7 +1,7 @@
 [
   {
     "active": true,
-    "comment": "This is used only for tests in httphandler_test.go",
+    "comment": "This is used only for tests",
     "freezetimems": 0,
     "method": "GET",
     "payload": {
@@ -9,5 +9,14 @@
     },
     "statuscode": 404,
     "urlpart": "/api/test/mocktesting"
+  },
+  {
+    "active": true,
+    "comment": "This is used only for tests",
+    "freezetimems": 1500,
+    "method": "PUT",
+    "payloadFromFile": "/absolute/path/to/some/file",
+    "statuscode": 200,
+    "urlpart": "/api/test/mocktesting2"
   }
 ]

@@ -41,6 +41,14 @@ func main() {
 	fmt.Println(" ")
 	fmt.Println(" ")
 
+	PrintInitSetup()
+
+	if !*lFlag {
+		hh.CreateHTTPListener()
+	}
+}
+
+func PrintInitSetup() {
 	// Mockdef
 	mockObjArr := ut.GetMockJSON()
 	fmt.Println(ut.ColorPurple + "-------- Mockdef --------" + ut.ColorReset)
@@ -63,22 +71,14 @@ func main() {
 	fmt.Println(ut.ColorPurple + "-------------------------\n" + ut.ColorReset)
 
 	// Proxydef
-	objArr := ut.GetProxyJSON()
+	proxyObjArr := ut.GetProxyJSON()
 	fmt.Println(ut.ColorGreen + "-------- Proxydef --------" + ut.ColorReset)
 
-	for _, proxyEntity := range objArr {
-		fmt.Println(ut.ColorGreen +
-			proxyEntity.URLPart + ut.RightArrow + proxyEntity.Target +
-			ut.ColorReset +
-			getInactiveStr(proxyEntity.Active))
+	for _, proxyEntity := range proxyObjArr {
+		fmt.Println(ut.GetProxyEventString(proxyEntity.URLPart, proxyEntity.Target, "") + getInactiveStr(proxyEntity.Active))
 	}
 
 	fmt.Println(ut.ColorGreen + "--------------------------\n" + ut.ColorReset)
-
-	if !*lFlag {
-		// INIT HTTP HANDLING
-		hh.CreateHTTPListener()
-	}
 }
 
 func getInactiveStr(active bool) string {

@@ -7,13 +7,9 @@ import (
 	"testing"
 
 	"github.com/mattinordstrom/moxy/models"
+	testhelper "github.com/mattinordstrom/moxy/testhelpers"
 	"github.com/mattinordstrom/moxy/utils"
 )
-
-func printAssertError(t *testing.T, expected string, actual string) {
-	t.Helper()
-	t.Error("\n EXPECTED: " + expected + "\n ACTUAL: " + actual)
-}
 
 func TestGetMockEventString(t *testing.T) {
 	t.Parallel()
@@ -39,7 +35,7 @@ func TestGetMockEventString(t *testing.T) {
 		utils.ColorReset
 
 	if testStr != expected {
-		printAssertError(t, expected, testStr)
+		testhelper.PrintAssertError(t, expected, testStr)
 	}
 }
 
@@ -58,7 +54,7 @@ func TestUsePayloadFromFile(t *testing.T) {
 	expected := true
 
 	if res != expected {
-		printAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res))
+		testhelper.PrintAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res))
 	}
 
 	// Test with both
@@ -69,6 +65,6 @@ func TestUsePayloadFromFile(t *testing.T) {
 	expected = false
 
 	if res != expected {
-		printAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res))
+		testhelper.PrintAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res))
 	}
 }

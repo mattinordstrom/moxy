@@ -158,8 +158,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 
 			if proxyEntity.Verbose {
 				fmt.Println(" ")
-				fmt.Println(utils.ColorGreen + req.Method + " " + reqURL + utils.RightArrow + newURL + utils.ColorReset)
-
+				fmt.Println(utils.GetProxyEventString(reqURL, newURL, req.Method+" "))
 				// headers
 				var sBuilder strings.Builder
 				for name, values := range req.Header {
@@ -200,7 +199,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 				fmt.Println(" ")
 			} else {
 				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy)
-				fmt.Println(utils.ColorGreen + reqURL + utils.RightArrow + newURL + utils.ColorReset)
+				fmt.Println(utils.GetProxyEventString(reqURL, newURL, ""))
 			}
 
 			break
@@ -210,7 +209,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 	if newURL == "" {
 		newURL = DefaultRoute + reqURL
 		updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy)
-		fmt.Println(utils.ColorGray + reqURL + utils.RightArrow + newURL + utils.ColorReset)
+		fmt.Println(utils.GetProxyEventString(reqURL, newURL, ""))
 	}
 
 	forwardReq(resWriter, req, newURL)

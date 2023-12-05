@@ -63,6 +63,14 @@ func GetMockEventString(mockEntity models.Mock, withColor bool, payload string) 
 	return rawString
 }
 
+func GetProxyEventString(url string, newURL string, extraInfo string) string {
+	if newURL == "" {
+		return ColorGray + extraInfo + url + RightArrow + newURL + ColorReset
+	}
+
+	return ColorGreen + extraInfo + url + RightArrow + newURL + ColorReset
+}
+
 func GetMockJSON() []models.Mock {
 	var result []models.Mock
 	byteValue, _ := getJSONResultBytes(MockFile, false)

@@ -1,0 +1,14 @@
+[
+  {
+    "active": true,
+    "target": "http://localhost:8088",
+    "urlpart": "/api/test123",
+    "verbose": false
+  },
+  {
+    "active": false,
+    "target": "http://localhost:8089",
+    "urlpart": "/api/test456",
+    "verbose": false
+  }
+]
