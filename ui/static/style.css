@@ -7,19 +7,6 @@ body, html {
     font-family: monospace;
 }
 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    appearance: none;
-    margin: 0;
-}
-
-input[type=number] {
-    -moz-appearance: textfield;
-    appearance: textfield;
-}
-
-
 header {
     background-color: #f1f1f1;
     padding: 10px;
@@ -48,18 +35,6 @@ header {
 
 .left {
     border-right: 2px solid #000000;
-}
-
-input {
-    min-height: 22px;
-}
-
-.input-wide {
-    min-width: 272px;
-}
-
-label {
-    min-width: 200px;
 }
 
 footer {
@@ -111,10 +86,6 @@ footer.expanded {
     background-color: red;
 }
 
-.fixed-textarea {
-    resize: none;
-}
-
 .expbutton {
     margin-top: 20px;
     min-height: 36px;
@@ -160,23 +131,6 @@ footer.expanded {
 .proxy-obj label, .mock-obj label {
     margin-right: 8px;
     min-width: 140px;
-}
-
-.cbox {
-    width: 20px;
-    height: 20px;
-}
-
-.slct {
-    height: 38px;
-    min-width: 130px;
-}
-
-.comment-input {
-    min-height: 16px;
-    margin-right: 60px;
-    margin-bottom: 7px;
-    background-color: #ccc;
 }
 
 .payload-files {

@@ -1,0 +1,76 @@
+input, select, textarea {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #66afe9;
+    outline: none;
+}
+
+input[type="checkbox"]:before {
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    border: 2px solid #969696;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+input[type="checkbox"]:checked:before {
+    content: "✓";
+    color: #fff;
+    background-color: #38903e;
+    border-color: #969696;
+    text-align: center;
+    line-height: 18px;
+}
+
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+input {
+    min-height: 22px;
+}
+
+.input-wide {
+    min-width: 272px;
+}
+
+label {
+    min-width: 200px;
+}
+
+.fixed-textarea {
+    resize: none;
+}
+
+.cbox {
+    width: 20px;
+    height: 20px;
+}
+
+.slct {
+    height: 38px;
+    min-width: 130px;
+}
+
+.comment-input {
+    min-height: 18px;
+    margin-right: 60px;
+    margin-bottom: 7px;
+    background-color: #b3b3b3;
+}
