@@ -61,9 +61,7 @@ const fetchSettings = async () => {
 }
 
 const renderMockdef = () => {
-    const data = MockDefModule.get();
-    for (let i = 0; i < data.length; i++) {
-        const mockEntityData = data[i];
+    MockDefModule.get().forEach((mockEntityData, i) => {
         let mockEntity = `
             <div class="proxymock-content">
                 <div style="color:#999999; display: flex; justify-content: space-between;">
@@ -85,24 +83,24 @@ const renderMockdef = () => {
                     </select>
                 </div>`;
 
-            let payload = mockEntityData['payload'];
-            if (typeof payload === 'object') {
-                payload = JSON.stringify(mockEntityData['payload'], null, 2);
-            }
+        let payload = mockEntityData['payload'];
+        if (typeof payload === 'object') {
+            payload = JSON.stringify(mockEntityData['payload'], null, 2);
+        }
 
-            mockEntity += `
+        mockEntity += `
                 <div class="mock-obj">
                     <label for="payload_${i}">payload:</label>
                     <textarea onchange="updateMockdef(this)" spellcheck="false" rows="8" cols="32" name="payload_${i}" id="payload_${i}">${payload}</textarea>
                 </div>`;
 
-            mockEntity += `
+        mockEntity += `
                 <div class="mock-obj">
                     <label for="payloadFromFile_${i}">payloadFromFile:</label>
                     <textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="32" class="fixed-textarea" name="payloadFromFile_${i}" id="payloadFromFile_${i}">${mockEntityData['payloadFromFile']}</textarea>
                 </div>`;
 
-            mockEntity += `
+        mockEntity += `
                 <div class="mock-obj">
                     <label for="statuscode_${i}">statuscode:</label>
                     <input onchange="updateMockdef(this)" type="number" name="statuscode_${i}" id="statuscode_${i}" value="${mockEntityData['statuscode']}"></input>
@@ -113,15 +111,12 @@ const renderMockdef = () => {
                 </div>
             </div>`;
 
-            document.getElementById('mock-content-container').innerHTML += mockEntity + "<br />";
-    };
-
+        document.getElementById('mock-content-container').innerHTML += mockEntity + "<br />";
+    });
 }
 
 const renderProxydef = () => {
-    const data = ProxyDefModule.get();
-    for (let i = 0; i < data.length; i++) {
-        const proxyEntityData = data[i];
+    ProxyDefModule.get().forEach((proxyEntityData, i) => {
         let proxyEntity = `
             <div class="proxymock-content">
                 <div style="color:#999999; display: flex; justify-content: space-between;">
@@ -140,8 +135,7 @@ const renderProxydef = () => {
             </div>`;
 
         document.getElementById('proxy-content-container').innerHTML += proxyEntity + "<br />";
-    };
-
+    });
 }
 
 const maximizeMock = (index) => {
@@ -162,16 +156,20 @@ const showOnlyMocks = () => {
 }
 
 const listPayloadFiles = () => {
+    if(document.getElementById('payloadFiles').style.display === 'block') {
+        closeListPayloadFiles();
+        return;
+    }
+
     document.getElementById('payloadFiles').style.display = 'block';
     document.getElementById('payloadFilesContent').innerHTML = `<br />${PayloadFromFileModule.getPayloadPath()}<hr /><br />`;
 
     let filesListHtml = '';
-    const files = PayloadFromFileModule.getPayloadFiles();
-    for (let i = 0; i < files.length; i++) {
-        filesListHtml += '<div style="display:flex"><div style="min-width:225px">' + files[i] + '</div>';
-        filesListHtml += '&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'' + PayloadFromFileModule.getPayloadPath() + files[i] + '\')">Copy full path</button>';
+    PayloadFromFileModule.getPayloadFiles().forEach((file) => {
+        filesListHtml += '<div style="display:flex"><div style="min-width:225px">' + file + '</div>';
+        filesListHtml += '&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'' + PayloadFromFileModule.getPayloadPath() + file + '\')">Copy full path</button>';
         filesListHtml += '</div><br />';
-    }
+    });
 
     document.getElementById('payloadFilesContent').innerHTML += filesListHtml;
 }

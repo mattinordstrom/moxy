@@ -135,6 +135,7 @@ footer.expanded {
 
 .payload-files {
     position: absolute; 
+    top: 0;
     left: 50%; 
     display: none; 
     background-color: #c3bfa5;
