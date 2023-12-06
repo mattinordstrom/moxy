@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"strconv"
 	"testing"
 
@@ -12,9 +11,9 @@ import (
 	testhelper "github.com/mattinordstrom/moxy/testhelpers"
 )
 
-type mockTransport struct{}
-
 var ErrConnectionRefused = errors.New("connection refused")
+
+type mockTransport struct{}
 
 func (m *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// When testing all forwarded requests (proxydef_test.json) will fail
@@ -37,10 +36,7 @@ func TestProxyResponseFail(t *testing.T) {
 		Transport: &mockTransport{},
 	}
 
-	resRecorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(httphandling.HTTPHandler)
-
-	handler.ServeHTTP(resRecorder, req)
+	resRecorder := testhelper.GetRecorder(req)
 
 	actualBody := resRecorder.Body.String()
 	expectedBody := "Error: No response from http://localhost:8088/api/test123"
@@ -59,10 +55,7 @@ func TestMockedResponse(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resRecorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(httphandling.HTTPHandler)
-
-	handler.ServeHTTP(resRecorder, req)
+	resRecorder := testhelper.GetRecorder(req)
 
 	if status := resRecorder.Code; status != http.StatusNotFound {
 		testhelper.PrintAssertError(t, strconv.Itoa(http.StatusNotFound), strconv.Itoa(status),
@@ -70,6 +63,40 @@ func TestMockedResponse(t *testing.T) {
 	}
 
 	expectedBody := `{"response":"mocktest"}`
+	if resRecorder.Body.String() != expectedBody {
+		testhelper.PrintAssertError(t, expectedBody, resRecorder.Body.String(),
+			"Handler returned unexpected body")
+	}
+}
+
+func TestMockedResponseRegex(t *testing.T) {
+	t.Parallel()
+
+	req, err := http.NewRequest(http.MethodGet, "/api/regex/123/test", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resRecorder := testhelper.GetRecorder(req)
+
+	expectedBody := `{"response":"mocktest regex"}`
+	if resRecorder.Body.String() != expectedBody {
+		testhelper.PrintAssertError(t, expectedBody, resRecorder.Body.String(),
+			"Handler returned unexpected body")
+	}
+}
+
+func TestMockedResponseActive(t *testing.T) {
+	t.Parallel()
+
+	req, err := http.NewRequest(http.MethodGet, "/api/testactive", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	resRecorder := testhelper.GetRecorder(req)
+
+	expectedBody := `{"response":"mocktest active 456"}`
 	if resRecorder.Body.String() != expectedBody {
 		testhelper.PrintAssertError(t, expectedBody, resRecorder.Body.String(),
 			"Handler returned unexpected body")

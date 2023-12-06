@@ -18,5 +18,38 @@
     "payloadFromFile": "/absolute/path/to/some/file",
     "statuscode": 200,
     "urlpart": "/api/test/mocktesting2"
+  },
+  {
+    "active": true,
+    "comment": "This is used for testing regex",
+    "freezetimems": 0,
+    "method": "GET",
+    "payload": {
+      "response": "mocktest regex"
+    },
+    "statuscode": 200,
+    "urlpart": "/api/regex/.*/test"
+  },
+  {
+    "active": false,
+    "comment": "This is used for testing active flag (this is active false)",
+    "freezetimems": 0,
+    "method": "GET",
+    "payload": {
+      "response": "mocktest active 123"
+    },
+    "statuscode": 200,
+    "urlpart": "/api/testactive/"
+  },
+  {
+    "active": true,
+    "comment": "This is used for testing active flag (this is active true)",
+    "freezetimems": 0,
+    "method": "GET",
+    "payload": {
+      "response": "mocktest active 456"
+    },
+    "statuscode": 200,
+    "urlpart": "/api/testactive/"
   }
 ]

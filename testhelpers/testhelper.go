@@ -2,9 +2,12 @@ package testhelper
 
 import (
 	"bytes"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/mattinordstrom/moxy/httphandling"
 	"github.com/mattinordstrom/moxy/utils"
 )
 
@@ -47,4 +50,12 @@ func PrintAssertError(t *testing.T, expected string, actual string, extraInfo st
 	t.Helper()
 
 	t.Error(utils.ColorRed + "\n" + extraInfo + "\n EXPECTED: " + expected + "\n ACTUAL: " + actual + utils.ColorReset)
+}
+
+func GetRecorder(req *http.Request) *httptest.ResponseRecorder {
+	resRecorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(httphandling.HTTPHandler)
+	handler.ServeHTTP(resRecorder, req)
+
+	return resRecorder
 }
