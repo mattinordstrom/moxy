@@ -17,7 +17,7 @@ const fetchMockDef = async () => {
         const response = await fetch('/moxyadminui/mockdef');
         const data = await response.json();
         
-        MockDefModule.set(data);
+        MockDefModule.set(MockDefModule.stringifyPayload(data));
         renderMockdef(data);
     } catch (error) {
         console.error('Fetch error mockdef:', error);
@@ -84,8 +84,9 @@ const renderMockdef = () => {
                 </div>`;
 
         let payload = mockEntityData['payload'];
-        if (typeof payload === 'object') {
-            payload = JSON.stringify(mockEntityData['payload'], null, 2);
+        const jsonPayload = safelyParseJSON(payload);
+        if (typeof jsonPayload === 'object') {
+            payload = JSON.stringify(jsonPayload, null, 2);
         }
 
         mockEntity += `
@@ -183,9 +184,7 @@ const addMock = () => {
         "active": true,
         "freezetimems": 0,
         "method": "GET",
-        "payload": {
-            "response": "abc123"
-        },
+        "payload": '{ "response": "abc123" }',
         "payloadFromFile": "",
         "statuscode": 200,
         "urlpart": "/api/whatever/someendpoint"
@@ -228,33 +227,27 @@ const updateMockdef = async (evt) => {
         const index = Number(evt.id.split('_').slice(-1)[0]);
         const name = evt.id.split('_')[0];
 
-        let mocks = MockDefModule.get();
+        const mocks = MockDefModule.get();
+        let mock = mocks[index];
 
         if(evt.tagName.toLowerCase() === "input") {
             if(evt.type === "checkbox") {
-                mocks[index][name] = evt.checked;
+                mock[name] = evt.checked;
             } else if(evt.type === "number") { 
-                mocks[index][name] = Number(evt.value);
+                mock[name] = parseInt(evt.value);
             } else if(evt.type === "text") {
-                mocks[index][name] = evt.value;
+                mock[name] = evt.value;
             } 
         } else if(evt.tagName.toLowerCase() === "select") {
-            mocks[index][name] = evt.value;
+            mock[name] = evt.value;
         } else if(evt.tagName.toLowerCase() === "textarea") {
-            if(name === "payload") {
-                let value = evt.value;
-                try {
-                    value = JSON.parse(value);
-                } catch (e) {
-                    value = evt.value;
-                }
-
-                mocks[index][name] = value;
+            if(name === "payload" && !isNaN(evt.value)) {
+                mock[name] = parseFloat(evt.value);
             } else if(name === "payloadFromFile" && evt.value.startsWith('~')) {
                 alert('Absolute path cannot start with ~');
                 return;
             } else {
-                mocks[index][name] = evt.value;
+                mock[name] = evt.value;
             }
         }
 
@@ -262,9 +255,11 @@ const updateMockdef = async (evt) => {
     }
 
     try {
-        const response = await fetch('/moxyadminui/mockdef', {
+        const mocksWithJSONPayload = MockDefModule.getWithJSONPayload();
+
+        await fetch('/moxyadminui/mockdef', {
             method: "POST",
-            body: JSON.stringify(MockDefModule.get()),
+            body: JSON.stringify(mocksWithJSONPayload),
         });
 
         console.log("Success POST mockdef");
@@ -278,13 +273,14 @@ const updateProxydef = async (evt) => {
         const index = Number(evt.id.split('_').slice(-1)[0]);
         const name = evt.id.split('_')[0];
 
-        let proxies = ProxyDefModule.get();
+        const proxies = ProxyDefModule.get();
+        let proxy = proxies[index];
 
         if(evt.tagName.toLowerCase() === "input") {
             if(evt.type === "checkbox") {
-                proxies[index][name] = evt.checked;
+                proxy[name] = evt.checked;
             } else if(evt.type === "text") {
-                proxies[index][name] = evt.value;
+                proxy[name] = evt.value;
             } 
         }
 
@@ -292,7 +288,7 @@ const updateProxydef = async (evt) => {
     }
 
     try {
-        const response = await fetch('/moxyadminui/proxydef', {
+        await fetch('/moxyadminui/proxydef', {
             method: "POST",
             body: JSON.stringify(ProxyDefModule.get()),
         });

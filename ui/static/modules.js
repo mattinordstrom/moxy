@@ -1,45 +1,71 @@
 const MockDefModule = (() => {
-    let mockdefObj = [];
+    let mockDefs = [];
 
-    const setMockdefObj = (data) => {
-        mockdefObj = data;
+    const set = (data) => {
+        data.forEach((mock, i) => {
+            // We make shallow copies of the array. To prevent external modifications of objects from affecting our internal state, we require 'payload' to be a stringified version of any object.
+            if(mock.payload && typeof mock.payload !== 'string' && typeof mock.payload !== 'number') {
+                throw new Error('Payload must be stringified: ' + i);
+            }
+        });
+
+        mockDefs = [...data];
     }
 
-    const getMockdefObj = () => mockdefObj;
+    const get = () => [...mockDefs];
 
-    const removeFromMockdefObj = (index) => {
-        let newArray = [...mockdefObj];
-        newArray.splice(index, 1);
-        setMockdefObj(newArray);
+    const remove = (index) => {
+        if (index < 0 || index >= mockDefs.length) {
+            throw new Error('Index out of bounds mockDefs');
+        }
+
+        mockDefs.splice(index, 1);
     }
 
-    return {
-        set: setMockdefObj,
-        get: getMockdefObj,
-        remove: removeFromMockdefObj
-    };
+    const stringifyPayload = (data) => {
+        data.forEach((mock, i) => {
+            if(mock.payload && typeof mock.payload === 'object') {
+                mock.payload = JSON.stringify(mock.payload);
+            }
+        });
+
+        return data;
+    }
+
+    const getWithJSONPayload = () => {
+        return MockDefModule.get().map(mock => {
+            if (mock.payload && typeof mock.payload !== 'number') {
+                return {
+                    ...mock,
+                    payload: safelyParseJSON(mock.payload)
+                };
+            } else {
+                return { ...mock };
+            }
+        });
+    }
+
+    return { set, get, remove, stringifyPayload, getWithJSONPayload };
 })();
 
 const ProxyDefModule = (() => {
-    let proxydefObj = [];
+    let proxyDefs = [];
 
-    const setProxydefObj = (data) => {
-        proxydefObj = data;
+    const set = (data) => {
+        proxyDefs = [...data];
     }
 
-    const getProxydefObj = () => proxydefObj;
+    const get = () => [...proxyDefs];
 
-    const removeFromProxydefObj = (index) => {
-        let newArray = [...proxydefObj];
-        newArray.splice(index, 1);
-        setProxydefObj(newArray);
+    const remove = (index) => {
+        if (index < 0 || index >= proxyDefs.length) {
+            throw new Error('Index out of bounds proxyDefs');
+        }
+
+        proxyDefs.splice(index, 1);
     }
 
-    return {
-        set: setProxydefObj,
-        get: getProxydefObj,
-        remove: removeFromProxydefObj
-    };
+    return { set, get, remove };
 })();
 
 const PayloadFromFileModule = (() => {
@@ -47,10 +73,10 @@ const PayloadFromFileModule = (() => {
     let payloadFiles = [];
 
     const setPayloadFiles = (data) => {
-        payloadFiles = data;
+        payloadFiles = [...data];
     }
 
-    const getPayloadFiles = () => payloadFiles;
+    const getPayloadFiles = () => [...payloadFiles];
     
     const setPayloadPath = (str) => {
         payloadPath = str;
