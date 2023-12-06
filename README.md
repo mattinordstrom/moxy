@@ -74,7 +74,7 @@ $ golangci-lint run -v
 
   
   
-### Precommit hook:  
+### Precommit hook installation:  
 ```sh
 $ pip3 install pre-commit
 $ pre-commit install

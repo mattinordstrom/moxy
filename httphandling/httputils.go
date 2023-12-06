@@ -5,13 +5,9 @@ import (
 	"net/http"
 )
 
-func CreateReqFromReq(req *http.Request, newURL string) (*http.Request, http.Client) {
-	client := http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
+var ForwardClient http.Client
 
+func createReqFromReq(req *http.Request, newURL string) *http.Request {
 	freq, reqerror := http.NewRequest(req.Method, newURL, req.Body)
 	if reqerror != nil {
 		log.Fatalln(reqerror)
@@ -31,5 +27,5 @@ func CreateReqFromReq(req *http.Request, newURL string) (*http.Request, http.Cli
 	// https://go.dev/src/net/http/transport.go#L190
 	freq.Header.Del("Accept-Encoding")
 
-	return freq, client
+	return freq
 }

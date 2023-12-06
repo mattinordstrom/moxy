@@ -35,7 +35,7 @@ func TestGetMockEventString(t *testing.T) {
 		utils.ColorReset
 
 	if testStr != expected {
-		testhelper.PrintAssertError(t, expected, testStr)
+		testhelper.PrintAssertError(t, expected, testStr, "")
 	}
 }
 
@@ -49,7 +49,7 @@ func TestGetProxyEventString(t *testing.T) {
 		utils.ColorReset
 
 	if testStr != expected {
-		testhelper.PrintAssertError(t, expected, testStr)
+		testhelper.PrintAssertError(t, expected, testStr, "")
 	}
 }
 
@@ -68,7 +68,7 @@ func TestUsePayloadFromFile(t *testing.T) {
 	expected := true
 
 	if res != expected {
-		testhelper.PrintAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res))
+		testhelper.PrintAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res), "")
 	}
 
 	// Test with both
@@ -79,6 +79,6 @@ func TestUsePayloadFromFile(t *testing.T) {
 	expected = false
 
 	if res != expected {
-		testhelper.PrintAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res))
+		testhelper.PrintAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res), "")
 	}
 }

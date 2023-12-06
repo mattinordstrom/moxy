@@ -1,15 +1,55 @@
 package httphandling_test
 
 import (
-	"bytes"
-	"io"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/mattinordstrom/moxy/httphandling"
-	"github.com/mattinordstrom/moxy/utils"
+	testhelper "github.com/mattinordstrom/moxy/testhelpers"
 )
+
+type mockTransport struct{}
+
+var ErrConnectionRefused = errors.New("connection refused")
+
+func (m *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// When testing all forwarded requests (proxydef_test.json) will fail
+	return nil, fmt.Errorf("mock transport error for %s: %w", req.Host, ErrConnectionRefused)
+}
+
+func TestMain(m *testing.M) {
+	testhelper.SetupTest(m)
+}
+
+func TestProxyResponseFail(t *testing.T) {
+	t.Parallel()
+
+	req, err := http.NewRequest(http.MethodGet, "/api/test123", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	httphandling.ForwardClient = http.Client{
+		Transport: &mockTransport{},
+	}
+
+	resRecorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(httphandling.HTTPHandler)
+
+	handler.ServeHTTP(resRecorder, req)
+
+	actualBody := resRecorder.Body.String()
+	expectedBody := "Error: No response from http://localhost:8088/api/test123"
+
+	if actualBody != expectedBody {
+		testhelper.PrintAssertError(t, expectedBody, actualBody,
+			"Handler returned wrong body")
+	}
+}
 
 func TestMockedResponse(t *testing.T) {
 	t.Parallel()
@@ -19,60 +59,19 @@ func TestMockedResponse(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	utils.MockFile = "mockdef_test.json"
-
 	resRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(httphandling.HTTPHandler)
 
 	handler.ServeHTTP(resRecorder, req)
 
 	if status := resRecorder.Code; status != http.StatusNotFound {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusNotFound)
+		testhelper.PrintAssertError(t, strconv.Itoa(http.StatusNotFound), strconv.Itoa(status),
+			"Handler returned wrong status code")
 	}
 
-	expected := `{"response":"mocktest"}`
-	if resRecorder.Body.String() != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v", resRecorder.Body.String(), expected)
-	}
-}
-
-func TestCreateReqFromReq(t *testing.T) {
-	t.Parallel()
-
-	expectedReqBody := `{ "id": "123" }`
-	expectedReqHeaderUA := "PostmanRuntime/7.30.0"
-
-	req, err := http.NewRequest(http.MethodGet, "/api/test/mocktesting", bytes.NewReader([]byte(expectedReqBody)))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	req.Header.Set("User-Agent", expectedReqHeaderUA)
-	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
-
-	newURL := "http://localhost:9098/api/test/mocktesting"
-
-	// TODO make it createReqFromReq and rewrite this test
-	freq, _ := httphandling.CreateReqFromReq(req, newURL)
-
-	// Test Accept-Encoding header
-	if acceptEncoding := freq.Header.Get("Accept-Encoding"); acceptEncoding != "" {
-		t.Errorf("handler returned wrong header Accept-Encoding: got %v want EMPTY", acceptEncoding)
-	}
-
-	// Test user-agent header
-	if ua := freq.Header.Get("User-Agent"); ua != expectedReqHeaderUA {
-		t.Errorf("handler returned wrong header User-Agent: got %v want %v", ua, expectedReqHeaderUA)
-	}
-
-	// Test body
-	reqBody, ioerr := io.ReadAll(freq.Body)
-	if ioerr != nil {
-		t.Fatal(ioerr)
-	}
-
-	if reqBodyString := string(reqBody); reqBodyString != expectedReqBody {
-		t.Errorf("handler returned wrong body: got %v want %v", reqBodyString, expectedReqBody)
+	expectedBody := `{"response":"mocktest"}`
+	if resRecorder.Body.String() != expectedBody {
+		testhelper.PrintAssertError(t, expectedBody, resRecorder.Body.String(),
+			"Handler returned unexpected body")
 	}
 }

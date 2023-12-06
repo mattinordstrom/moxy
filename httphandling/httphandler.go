@@ -32,6 +32,12 @@ func CreateHTTPListener() {
 	// Start listening
 	fmt.Printf("Now listening on port %s...\n", strconv.Itoa(Port))
 
+	ForwardClient = http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
 	fs := http.FileServer(http.Dir("ui/static"))
 	http.Handle("/ui/static/", http.StripPrefix("/ui/static/", fs))
 	http.HandleFunc("/moxyws", handleWebSocket)
@@ -216,9 +222,9 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 }
 
 func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string) {
-	freq, client := CreateReqFromReq(req, newURL)
+	freq := createReqFromReq(req, newURL)
 
-	fresp, resperr := client.Do(freq)
+	fresp, resperr := ForwardClient.Do(freq)
 	if resperr != nil {
 		utils.LogError("", resperr)
 		fmt.Fprintf(resWriter, "Error: No response from "+newURL)

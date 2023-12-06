@@ -4,7 +4,19 @@ import (
 	"bytes"
 	"os"
 	"testing"
+
+	"github.com/mattinordstrom/moxy/utils"
 )
+
+func SetupTest(m *testing.M) {
+	utils.MockFile = "mockdef_test.json"
+	utils.ProxyFile = "proxydef_test.json"
+
+	// Run the tests
+	code := m.Run()
+
+	os.Exit(code)
+}
 
 func CaptureOutput(t *testing.T, funct func()) string {
 	t.Helper()
@@ -31,7 +43,8 @@ func CaptureOutput(t *testing.T, funct func()) string {
 	return buf.String()
 }
 
-func PrintAssertError(t *testing.T, expected string, actual string) {
+func PrintAssertError(t *testing.T, expected string, actual string, extraInfo string) {
 	t.Helper()
-	t.Error("\n EXPECTED: " + expected + "\n ACTUAL: " + actual)
+
+	t.Error(utils.ColorRed + "\n" + extraInfo + "\n EXPECTED: " + expected + "\n ACTUAL: " + actual + utils.ColorReset)
 }

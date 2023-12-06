@@ -8,11 +8,12 @@ import (
 	"github.com/mattinordstrom/moxy/utils"
 )
 
+func TestMain(m *testing.M) {
+	testhelper.SetupTest(m)
+}
+
 func TestGetEventString(t *testing.T) {
 	t.Parallel()
-
-	utils.MockFile = "mockdef_test.json"
-	utils.ProxyFile = "proxydef_test.json"
 
 	output := testhelper.CaptureOutput(t, PrintInitSetup)
 
@@ -23,7 +24,7 @@ func TestGetEventString(t *testing.T) {
 	test := strings.Contains(output, expected)
 
 	if !test {
-		testhelper.PrintAssertError(t, expected, output)
+		testhelper.PrintAssertError(t, expected, output, "")
 	}
 
 	// Test mock - print payloadFromFile and freeze time
@@ -33,7 +34,7 @@ func TestGetEventString(t *testing.T) {
 	test = strings.Contains(output, expected)
 
 	if !test {
-		testhelper.PrintAssertError(t, expected, output)
+		testhelper.PrintAssertError(t, expected, output, "")
 	}
 
 	// Test proxy - should be green color
@@ -41,7 +42,7 @@ func TestGetEventString(t *testing.T) {
 	test = strings.Contains(output, expected)
 
 	if !test {
-		testhelper.PrintAssertError(t, expected, output)
+		testhelper.PrintAssertError(t, expected, output, "")
 	}
 
 	// Test proxy - INACTIVE
@@ -50,6 +51,6 @@ func TestGetEventString(t *testing.T) {
 	test = strings.Contains(output, expected)
 
 	if !test {
-		testhelper.PrintAssertError(t, expected, output)
+		testhelper.PrintAssertError(t, expected, output, "")
 	}
 }
