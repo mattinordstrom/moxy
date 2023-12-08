@@ -186,14 +186,16 @@ const listPayloadFiles = async () => {
     filesListHtml += '</div>';
 
     document.getElementById('payloadFilesContent').innerHTML += filesListHtml + 
-        '<hr /><b><div class="editfile">---</div></b><br/>' +
+        '<hr /><br /><b><div class="editfile">---</div></b><br/>' +
         '<textarea disabled onchange="updatePayloadFile(this)" spellcheck="false" rows="20" cols="75" name="payloadedit" id="payloadedit"></textarea>';
 }
 
 const editFile = async (btnEl, fullPath) => {
     const filename = fullPath.split('/').pop();
 
-    document.getElementsByClassName('editfile')[0].innerHTML = filename;
+    document.getElementsByClassName('editfile')[0].innerHTML = filename + 
+        `&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'${PayloadFromFileModule.getPayloadPath() + filename}\')">Copy full path</button>`;
+
     document.getElementById('payloadedit').disabled = false;
 
     const response = await fetch('/moxyadminui/editpayloadfile?file=' + filename, { cache: 'no-store' });
