@@ -9,10 +9,10 @@ const MockDefModule = (() => {
             }
         });
 
-        mockDefs = [...data];
+        mockDefs = data.map(obj => ({ ...obj }));
     }
 
-    const get = () => [...mockDefs];
+    const get = () => mockDefs.map(obj => ({ ...obj }));
 
     const remove = (index) => {
         if (index < 0 || index >= mockDefs.length) {
@@ -52,10 +52,10 @@ const ProxyDefModule = (() => {
     let proxyDefs = [];
 
     const set = (data) => {
-        proxyDefs = [...data];
+        proxyDefs = data.map(obj => ({ ...obj }));
     }
 
-    const get = () => [...proxyDefs];
+    const get = () => proxyDefs.map(obj => ({ ...obj }));
 
     const remove = (index) => {
         if (index < 0 || index >= proxyDefs.length) {
