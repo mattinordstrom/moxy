@@ -160,11 +160,15 @@ const showOnlyMocks = () => {
     maximizeMock(1);
 }
 
-const listPayloadFiles = () => {
+const listPayloadFiles = async () => {
     if(document.getElementById('payloadFiles').style.display === 'block') {
         closeListPayloadFiles();
         return;
     }
+
+    const response = await fetch('/moxyadminui/settings');
+    const data = await response.json();
+    PayloadFromFileModule.setPayloadFiles(data['payloadFiles']);
 
     document.getElementById('payloadFiles').style.display = 'block';
     document.getElementById('payloadFilesContent').innerHTML = `<br />${PayloadFromFileModule.getPayloadPath()}<hr /><br />`;
@@ -183,22 +187,41 @@ const listPayloadFiles = () => {
 
     document.getElementById('payloadFilesContent').innerHTML += filesListHtml + 
         '<hr /><b><div class="editfile">---</div></b><br/>' +
-        '<textarea disabled spellcheck="false" rows="20" cols="75" name="payloadedit" id="payloadedit"></textarea>';
+        '<textarea disabled onchange="updatePayloadFile(this)" spellcheck="false" rows="20" cols="75" name="payloadedit" id="payloadedit"></textarea>';
 }
 
-const editFile = (btnEl, fullPath) => {
+const editFile = async (btnEl, fullPath) => {
     const filename = fullPath.split('/').pop();
 
     document.getElementsByClassName('editfile')[0].innerHTML = filename;
     document.getElementById('payloadedit').disabled = false;
 
-    console.log("TODO: EDIT FILE");
+    const response = await fetch('/moxyadminui/editpayloadfile?file=' + filename, { cache: 'no-store' });
+    const data = await response.json();
+
+    document.getElementById('payloadedit').value = JSON.stringify(data, null, 2);
+}
+
+const updatePayloadFile = async (el) => {
+    const filename = document.getElementsByClassName('editfile')[0].innerText;
+    const newPayload = JSON.parse(el.value);
+    
+    try {
+        await fetch('/moxyadminui/editpayloadfile', {
+            method: "POST",
+            body: JSON.stringify({ 
+                file: PayloadFromFileModule.getPayloadPath() + filename, 
+                payload: newPayload
+            }),
+        });
+
+        console.log("Success POST editpayloadfile");
+    } catch (error) {
+        console.error('POST error editpayloadfile:', error);
+    }
 }
 
 const closeListPayloadFiles = () => {
-    document.getElementsByClassName('editfile')[0].innerHTML = '---';
-    document.getElementById('payloadedit').disabled = true;
-
     document.getElementById('payloadFiles').style.display = 'none';
 }
 
