@@ -169,17 +169,36 @@ const listPayloadFiles = () => {
     document.getElementById('payloadFiles').style.display = 'block';
     document.getElementById('payloadFilesContent').innerHTML = `<br />${PayloadFromFileModule.getPayloadPath()}<hr /><br />`;
 
-    let filesListHtml = '';
+    let filesListHtml = '<div style="max-height: 215px; overflow:auto">';
     PayloadFromFileModule.getPayloadFiles().forEach((file) => {
-        filesListHtml += '<div style="display:flex"><div style="min-width:225px">' + file + '</div>';
-        filesListHtml += '&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'' + PayloadFromFileModule.getPayloadPath() + file + '\')">Copy full path</button>';
-        filesListHtml += '</div><br />';
+        filesListHtml += `
+            <div style="display:flex">
+                <div style="min-width:275px">${file}</div>
+                &nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'${PayloadFromFileModule.getPayloadPath() + file}\')">Copy full path</button>
+                &nbsp;&nbsp;<button onclick="editFile(this, \'${PayloadFromFileModule.getPayloadPath() + file}\')">Edit file</button>
+            </div><br />
+        `;
     });
+    filesListHtml += '</div>';
 
-    document.getElementById('payloadFilesContent').innerHTML += filesListHtml;
+    document.getElementById('payloadFilesContent').innerHTML += filesListHtml + 
+        '<hr /><b><div class="editfile">---</div></b><br/>' +
+        '<textarea disabled spellcheck="false" rows="20" cols="75" name="payloadedit" id="payloadedit"></textarea>';
+}
+
+const editFile = (btnEl, fullPath) => {
+    const filename = fullPath.split('/').pop();
+
+    document.getElementsByClassName('editfile')[0].innerHTML = filename;
+    document.getElementById('payloadedit').disabled = false;
+
+    console.log("TODO: EDIT FILE");
 }
 
 const closeListPayloadFiles = () => {
+    document.getElementsByClassName('editfile')[0].innerHTML = '---';
+    document.getElementById('payloadedit').disabled = true;
+
     document.getElementById('payloadFiles').style.display = 'none';
 }
 

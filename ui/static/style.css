@@ -139,7 +139,7 @@ footer.expanded {
     left: 50%; 
     display: none; 
     background-color: #c3bfa5;
-    min-width: 400px;
-    min-height: 610px;
     padding: 14px;
+    width: 45%; 
+    height: 85%
 }
