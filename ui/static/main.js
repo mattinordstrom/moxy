@@ -68,8 +68,10 @@ const renderMockdef = () => {
                     ${(i+1)} 
                     <div style="display:flex">
                         <div><input onchange="updateMockdef(this)" class="comment-input" type="text" spellcheck="false" name="comment_mock_${i}" id="comment_mock_${i}" value="${mockEntityData['comment'] || ""}"></input></div>
+                        <div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_first_btn_${i}">&#10514;</button></div>
                         <div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_up_btn_${i}">&#8593;</button></div>
                         <div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_down_btn_${i}">&#8595;</button></div>
+                        <div style="margin-right:4px"><button onclick="moveMock(this)" id="movemock_last_btn_${i}">&#10515;</button></div>
                         <div><button onclick="removeMock(this)" id="x_btn_${i}">X</button></div>
                     </div>
                 </div>
@@ -124,8 +126,10 @@ const renderProxydef = () => {
                     ${(i+1)} 
                     <div style="display:flex">
                         <div><input onchange="updateProxydef(this)" class="comment-input" type="text" spellcheck="false" name="comment_proxy_${i}" id="comment_proxy_${i}" value="${proxyEntityData['comment'] || ""}"></input></div>
+                        <div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_first_btn_${i}">&#10514;</button></div>
                         <div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_up_btn_${i}">&#8593;</button></div>
                         <div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_down_btn_${i}">&#8595;</button></div>
+                        <div style="margin-right:4px"><button onclick="moveProxy(this)" id="moveproxy_last_btn_${i}">&#10515;</button></div>
                         <div><button onclick="removeProxy(this)" id="x_btn_${i}">X</button></div>
                     </div>
                 </div>
@@ -301,6 +305,7 @@ const updateProxydef = async (evt) => {
 
 const moveMock = (evt) => {
     let mocks = MockDefModule.get();
+
     if(moveEntity(evt, mocks)) {
         MockDefModule.set(mocks);
         resetAndSync("mock");
@@ -309,6 +314,7 @@ const moveMock = (evt) => {
 
 const moveProxy = (evt) => {
     let proxies = ProxyDefModule.get();
+
     if(moveEntity(evt, proxies)) {
         ProxyDefModule.set(proxies);
         resetAndSync("proxy");
@@ -321,13 +327,25 @@ const moveEntity = (evt, arr) => {
     let changed = false;
 
     if(way === 'up') {
-        if (index > 0 && index < arr.length) {
+        if (index > 0) {
             [arr[index], arr[index - 1]] = [arr[index - 1], arr[index]];
             changed = true;
         }
     } else if (way === 'down') {
-        if (index >= 0 && index < arr.length - 1) {
+        if (index < arr.length - 1) {
             [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
+            changed = true;
+        }
+    } else if (way === 'first') {
+        if (index > 0) {
+            const [item] = arr.splice(index, 1);
+            arr.unshift(item);
+            changed = true;
+        }
+    } else if (way === 'last'){
+        if (index < arr.length - 1) {
+            const [item] = arr.splice(index, 1);
+            arr.push(item);
             changed = true;
         }
     }
