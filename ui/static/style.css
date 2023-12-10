@@ -14,6 +14,25 @@ header {
     text-align: left;
 }
 
+button {
+    border-radius: 2px;
+    border: 2px solid black;
+    cursor: pointer;
+    min-height: 25px;
+    background-color: #FFFFFF;
+}
+
+button:hover {
+    background-color: #cacaca;
+}
+
+.small-btn-wrapper {
+    width: 20px; 
+    height: 15px; 
+    display: block; 
+    margin-top: 2px;
+}
+
 .header-info {
     color: #666666;
     display: flex;
@@ -143,3 +162,9 @@ footer.expanded {
     width: 45%; 
     height: 85%
 }
+
+.mock-file-edit {
+    margin-top: 2px;
+    align-self: flex-end;
+  }
+      

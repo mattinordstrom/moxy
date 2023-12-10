@@ -9,6 +9,10 @@ input:focus, select:focus, textarea:focus {
     outline: none;
 }
 
+input[type="checkbox"] {
+    cursor: pointer;
+}
+
 input[type="checkbox"]:before {
     content: "";
     display: inline-block;
