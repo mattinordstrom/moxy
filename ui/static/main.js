@@ -4,7 +4,8 @@ const initFunc = () => {
     fetchSettings();
 
     document.getElementById("close-list-payloadfiles").innerHTML = SVGModule.getX(16, 12);
-    
+    document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + ' Toggle fullscreen log ' + SVGModule.getUpArrow(12, 12);
+
     darkModeSetup();
 
     //websocket setup
@@ -74,7 +75,7 @@ const renderMockdef = () => {
                         <div style="margin-right:4px"><button style="padding: 0" onclick="moveMock(this)" id="movemock_up_btn_${i}"><span class="small-btn-wrapper">${SVGModule.getUpArrow(12, 12)}</span></button></div>
                         <div style="margin-right:4px"><button style="padding: 0" onclick="moveMock(this)" id="movemock_down_btn_${i}"><span class="small-btn-wrapper">${SVGModule.getDownArrow(12, 12)}</span></button></div>
                         <div style="margin-right:4px"><button style="padding: 0" onclick="moveMock(this)" id="movemock_last_btn_${i}"><span class="small-btn-wrapper">${SVGModule.getDownArrows(12, 12)}</span></button></div>
-                        <div style="margin-left:4px"><button onclick="removeMock(this)" id="x_btn_${i}"><span style="margin-top:0;" class="small-btn-wrapper">${SVGModule.getX(12, 14)}</span></button></div>
+                        <div style="margin-left:4px"><button style="width: 25px" onclick="removeMock(this)" id="x_btn_${i}"><span style="margin-top:0; width:1px" class="small-btn-wrapper">${SVGModule.getX(12, 14)}</span></button></div>
                     </div>
                 </div>
                 <div class="mock-obj"><label for="active_mock_${i}">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_${i}" id="active_mock_${i}" ${mockEntityData['active'] ? "checked" : ""}></input></div>
@@ -104,7 +105,7 @@ const renderMockdef = () => {
                     <label style="display:flex; flex-direction: column" for="payloadFromFile_${i}">
                         payloadFromFile:
                         <br />
-                        <button class="mock-file-edit" id="mock_file_edit${i}" onclick="editFileFromMock(this)">
+                        <button class="mock-file-edit" id="mock_file_edit_${i}" onclick="editFileFromMock(this)">
                         ${SVGModule.getPen(12, 12)}
                         </button>
                     </label>
@@ -127,13 +128,12 @@ const renderMockdef = () => {
 }
 
 const editFileFromMock = (el) => {
-    console.log("editFileFromMock");
+    const index = Number(el.id.split('_').slice(-1)[0]);
+    const fullPath = document.getElementById('payloadFromFile_'+index).value;
 
-    // TODO
-
-    //if(listPayloadFiles()) {
-    //    editFile(null, PayloadFromFileModule.getPayloadPath() + '/rights.json');
-    //}
+    if(listPayloadFiles()) {
+        editFile(null, fullPath);
+    }
 }
 
 const renderProxydef = () => {
@@ -203,16 +203,23 @@ const listPayloadFiles = async () => {
     });
     filesListHtml += '</div>';
 
-    document.getElementById('payloadFilesContent').innerHTML += filesListHtml + 
-        '<hr /><br /><b><div class="editfile">---</div></b><br/>' +
-        '<textarea disabled onchange="updatePayloadFile(this)" spellcheck="false" rows="20" cols="75" name="payloadedit" id="payloadedit"></textarea>';
-
+    document.getElementById('payloadFilesContent').innerHTML += filesListHtml;
+   
     return true;
 }
 
 const editFile = async (btnEl, fullPath) => {
     const filename = fullPath.split('/').pop();
     
+    if(!PayloadFromFileModule.getPayloadFiles().includes(filename)) {
+        document.getElementById('payloadedit').disabled = true;
+        document.getElementById('payloadedit').value = '';
+        document.getElementsByClassName('editfile')[0].innerHTML = '---';
+
+        alert('Invalid file ' + filename);
+        return;
+    }
+
     const response = await fetch('/moxyadminui/editpayloadfile?file=' + filename, { cache: 'no-store' });
     const data = await response.json();
 
