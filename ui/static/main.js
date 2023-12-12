@@ -214,26 +214,36 @@ const editFile = async (btnEl, fullPath) => {
     if(!PayloadFromFileModule.getPayloadFiles().includes(filename)) {
         document.getElementById('payloadedit').disabled = true;
         document.getElementById('payloadedit').value = '';
-        document.getElementsByClassName('editfile')[0].innerHTML = '---';
+        document.getElementById('editfiletitle').innerText = '---';
 
         alert('Invalid file ' + filename);
         return;
     }
 
     const response = await fetch('/moxyadminui/editpayloadfile?file=' + filename, { cache: 'no-store' });
-    const data = await response.json();
+
+    let data = '';
+    
+    try {
+        data = await response.json();
+        data = JSON.stringify(data, null, 2);
+    } catch (error) {
+        console.warn("Received response could not be parsed as JSON");
+    }
 
     document.getElementsByClassName('editfile')[0].innerHTML = `
-        ${filename}&nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'${PayloadFromFileModule.getPayloadPath() + filename}\')">Copy full path</button>
+        <span id="editfiletitle">${filename}</span>
+        &nbsp;&nbsp;
+        <button onclick="navigator.clipboard.writeText(\'${PayloadFromFileModule.getPayloadPath() + filename}\')">Copy full path</button>
     `;
 
     document.getElementById('payloadedit').disabled = false;
 
-    document.getElementById('payloadedit').value = JSON.stringify(data, null, 2);
+    document.getElementById('payloadedit').value = data;
 }
 
 const updatePayloadFile = async (el) => {
-    const filename = document.getElementsByClassName('editfile')[0].innerText;
+    const filename = document.getElementById('editfiletitle').innerText;
     const newPayload = JSON.parse(el.value);
     
     try {
