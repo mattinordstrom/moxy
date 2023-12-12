@@ -15,6 +15,11 @@ alias moxy="cd /home/matti/projects/moxy && go run main.go"
 <br>
   
   
+#### Edit config
+First time starting moxy a config.yml file will be created
+<br>
+
+
 ## Run:  
 #### Run (on default port 9097)  
 ```sh
@@ -32,14 +37,6 @@ $ moxy -p 9098
 ## Admin UI:
 Go to http://localhost:9097/moxyadminui
   
-  
-  
-  
-## Edit proxies and mocks directly:
-Edit mocks: [mockdef.json]  
-Edit proxies: [proxydef.json]  
-
-<br>
 
   
 ## Quick notes:
@@ -50,7 +47,6 @@ Edit proxies: [proxydef.json]
 - URLs will be matched "if contains", so the order and precision in the json urlpart is important
 - If payload and payloadFromFile are both defined payload will be used
 - .* can be used in urlpart in mocks and proxies
-- Copy config_template.yml to config.yml to use your own config
   
 <br>  
 <br>
@@ -85,6 +81,3 @@ $ pre-commit install
 ```sh
 $ pre-commit run --all-files
 ```  
-  
-[mockdef.json]: <https://github.com/mattinordstrom/moxy/blob/main/mockdef.json>
-[proxydef.json]: <https://github.com/mattinordstrom/moxy/blob/main/proxydef.json>

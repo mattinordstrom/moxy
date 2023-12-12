@@ -127,15 +127,6 @@ const renderMockdef = () => {
     });
 }
 
-const editFileFromMock = (el) => {
-    const index = Number(el.id.split('_').slice(-1)[0]);
-    const fullPath = document.getElementById('payloadFromFile_'+index).value;
-
-    if(listPayloadFiles()) {
-        editFile(null, fullPath);
-    }
-}
-
 const renderProxydef = () => {
     ProxyDefModule.get().forEach((proxyEntityData, i) => {
         let proxyEntity = `
@@ -178,8 +169,17 @@ const showOnlyMocks = () => {
     maximizeMock(1);
 }
 
-const listPayloadFiles = async () => {
-    if(document.getElementById('payloadFiles').style.display === 'block') {
+const editFileFromMock = (el) => {
+    const index = Number(el.id.split('_').slice(-1)[0]);
+    const fullPath = document.getElementById('payloadFromFile_'+index).value;
+
+    if(listPayloadFiles('edit_file_btn')) {
+        editFile(null, fullPath);
+    }
+}
+
+const listPayloadFiles = async (evtSource) => {
+    if(document.getElementById('payloadFiles').style.display === 'block' && evtSource === 'payload_files_btn') {
         closeListPayloadFiles();
         return false;
     }

@@ -22,12 +22,11 @@ func main() {
 
 	hh.Port = *pFlag
 
+	firstTimeSetup()
+
 	err := config.LoadConfig("config.yml")
 	if err != nil {
-		err := config.LoadConfig("config_template.yml")
-		if err != nil {
-			log.Fatalf("Failed to load config: %v", err)
-		}
+		log.Fatalf("Failed to load config: %v", err)
 	}
 
 	hh.DefaultRoute = config.AppConfig.Defaults.DefaultRoute
@@ -89,4 +88,21 @@ func getInactiveStr(active bool) string {
 	}
 
 	return activeStr
+}
+
+func firstTimeSetup() {
+	err := ut.CopyFile("config_template.yml", "config.yml")
+	if err != nil {
+		fmt.Println("File copy failed:", err)
+	}
+
+	err = ut.CopyFile("mockdef_template.json", "mockdef.json")
+	if err != nil {
+		fmt.Println("File copy failed:", err)
+	}
+
+	err = ut.CopyFile("proxydef_template.json", "proxydef.json")
+	if err != nil {
+		fmt.Println("File copy failed:", err)
+	}
 }
