@@ -15,7 +15,7 @@ header {
 }
 
 button {
-    border-radius: 2px;
+    border-radius: 4px;
     border: 2px solid black;
     cursor: pointer;
     min-height: 25px;
@@ -57,6 +57,7 @@ footer {
     bottom: 0;
     height: 100px;
     overflow-y: auto;
+    z-index: 999999;
 }
 
 footer.expanded {
