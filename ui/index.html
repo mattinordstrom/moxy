@@ -31,7 +31,7 @@
             <div class="payload-files-container">
                 <div class="payload-files-header">
                     <div style="display: flex; justify-content: end;">
-                        <button id="close-list-payloadfiles" style="padding-top:2px; width: 25px;" onclick="closeListPayloadFiles()"></button>
+                        <button id="close-list-payloadfiles" class="small-btn small-btn-close" onclick="closeListPayloadFiles()"></button>
                     </div>
                     <div id="payloadFilesPath"></div>
                 </div>
@@ -49,30 +49,29 @@
         <div id="left" class="left">
             <div style="margin-left: 20px;">
                 <h2>mock definitions</h2>
-                <button style="min-width: 60px; min-height: 30px;" onclick="addMock()">Add</button>&nbsp;&nbsp;
-                <button style="min-width: 60px; min-height: 30px;" onclick="maximizeMock(0)">Maximize first</button>
-                <button style="min-width: 60px; min-height: 30px;" onclick="showOnlyMocks()">Toggle show only mocks</button>&nbsp;&nbsp;
-                <button style="min-width: 60px; min-height: 30px;" onclick="listPayloadFiles('payload_files_btn')">Payload files</button>
+                <button class="action-btn" onclick="addMock()">Add</button>
+                <button class="action-btn" onclick="showOnlyMocks()">Toggle show only mocks</button>
+                <button class="action-btn payload-files-btn" onclick="listPayloadFiles('payload_files_btn')">Payload files</button>
                 <br /><br />
             </div>
             <div id="mock-content-container" class="proxymock-content-container"></div>
-            <div style="margin-bottom:200px"></div>
+            <div style="margin-bottom: 200px"></div>
         </div>
         <div class="right">
             <div style="margin-left: 20px;">
                 <h2>proxy definitions</h2>
-                <button style="min-width: 60px; min-height: 30px;" onclick="addProxy()">Add</button><br /><br />
+                <button class="action-btn" onclick="addProxy()">Add</button><br /><br />
             </div>
             <div id="proxy-content-container" class="proxymock-content-container"></div>
-            <div style="margin-bottom:200px"></div>
+            <div style="margin-bottom: 200px"></div>
         </div>
     </div>
 
     <footer>
-        <button class="expbutton" id="expand-button"></button>
+        <button class="expbutton action-btn" id="expand-button"></button>
         <div class="logextrabutton">
-            <button class="logextrabutton-btn" id="clear-log-button">Clear log</button>
-            <button class="logextrabutton-btn" id="add-lines-button">Add 5 empty lines</button>
+            <button class="logextrabutton-btn action-btn" id="clear-log-button">Clear log</button>
+            <button class="logextrabutton-btn action-btn" id="add-lines-button">Add 5 empty lines</button>
         </div>
         <div id="footer-log"></div>
     </footer>
