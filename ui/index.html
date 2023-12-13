@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>moxy</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="/ui/static/inputs.css">
-    <link rel="stylesheet" href="/ui/static/style.css">
-    <link id="darkModeStylesheet" rel="stylesheet" href="/ui/static/style_dark.css">
+    <link rel="stylesheet" href="/ui/static/style/inputs.css">
+    <link rel="stylesheet" href="/ui/static/style/payloadfiles.css">
+    <link rel="stylesheet" href="/ui/static/style/style.css">
+    <link id="darkModeStylesheet" rel="stylesheet" href="/ui/static/style/style_dark.css">
     <script src="/ui/static/main.js"></script>
     <script src="/ui/static/modules.js"></script>
     <script src="/ui/static/setup.js"></script>
@@ -27,13 +28,24 @@
 
     <div class="container">
         <div id="payloadFiles" class="payload-files">
-            <div style="display: flex; justify-content: end; margin-bottom: 10px">
-                <button id="close-list-payloadfiles" style="padding-top:2px; width: 28px; height: 15px;" onclick="closeListPayloadFiles()"></button>
+            <div class="payload-files-container">
+                <div class="payload-files-header">
+                    <div style="display: flex; justify-content: end;">
+                        <button id="close-list-payloadfiles" style="padding-top:2px; width: 25px;" onclick="closeListPayloadFiles()"></button>
+                    </div>
+                    <div id="payloadFilesPath"></div>
+                </div>
+                <div class="payload-files-content" id="payloadFilesContent"></div>
             </div>
-            <div id="payloadFilesContent"></div>
-            <hr /><br /><b><div class="editfile"><span id="editfiletitle">---</span></div></b><br/>
-            <textarea disabled onchange="updatePayloadFile(this)" spellcheck="false" rows="20" cols="75" name="payloadedit" id="payloadedit"></textarea>
+            <div class="payload-files-bottom">
+                <hr /><br />
+                <b><div class="editfile"><span id="editfiletitle">---</span></b>
+                <span id="editfilecopybtn"></span></div>
+                <br/>
+                <textarea class="payload-files-textarea" disabled onchange="updatePayloadFile(this)" spellcheck="false" name="payloadedit" id="payloadedit"></textarea>
+            </div>
         </div>
+
         <div id="left" class="left">
             <div style="margin-left: 20px;">
                 <h2>mock definitions</h2>

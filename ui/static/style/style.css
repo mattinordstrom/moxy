@@ -152,19 +152,8 @@ footer.expanded {
     min-width: 140px;
 }
 
-.payload-files {
-    position: absolute; 
-    top: 0;
-    left: 50%; 
-    display: none; 
-    background-color: #c3bfa5;
-    padding: 14px;
-    width: 45%; 
-    height: 85%
-}
-
 .mock-file-edit {
     margin-top: 2px;
     align-self: flex-end;
-  }
+}
       

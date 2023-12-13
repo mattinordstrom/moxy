@@ -3,7 +3,7 @@ const initFunc = () => {
     fetchProxyDef();
     fetchSettings();
 
-    document.getElementById("close-list-payloadfiles").innerHTML = SVGModule.getX(16, 12);
+    document.getElementById("close-list-payloadfiles").innerHTML = SVGModule.getX(12, 12);
     document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + ' Toggle fullscreen log ' + SVGModule.getUpArrow(12, 12);
 
     darkModeSetup();
@@ -75,7 +75,7 @@ const renderMockdef = () => {
                         <div style="margin-right:4px"><button style="padding: 0" onclick="moveMock(this)" id="movemock_up_btn_${i}"><span class="small-btn-wrapper">${SVGModule.getUpArrow(12, 12)}</span></button></div>
                         <div style="margin-right:4px"><button style="padding: 0" onclick="moveMock(this)" id="movemock_down_btn_${i}"><span class="small-btn-wrapper">${SVGModule.getDownArrow(12, 12)}</span></button></div>
                         <div style="margin-right:4px"><button style="padding: 0" onclick="moveMock(this)" id="movemock_last_btn_${i}"><span class="small-btn-wrapper">${SVGModule.getDownArrows(12, 12)}</span></button></div>
-                        <div style="margin-left:4px"><button style="width: 25px" onclick="removeMock(this)" id="x_btn_${i}"><span style="margin-top:0; width:1px" class="small-btn-wrapper">${SVGModule.getX(12, 14)}</span></button></div>
+                        <div style="margin-left:4px"><button style="width: 25px" onclick="removeMock(this)" id="x_btn_${i}"><span style="margin-top:0; width:1px" class="small-btn-wrapper">${SVGModule.getX(12, 12)}</span></button></div>
                     </div>
                 </div>
                 <div class="mock-obj"><label for="active_mock_${i}">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_${i}" id="active_mock_${i}" ${mockEntityData['active'] ? "checked" : ""}></input></div>
@@ -139,7 +139,7 @@ const renderProxydef = () => {
                         <div style="margin-right:4px"><button style="padding: 0" onclick="moveProxy(this)" id="moveproxy_up_btn_${i}"><span class="small-btn-wrapper">${SVGModule.getUpArrow(12, 12)}</span></button></div>
                         <div style="margin-right:4px"><button style="padding: 0" onclick="moveProxy(this)" id="moveproxy_down_btn_${i}"><span class="small-btn-wrapper">${SVGModule.getDownArrow(12, 12)}</span></button></div>
                         <div style="margin-right:4px"><button style="padding: 0" onclick="moveProxy(this)" id="moveproxy_last_btn_${i}"><span class="small-btn-wrapper">${SVGModule.getDownArrows(12, 12)}</span></button></div>
-                        <div style="margin-left:4px"><button onclick="removeProxy(this)" id="x_btn_${i}"><span style="margin-top:0;" class="small-btn-wrapper">${SVGModule.getX(12, 14)}</span></button></div>
+                        <div style="margin-left:4px"><button onclick="removeProxy(this)" id="x_btn_${i}"><span style="margin-top:0;" class="small-btn-wrapper">${SVGModule.getX(12, 12)}</span></button></div>
                     </div>
                 </div>
                 <div class="proxy-obj"><label for="active_proxy_${i}">active:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="active_proxy_${i}" id="active_proxy_${i}" ${proxyEntityData['active'] ? "checked" : ""}></input></div>    
@@ -189,9 +189,9 @@ const listPayloadFiles = async (evtSource) => {
     PayloadFromFileModule.setPayloadFiles(data['payloadFiles']);
 
     document.getElementById('payloadFiles').style.display = 'block';
-    document.getElementById('payloadFilesContent').innerHTML = `<br />${PayloadFromFileModule.getPayloadPath()}<hr /><br />`;
+    document.getElementById('payloadFilesPath').innerHTML = `<br />${PayloadFromFileModule.getPayloadPath()}<hr /><br />`;
 
-    let filesListHtml = '<div style="max-height: 215px; overflow:auto">';
+    let filesListHtml = '<div>';
     PayloadFromFileModule.getPayloadFiles().forEach((file) => {
         filesListHtml += `
             <div style="display:flex">
@@ -231,11 +231,8 @@ const editFile = async (btnEl, fullPath) => {
         console.warn("Received response could not be parsed as JSON");
     }
 
-    document.getElementsByClassName('editfile')[0].innerHTML = `
-        <span id="editfiletitle">${filename}</span>
-        &nbsp;&nbsp;
-        <button onclick="navigator.clipboard.writeText(\'${PayloadFromFileModule.getPayloadPath() + filename}\')">Copy full path</button>
-    `;
+    document.getElementById('editfiletitle').innerHTML = filename;
+    document.getElementById('editfilecopybtn').innerHTML = `<button onclick="navigator.clipboard.writeText(\'${PayloadFromFileModule.getPayloadPath() + filename}\')">Copy full path</button>`;
 
     document.getElementById('payloadedit').disabled = false;
 

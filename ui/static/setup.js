@@ -15,7 +15,7 @@ const toggleDarkMode = () => {
         darkModeLink = document.createElement('link');
         darkModeLink.id = 'darkModeStylesheet';
         darkModeLink.rel = 'stylesheet';
-        darkModeLink.href = '/ui/static/style_dark.css';
+        darkModeLink.href = '/ui/static/style/style_dark.css';
         document.head.appendChild(darkModeLink);
         localStorage.setItem('moxyDarkMode', 'true');
     }

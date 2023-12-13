@@ -91,17 +91,17 @@ func getInactiveStr(active bool) string {
 }
 
 func firstTimeSetup() {
-	err := ut.CopyFile("config_template.yml", "config.yml")
+	err := ut.CopyFile("templates/config_template.yml", "config.yml")
 	if err != nil {
 		fmt.Println("File copy failed:", err)
 	}
 
-	err = ut.CopyFile("mockdef_template.json", "mockdef.json")
+	err = ut.CopyFile("templates/mockdef_template.json", "mockdef.json")
 	if err != nil {
 		fmt.Println("File copy failed:", err)
 	}
 
-	err = ut.CopyFile("proxydef_template.json", "proxydef.json")
+	err = ut.CopyFile("templates/proxydef_template.json", "proxydef.json")
 	if err != nil {
 		fmt.Println("File copy failed:", err)
 	}
