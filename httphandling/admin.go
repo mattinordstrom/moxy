@@ -31,26 +31,54 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-var updateClient *websocket.Conn
+var currentConn *websocket.Conn
 
-func handleWebSocket(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+func handleWebSocket(writer http.ResponseWriter, request *http.Request) {
+	queryParams := request.URL.Query()
+	value := queryParams["id"]
+	log.Println("handleWebSocket: " + value[0])
+
+	if currentConn != nil {
+		currentConn.Close()
+		currentConn = nil
+	}
+
+	conn, err := upgrader.Upgrade(writer, request, nil)
 	if err != nil {
 		utils.LogError("WS connection error: ", err)
 
 		return
 	}
 
-	updateClient = conn
+	currentConn = conn
 
-	// Keep the connection alive, handle incoming messages or disconnection
+	defer func() {
+		// Close the connection and clear the reference when the handler exits
+		currentConn.Close()
+		currentConn = nil
+	}()
+
 	for {
-		if _, _, err := conn.ReadMessage(); err != nil {
-			conn.Close()
+		messageType, payload, err := currentConn.ReadMessage()
+		if err != nil {
+			utils.LogError("WebSocket read error: ", err)
 
-			updateClient = nil
+			return
+		}
 
-			break
+		if messageType == websocket.TextMessage || messageType == websocket.BinaryMessage {
+			message := string(payload)
+
+			if strings.HasPrefix(message, "ping_") {
+				// log.Println("test: " + message[strings.Index(message, "_")+1:])
+
+				err := currentConn.WriteMessage(websocket.TextMessage, []byte("pong"))
+				if err != nil {
+					utils.LogError("WebSocket write error: ", err)
+
+					return
+				}
+			}
 		}
 	}
 }
@@ -196,7 +224,7 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 }
 
 func updateAdminWithLatest(evtStr string, evtType string) {
-	if updateClient != nil {
+	if currentConn != nil {
 		msg := WebSocketMessage{
 			Type:    evtType,
 			Message: evtStr,
@@ -207,7 +235,7 @@ func updateAdminWithLatest(evtStr string, evtType string) {
 			utils.LogError("Error: json marshal websocket msg ", jErr)
 		}
 
-		err := updateClient.WriteMessage(websocket.TextMessage, jsonMsg)
+		err := currentConn.WriteMessage(websocket.TextMessage, jsonMsg)
 		if err != nil {
 			utils.LogError("Error: WriteMessage websocket ", err)
 		}

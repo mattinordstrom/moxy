@@ -91,8 +91,13 @@ const WSModule = (() => {
     let wSocket = null;
     let wsAttempts = 0;
 
-    const wsMaxAttempts = 3;
-    const wsReconnectDelay = 5000;
+    const wsMaxAttempts = 5;
+    //const wsReconnectDelay = 5000;
+
+    let reconnectTimeout = null;
+
+    let pingInterval = null;
+    let pingTimeout = null;
 
     const createWSocket = () => {
         if(wSocket !== null) {
@@ -104,9 +109,54 @@ const WSModule = (() => {
             wSocket.onopen = null;
 
             wSocket = null;
+
+            clearInterval(pingInterval);
+            clearTimeout(pingTimeout);
+
+            if(reconnectTimeout !== null) {
+                clearTimeout(reconnectTimeout);
+                reconnectTimeout = null;
+            }
         }
 
         wSocket = new WebSocket("ws://localhost:"+Number(location.port)+"/moxyws");
+        
+        pingInterval = setInterval(sendPing, 5000);
+    }
+
+    const sendPing = () => {
+        if (wSocket.readyState === WebSocket.OPEN) {
+          wSocket.send("ping");
+          
+          pingTimeout = setTimeout(() => {
+            //clearTimeout(reconnectTimeout);
+
+            console.log("No ping pong response (open socket)");
+            document.getElementById('header-ws').innerHTML = 'No ping response. UI opened in other tab? <span class="bullet bullet-red"></span>';
+            clearPingTimeout();
+          }, 3000);
+        } else if(wSocket.readyState === WebSocket.CLOSED) {
+            if (getWSAttempts() >= getWSMaxAttempts()) {
+                document.getElementById('header-ws').innerHTML = 'Closed <span class="bullet bullet-red"></span>';
+                clearInterval(pingInterval);
+                return;
+            }
+
+            setWSAttempts(getWSAttempts() + 1);
+            wsSetup();
+
+            console.log("No ping pong response (closed socket)");
+            document.getElementById('header-ws').innerHTML = 'Reconnecting... <span class="bullet bullet-red"></span>';
+
+        }
+    }
+
+    const clearPingTimeout = () => {
+        clearTimeout(pingTimeout);
+    }
+
+    const setReconnectTimeout = (rto) => {
+        reconnectTimeout = rto;
     }
 
     const getWSocket = () => wSocket;
@@ -121,7 +171,7 @@ const WSModule = (() => {
 
     const getWSReconnectDelay = () => wsReconnectDelay;
 
-    return { createWSocket, getWSocket, setWSAttempts, getWSAttempts, getWSMaxAttempts, getWSReconnectDelay };
+    return { createWSocket, getWSocket, setWSAttempts, getWSAttempts, getWSMaxAttempts, getWSReconnectDelay, clearPingTimeout, setReconnectTimeout };
 })();
 
 const SVGModule = (() => {
