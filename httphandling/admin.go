@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/mattinordstrom/moxy/config"
@@ -31,9 +33,16 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-var updateClient *websocket.Conn
+var (
+	currentWSConnection  *websocket.Conn
+	connMutex            sync.Mutex
+	closeMessageDeadLine = 5
+)
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+	connMutex.Lock()
+	defer connMutex.Unlock()
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		utils.LogError("WS connection error: ", err)
@@ -41,14 +50,14 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updateClient = conn
+	currentWSConnection = conn
 
 	// Keep the connection alive, handle incoming messages or disconnection
 	for {
 		if _, _, err := conn.ReadMessage(); err != nil {
 			conn.Close()
 
-			updateClient = nil
+			currentWSConnection = nil
 
 			break
 		}
@@ -135,6 +144,10 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 			utils.LogError("Error writing response: ", err)
 		}
 	case "/moxyadminui":
+		if currentWSConnection != nil {
+			closeConnectionWithMessage(currentWSConnection, "ws_takeover")
+		}
+
 		http.ServeFile(resWriter, req, "ui/index.html")
 	case "/moxyadminui/editpayloadfile":
 		if req.Method == http.MethodPost {
@@ -195,8 +208,23 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 	}
 }
 
+func closeConnectionWithMessage(conn *websocket.Conn, message string) {
+	msg := websocket.FormatCloseMessage(websocket.CloseNormalClosure, message)
+
+	deadline := time.Now().Add(time.Second * time.Duration(closeMessageDeadLine))
+	if err := conn.SetWriteDeadline(deadline); err != nil {
+		utils.LogError("Error SetWriteDeadline: ", err)
+	}
+
+	if err := conn.WriteMessage(websocket.CloseMessage, msg); err != nil {
+		utils.LogError("Error WriteMessage close msg: ", err)
+	}
+
+	conn.Close()
+}
+
 func updateAdminWithLatest(evtStr string, evtType string) {
-	if updateClient != nil {
+	if currentWSConnection != nil {
 		msg := WebSocketMessage{
 			Type:    evtType,
 			Message: evtStr,
@@ -207,7 +235,7 @@ func updateAdminWithLatest(evtStr string, evtType string) {
 			utils.LogError("Error: json marshal websocket msg ", jErr)
 		}
 
-		err := updateClient.WriteMessage(websocket.TextMessage, jsonMsg)
+		err := currentWSConnection.WriteMessage(websocket.TextMessage, jsonMsg)
 		if err != nil {
 			utils.LogError("Error: WriteMessage websocket ", err)
 		}

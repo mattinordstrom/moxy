@@ -21,9 +21,9 @@ var (
 )
 
 var (
-	ServerReadTimeout  = 10
-	ServerWriteTimeout = 10
-	ServerIdleTimeout  = 15
+	ServerReadTimeout  = 60
+	ServerWriteTimeout = 60
+	ServerIdleTimeout  = 45
 )
 
 var htmlBreak = "<br />"

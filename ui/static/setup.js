@@ -38,6 +38,7 @@ const clickEvtSetup = () => {
 const wsSetup = () => {
     WSModule.createWSocket();
     const wSocket = WSModule.getWSocket();
+    let tOut;
 
     wSocket.onmessage = (event) => {
         const evtJson = JSON.parse(event.data);
@@ -64,11 +65,17 @@ const wsSetup = () => {
     };
 
     wSocket.onclose = (event)  => {
-        console.log("WebSocket Close: " + event);
+        console.log("WebSocket Close: " + event.reason);
+        if(event.reason === 'ws_takeover') {
+            document.getElementById('header-ws').innerHTML = 'Taken over by other tab <span class="bullet bullet-red"></span>';
+            clearTimeout(tOut);
+            return;
+        }
+
         document.getElementById('header-ws').innerHTML = 'reconnecting... <span class="bullet bullet-red"></span>';
 
         if (WSModule.getWSAttempts() < WSModule.getWSMaxAttempts()) {
-            setTimeout(reconnectWebSocket, WSModule.getWSReconnectDelay());
+            tOut = setTimeout(reconnectWebSocket, WSModule.getWSReconnectDelay());
         } else {
             console.log("WebSocket reconnection failed after maximum attempts");
             document.getElementById('header-ws').innerHTML = 'closed <span class="bullet bullet-red"></span>';
