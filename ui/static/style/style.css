@@ -176,3 +176,13 @@ footer.expanded {
 footer .action-btn {
     margin-top: 20px;
 }
+
+#cover {
+    position: absolute;
+    z-index: 999999;
+    width: 97%;
+    height: 100%;
+    background-color: #a99c9c;
+    top: 158px;
+    padding: 20px;
+}

@@ -53,6 +53,7 @@ const wsSetup = () => {
     };
 
     wSocket.onopen = () => {
+        document.getElementById("cover").style.display = "none";
         console.log("WebSocket Connected");
         document.getElementById('header-ws').innerHTML = 'connected <span class="bullet"></span>';
 
@@ -75,6 +76,7 @@ const wsSetup = () => {
         document.getElementById('header-ws').innerHTML = 'reconnecting... <span class="bullet bullet-red"></span>';
 
         if (WSModule.getWSAttempts() < WSModule.getWSMaxAttempts()) {
+            document.getElementById("cover").style.display = "block";
             tOut = setTimeout(reconnectWebSocket, WSModule.getWSReconnectDelay());
         } else {
             console.log("WebSocket reconnection failed after maximum attempts");
