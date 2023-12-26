@@ -216,7 +216,7 @@ const editFile = async (btnEl, fullPath) => {
         document.getElementById('payloadedit').value = '';
         document.getElementById('editfiletitle').innerText = '---';
 
-        alert('Invalid file ' + filename);
+        //console.log('Invalid file ' + filename);
         return;
     }
 

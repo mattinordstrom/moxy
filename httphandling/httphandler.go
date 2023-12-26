@@ -59,7 +59,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 	reqURL := fmt.Sprint(req.URL)
 
 	if strings.HasPrefix(reqURL, "/moxyadminui") {
-		handleAdminReq(req, resWriter)
+		handleAdminReq(resWriter, req)
 
 		return
 	}

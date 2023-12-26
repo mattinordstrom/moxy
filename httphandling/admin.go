@@ -39,11 +39,15 @@ var (
 	closeMessageDeadLine = 5
 )
 
-func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+func handleWebSocket(resWriter http.ResponseWriter, req *http.Request) {
+	if currentWSConnection != nil {
+		closeConnectionWithMessage(currentWSConnection, "ws_takeover")
+	}
+
 	connMutex.Lock()
 	defer connMutex.Unlock()
 
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(resWriter, req, nil)
 	if err != nil {
 		utils.LogError("WS connection error: ", err)
 
@@ -64,7 +68,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
+func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 	reqURL := req.URL.Path
 
 	switch reqURL {
@@ -144,10 +148,6 @@ func handleAdminReq(req *http.Request, resWriter http.ResponseWriter) {
 			utils.LogError("Error writing response: ", err)
 		}
 	case "/moxyadminui":
-		if currentWSConnection != nil {
-			closeConnectionWithMessage(currentWSConnection, "ws_takeover")
-		}
-
 		http.ServeFile(resWriter, req, "ui/index.html")
 	case "/moxyadminui/editpayloadfile":
 		if req.Method == http.MethodPost {
