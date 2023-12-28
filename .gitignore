@@ -3,3 +3,4 @@ __debug_bin*
 config.yml
 mockdef.json
 proxydef.json
+node_modules
