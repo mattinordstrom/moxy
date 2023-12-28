@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "test": "node tests/*.test.js"
+  },  
+  "dependencies": {
+    "puppeteer": "^21.6.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

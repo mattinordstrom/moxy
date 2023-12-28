@@ -8,8 +8,15 @@ const initFunc = () => {
 
     darkModeSetup();
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+
     //websocket setup
-    wsSetup();
+    if (mode !== 'test') {
+        wsSetup();
+    } else {
+        document.getElementById("cover").style.display = "none";
+    }
 
     //click events setup
     clickEvtSetup();
