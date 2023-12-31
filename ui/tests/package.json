@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "node ./*.test.js"
+    "test": "for file in ./*.test.js; do node \"$file\"; done"
   },  
   "dependencies": {
     "puppeteer": "^21.6.1"

@@ -35,7 +35,7 @@ const handleHttpRequestsMock = (interceptedRequest) => {
           body: JSON.stringify([
               {
                 "active": true,
-                "comment": "test123",
+                "comment": "test123 mock",
                 "freezetimems": 0,
                 "method": "GET",
                 "payload": {
