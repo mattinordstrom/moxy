@@ -34,14 +34,50 @@ var upgrader = websocket.Upgrader{
 }
 
 var (
-	currentWSConnection  *websocket.Conn
+	currentWSConnection  *WebSocketConnection
 	connMutex            sync.Mutex
 	closeMessageDeadLine = 5
+	wsSendBuffer         = 1024
 )
+
+type WebSocketConnection struct {
+	Conn  *websocket.Conn
+	Send  chan []byte
+	mutex sync.Mutex
+}
+
+func NewWebSocketConnection(conn *websocket.Conn) *WebSocketConnection {
+	return &WebSocketConnection{
+		Conn: conn,
+		Send: make(chan []byte, wsSendBuffer),
+	}
+}
+
+func (wc *WebSocketConnection) enqueueMessage(message []byte) {
+	wc.Send <- message
+}
+
+func (wc *WebSocketConnection) writePump() {
+	for {
+		message, ok := <-wc.Send
+		if !ok {
+			// Channel closed, stop the goroutine
+			return
+		}
+
+		wc.mutex.Lock()
+		if err := wc.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			wc.mutex.Unlock()
+
+			break
+		}
+		wc.mutex.Unlock()
+	}
+}
 
 func handleWebSocket(resWriter http.ResponseWriter, req *http.Request) {
 	if currentWSConnection != nil {
-		closeConnectionWithMessage(currentWSConnection, "ws_takeover")
+		closeConnectionWithMessage(currentWSConnection.Conn, "ws_takeover")
 	}
 
 	connMutex.Lock()
@@ -54,18 +90,8 @@ func handleWebSocket(resWriter http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	currentWSConnection = conn
-
-	// Keep the connection alive, handle incoming messages or disconnection
-	for {
-		if _, _, err := conn.ReadMessage(); err != nil {
-			conn.Close()
-
-			currentWSConnection = nil
-
-			break
-		}
-	}
+	currentWSConnection = NewWebSocketConnection(conn)
+	go currentWSConnection.writePump()
 }
 
 func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
@@ -235,9 +261,6 @@ func updateAdminWithLatest(evtStr string, evtType string) {
 			utils.LogError("Error: json marshal websocket msg ", jErr)
 		}
 
-		err := currentWSConnection.WriteMessage(websocket.TextMessage, jsonMsg)
-		if err != nil {
-			utils.LogError("Error: WriteMessage websocket ", err)
-		}
+		currentWSConnection.enqueueMessage(jsonMsg)
 	}
 }
