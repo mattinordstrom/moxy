@@ -74,8 +74,8 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 	// Loop mockdef json obj
 	for _, mockEntity := range mockObjArr {
 		trimmedURL := strings.TrimRight(strings.TrimLeft(mockEntity.URLPart, "/"), "/")
-		isMatch := mockEntity.Active && (req.Method == mockEntity.Method)
-		isMatch = isMatch && strings.Contains(reqURL, trimmedURL)
+		isActiveAndMethodMatch := mockEntity.Active && (req.Method == mockEntity.Method)
+		isMatch := isActiveAndMethodMatch && strings.Contains(reqURL, trimmedURL)
 
 		if strings.Contains(trimmedURL, ".*") && !isMatch {
 			regex, err := regexp.Compile(trimmedURL)
@@ -85,7 +85,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			isMatch = mockEntity.Active && regex.MatchString(reqURL)
+			isMatch = isActiveAndMethodMatch && regex.MatchString(reqURL)
 		}
 
 		if isMatch {
@@ -162,7 +162,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 				return
 			}
 
-			isMatch = regex.MatchString(reqURL)
+			isMatch = proxyEntity.Active && regex.MatchString(reqURL)
 		}
 
 		if isMatch {

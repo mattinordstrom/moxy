@@ -27,7 +27,7 @@ const clickEvtSetup = () => {
     });
 
     document.getElementById('clear-log-button').addEventListener('click', () => {
-        document.getElementById('footer-log').innerHTML = "";
+        document.getElementById('footer-log').innerHTML = "------------<br/>";
     });
 
     document.getElementById('add-lines-button').addEventListener('click', () => {
