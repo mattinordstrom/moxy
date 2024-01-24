@@ -32,7 +32,7 @@ func TestProxyResponseFail(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	httphandling.ForwardClient = http.Client{
+	httphandling.ForwardClient = &http.Client{
 		Transport: &mockTransport{},
 	}
 

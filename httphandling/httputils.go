@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-var ForwardClient http.Client
+var ForwardClient *http.Client
 
 func createReqFromReq(req *http.Request, newURL string) *http.Request {
 	freq, reqerror := http.NewRequest(req.Method, newURL, req.Body)

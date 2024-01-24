@@ -1,6 +1,7 @@
 package httphandling
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -32,10 +33,15 @@ func CreateHTTPListener() {
 	// Start listening
 	fmt.Printf("Now listening on port %s...\n", strconv.Itoa(Port))
 
-	ForwardClient = http.Client{
+	transp := &http.Transport{
+		// #nosec G402
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	ForwardClient = &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
+		Transport: transp,
 	}
 
 	fs := http.FileServer(http.Dir("ui/static"))
