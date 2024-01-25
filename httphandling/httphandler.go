@@ -241,24 +241,16 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 
 	defer fresp.Body.Close()
 
-	// Check if it's a 302 redirect
-	if fresp.StatusCode == http.StatusFound {
-		resWriter.Header().Set("Location", fresp.Header.Get("Location"))
+	for key, values := range fresp.Header {
+		for _, value := range values {
+			resWriter.Header().Add(key, value)
+		}
 	}
 
-	body, ioerr := io.ReadAll(fresp.Body)
-	if ioerr != nil {
-		utils.LogError("", ioerr)
-		fmt.Fprintf(resWriter, "IO Error (Response body)")
-		updateAdminWithLatest("IO Error (Response body)", utils.EventTypeError)
-
-		return
-	}
-
-	resWriter.Header().Set("Content-Type", fresp.Header.Get("Content-Type"))
 	resWriter.WriteHeader(fresp.StatusCode)
 
-	if _, err := resWriter.Write(body); err != nil {
-		utils.LogError("Failed to write response: ", err)
+	if _, err := io.Copy(resWriter, fresp.Body); err != nil {
+		utils.LogError("Failed to copy response body: ", err)
+		updateAdminWithLatest("Failed to copy response body", utils.EventTypeError)
 	}
 }
