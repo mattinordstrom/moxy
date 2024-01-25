@@ -13,7 +13,10 @@ func createReqFromReq(req *http.Request, newURL string) *http.Request {
 		log.Fatalln(reqerror)
 	}
 
-	freq.Header = req.Header
+	freq.Header = make(http.Header)
+	for k, v := range req.Header {
+		freq.Header[k] = v
+	}
 
 	// DisableCompression, if true, prevents the Transport from
 	// requesting compression with an "Accept-Encoding: gzip"
