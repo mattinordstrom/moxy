@@ -3,6 +3,6 @@
     "test": "for file in ./*.test.js; do node \"$file\"; done"
   },  
   "dependencies": {
-    "puppeteer": "^21.6.1"
+    "puppeteer": "22.6.2"
   }
 }
