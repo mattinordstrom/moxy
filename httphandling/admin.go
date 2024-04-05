@@ -54,7 +54,13 @@ func NewWebSocketConnection(conn *websocket.Conn) *WebSocketConnection {
 }
 
 func (wc *WebSocketConnection) enqueueMessage(message []byte) {
-	wc.Send <- message
+	if len(wc.Send) < cap(wc.Send) {
+		wc.Send <- message
+
+		return
+	}
+
+	log.Println("Send channel is full, dropping message")
 }
 
 func (wc *WebSocketConnection) writePump() {
