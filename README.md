@@ -76,8 +76,9 @@ $ golangci-lint run -v
   
 ### Precommit hook installation:  
 ```sh
-$ pip3 install pre-commit
+$ pipx install pre-commit
 $ pre-commit install
+$ cd ui/tests && npm i
 ```  
   
   

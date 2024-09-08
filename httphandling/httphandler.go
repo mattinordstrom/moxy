@@ -38,7 +38,7 @@ func CreateHTTPListener() {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	ForwardClient = &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
 		Transport: transp,
@@ -233,7 +233,8 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 	fresp, resperr := ForwardClient.Do(freq)
 	if resperr != nil {
 		utils.LogError("", resperr)
-		fmt.Fprintf(resWriter, "Error: No response from "+newURL)
+		fmt.Fprintf(resWriter, "Error: No response from %s", newURL)
+
 		updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError)
 
 		return
