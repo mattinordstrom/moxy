@@ -77,7 +77,7 @@ const renderMockdef = () => {
                 <div class="proxymock-entity">
                     ${(i+1)} 
                     <div style="display:flex">
-                        <div><input onchange="updateMockdef(this)" class="comment-input" type="text" spellcheck="false" name="comment_mock_${i}" id="comment_mock_${i}" value="${mockEntityData['comment'] || ""}"></input></div>
+                        <div><input placeholder="comment here" onchange="updateMockdef(this)" class="comment-input" type="text" spellcheck="false" name="comment_mock_${i}" id="comment_mock_${i}" value="${mockEntityData['comment'] || ""}"></input></div>
                         <div><button class="small-btn" onclick="moveMock(this)" id="movemock_first_btn_${i}">${SVGModule.getUpArrows(12, 12)}</button></div>
                         <div><button class="small-btn" onclick="moveMock(this)" id="movemock_up_btn_${i}">${SVGModule.getUpArrow(12, 12)}</button></div>
                         <div><button class="small-btn" onclick="moveMock(this)" id="movemock_down_btn_${i}">${SVGModule.getDownArrow(12, 12)}</button></div>
@@ -104,7 +104,7 @@ const renderMockdef = () => {
         mockEntity += `
                 <div class="mock-obj">
                     <label for="payload_${i}">payload:</label>
-                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="8" cols="32" name="payload_${i}" id="payload_${i}">${payload}</textarea>
+                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="14" cols="55" name="payload_${i}" id="payload_${i}">${payload}</textarea>
                 </div>`;
 
         mockEntity += `
@@ -116,7 +116,7 @@ const renderMockdef = () => {
                         ${SVGModule.getPen(12, 12)}
                         </button>
                     </label>
-                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="32" class="fixed-textarea" name="payloadFromFile_${i}" id="payloadFromFile_${i}">${mockEntityData['payloadFromFile']}</textarea>
+                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="45" class="fixed-textarea" name="payloadFromFile_${i}" id="payloadFromFile_${i}">${mockEntityData['payloadFromFile']}</textarea>
                 </div>`;
 
         mockEntity += `
@@ -141,7 +141,7 @@ const renderProxydef = () => {
                 <div class="proxymock-entity">
                     ${(i+1)} 
                     <div style="display:flex">
-                        <div><input onchange="updateProxydef(this)" class="comment-input" type="text" spellcheck="false" name="comment_proxy_${i}" id="comment_proxy_${i}" value="${proxyEntityData['comment'] || ""}"></input></div>
+                        <div><input placeholder="comment here" onchange="updateProxydef(this)" class="comment-input" type="text" spellcheck="false" name="comment_proxy_${i}" id="comment_proxy_${i}" value="${proxyEntityData['comment'] || ""}"></input></div>
                         <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_first_btn_${i}">${SVGModule.getUpArrows(12, 12)}</button></div>
                         <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_up_btn_${i}">${SVGModule.getUpArrow(12, 12)}</button></div>
                         <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_down_btn_${i}">${SVGModule.getDownArrow(12, 12)}</button></div>
@@ -280,7 +280,7 @@ const addMock = () => {
         "urlpart": "/api/whatever/someendpoint"
     };
 
-    MockDefModule.set([...MockDefModule.get(), mock]);
+    MockDefModule.set([mock, ...MockDefModule.get()]);
 
     resetAndSync("mock");
 }
@@ -293,7 +293,7 @@ const addProxy = () => {
         "verbose": false
     };
 
-    ProxyDefModule.set([...ProxyDefModule.get(), proxy]);
+    ProxyDefModule.set([proxy, ...ProxyDefModule.get()]);
 
     resetAndSync("proxy");
 }

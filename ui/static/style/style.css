@@ -119,6 +119,7 @@ footer.expanded {
 }
 
 .proxymock-content {
+    width: 75%;
     display: flex;
     flex-direction: column;
     background-color: #ccc;
