@@ -12,6 +12,7 @@ header {
     padding: 10px;
     padding-left: 20px;
     text-align: left;
+    padding: 8px;
 }
 
 button {
@@ -30,7 +31,7 @@ button:hover {
     color: #666666;
     display: flex;
     justify-content: space-between;
-    margin-top: 32px;
+    margin-top: 12px;
 }
 
 .container {
