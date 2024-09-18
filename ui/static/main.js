@@ -75,7 +75,6 @@ const renderMockdef = () => {
         let mockEntity = `
             <div class="proxymock-content">
                 <div class="proxymock-entity">
-                    ${(i+1)} 
                     <div style="display:flex">
                         <div><input placeholder="comment here" onchange="updateMockdef(this)" class="comment-input" type="text" spellcheck="false" name="comment_mock_${i}" id="comment_mock_${i}" value="${mockEntityData['comment'] || ""}"></input></div>
                         <div><button class="small-btn" onclick="moveMock(this)" id="movemock_first_btn_${i}">${SVGModule.getUpArrows(12, 12)}</button></div>
@@ -104,7 +103,7 @@ const renderMockdef = () => {
         mockEntity += `
                 <div class="mock-obj">
                     <label for="payload_${i}">payload:</label>
-                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="14" cols="55" name="payload_${i}" id="payload_${i}">${payload}</textarea>
+                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="20" cols="60" name="payload_${i}" id="payload_${i}">${payload}</textarea>
                 </div>`;
 
         mockEntity += `
@@ -139,7 +138,6 @@ const renderProxydef = () => {
         let proxyEntity = `
             <div class="proxymock-content">
                 <div class="proxymock-entity">
-                    ${(i+1)} 
                     <div style="display:flex">
                         <div><input placeholder="comment here" onchange="updateProxydef(this)" class="comment-input" type="text" spellcheck="false" name="comment_proxy_${i}" id="comment_proxy_${i}" value="${proxyEntityData['comment'] || ""}"></input></div>
                         <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_first_btn_${i}">${SVGModule.getUpArrows(12, 12)}</button></div>

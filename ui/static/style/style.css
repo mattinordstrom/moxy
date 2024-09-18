@@ -133,7 +133,7 @@ footer.expanded {
 .proxymock-entity {
     color:#999999; 
     display: flex; 
-    justify-content: space-between;
+    justify-content: flex-end;
 }
 
 .proxy-obj, .mock-obj {
