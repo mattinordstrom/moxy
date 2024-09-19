@@ -1,8 +1,9 @@
 {
   "scripts": {
-    "test": "for file in ./*.test.js; do node \"$file\"; done"
-  },  
-  "dependencies": {
+    "test": "mocha --exit './uitests/*.test.js'"
+  },
+  "devDependencies": {
+    "mocha": "10.7.3",
     "puppeteer": "23.1.0"
   }
 }

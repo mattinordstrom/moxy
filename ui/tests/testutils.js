@@ -92,10 +92,8 @@ const setupRequestHandling = async (page) => {
 }
 
 const setupPreConditions = async () => {
-    console.log("########################");
-
-    //const browser = await puppeteer.launch({headless: false});
-    const browser = await puppeteer.launch({headless: "new"});
+    //const browser = await puppeteer.launch({headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    const browser = await puppeteer.launch({headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox']});
 
     const page = await browser.newPage();
     setupRequestHandling(page);
@@ -108,17 +106,6 @@ const setupPreConditions = async () => {
     return {page, browser};
 }
 
-const assertCondition = async (condition, testfile, scenario, browser) => {
-    if (condition) {
-        console.log('Test passed! ' + testfile + ": " + scenario + '\n');
-    } else {
-        const failedMsg = 'Test failed! ' + testfile + ": " + scenario;
-        console.log(failedMsg + '\n');
-        throw new Error(failedMsg);
-    }
 
-    await browser.close();
-}
-
-module.exports = { setupPreConditions, assertCondition };
+module.exports = { setupPreConditions };
   
