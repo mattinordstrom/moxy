@@ -57,7 +57,7 @@ _______________________
 ## For developers:
 ### Run tests:  
 ```sh
-$ go test ./... -v | sed -e 's/PASS/\x1b[32m&\x1b[0m/' -e 's/FAIL/\x1b[31m&\x1b[0m/'
+$ go test ./... -v
 ```  
   
 ### Run UI tests:  
