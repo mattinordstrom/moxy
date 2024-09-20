@@ -28,7 +28,7 @@ const fetchMockDef = async () => {
         const data = await response.json();
         
         MockDefModule.set(MockDefModule.stringifyPayload(data));
-        renderMockdef(data);
+        renderMockdefs(data);
     } catch (error) {
         console.error('Fetch error mockdef:', error);
     }
@@ -40,7 +40,7 @@ const fetchProxyDef = async () => {
         const data = await response.json();
         
         ProxyDefModule.set(data);
-        renderProxydef(data);
+        renderProxydefs(data);
     } catch (error) {
         console.error('Fetch error proxydef:', error);
     }
@@ -70,7 +70,7 @@ const fetchSettings = async () => {
     }
 }
 
-const renderMockdef = () => {
+const renderMockdefs = () => {
     MockDefModule.get().forEach((mockEntityData, i) => {
         let mockEntity = `
             <div class="proxymock-content">
@@ -133,7 +133,7 @@ const renderMockdef = () => {
     });
 }
 
-const renderProxydef = () => {
+const renderProxydefs = () => {
     ProxyDefModule.get().forEach((proxyEntityData, i) => {
         let proxyEntity = `
             <div class="proxymock-content">
@@ -160,6 +160,21 @@ const renderProxydef = () => {
 const maximizeMock = (index) => {
     document.getElementById('payload_'+index).style.height = '470px';
     document.getElementById('payload_'+index).style.width = '680px';
+}
+
+const showCompactList = () => {
+    if(document.getElementsByClassName('proxymock-content-container')[0].firstChild.id === 'compactlist') {
+        document.getElementById('mock-content-container').innerHTML = "";
+        renderMockdefs();
+        return;
+    }
+
+    let compactlist = '';
+    MockDefModule.get().forEach((mockEntityData, i) => {
+        compactlist += `<div><strong>[${mockEntityData['active'] ? 'V' : 'X'}]</strong> ${mockEntityData['method']} ${mockEntityData['urlpart']}</div><br /><br />`;
+    });
+
+    document.getElementsByClassName('proxymock-content-container')[0].innerHTML = `<div id="compactlist" style="background-color:#b1b1b1; padding:18px">${compactlist}</div>`;
 }
 
 const showOnlyMocks = () => {
@@ -440,13 +455,13 @@ const moveEntity = (evt, arr) => {
 const resetAndSync = (type) => {
     if(type === "mock") {
         document.getElementById('mock-content-container').innerHTML = "";
-        renderMockdef();
+        renderMockdefs();
         updateMockdef();
 
         return;
     }
 
     document.getElementById('proxy-content-container').innerHTML = "";
-    renderProxydef();
+    renderProxydefs();
     updateProxydef();
 }
