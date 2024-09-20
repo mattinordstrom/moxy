@@ -176,6 +176,14 @@ footer.expanded {
     margin-right: 3px;
 }
 
+#compactlist {
+    width: 75%;
+    background-color: #e1e0e0;
+    padding: 18px;
+    margin-top: 50px;
+    font-size: 14px;
+}
+
 footer .action-btn {
     margin-top: 20px;
 }

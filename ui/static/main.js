@@ -171,10 +171,10 @@ const showCompactList = () => {
 
     let compactlist = '';
     MockDefModule.get().forEach((mockEntityData, i) => {
-        compactlist += `<div><strong>[${mockEntityData['active'] ? 'V' : 'X'}]</strong> ${mockEntityData['method']} ${mockEntityData['urlpart']}</div><br /><br />`;
+        compactlist += `<div><strong>[${mockEntityData['active'] ? '<span class="square"></span>' : ' '}]</strong> ${mockEntityData['method']} ${mockEntityData['urlpart']}</div><br /><br />`;
     });
 
-    document.getElementsByClassName('proxymock-content-container')[0].innerHTML = `<div id="compactlist" style="background-color:#b1b1b1; padding:18px">${compactlist}</div>`;
+    document.getElementsByClassName('proxymock-content-container')[0].innerHTML = `<div id="compactlist">${compactlist}</div>`;
 }
 
 const showOnlyMocks = () => {
