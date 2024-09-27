@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "test": "mocha --exit './uitests/*.test.js'"
+    "test": "TEST_HEADLESS=true mocha --exit './uitests/*.test.js'",
+    "test-chrome": "TEST_HEADLESS=false mocha --exit './uitests/*.test.js'"
   },
   "devDependencies": {
     "mocha": "10.7.3",

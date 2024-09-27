@@ -92,8 +92,11 @@ const setupRequestHandling = async (page) => {
 }
 
 const setupPreConditions = async () => {
-    //const browser = await puppeteer.launch({headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox']});
-    const browser = await puppeteer.launch({headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    const headless = process.env.TEST_HEADLESS === 'true' ? 'new' : false;
+    const browser = await puppeteer.launch({
+        headless: headless, 
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
 
     const page = await browser.newPage();
     setupRequestHandling(page);
