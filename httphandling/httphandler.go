@@ -113,7 +113,9 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, string(jsonPayload)), utils.EventTypeMock, map[string]interface{}{})
+				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, string(jsonPayload)),
+					utils.EventTypeMock, map[string]interface{}{})
+
 				fmt.Println(utils.GetMockEventString(mockEntity, true, string(jsonPayload)))
 			} else {
 				// Payload is a json from separate file
@@ -134,7 +136,9 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, payloadPath), utils.EventTypeMock, map[string]interface{}{})
+				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, payloadPath),
+					utils.EventTypeMock, map[string]interface{}{})
+
 				fmt.Println(utils.GetMockEventString(mockEntity, true, payloadPath))
 			}
 
