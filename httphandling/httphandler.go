@@ -113,7 +113,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, string(jsonPayload)), utils.EventTypeMock)
+				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, string(jsonPayload)), utils.EventTypeMock, map[string]interface{}{})
 				fmt.Println(utils.GetMockEventString(mockEntity, true, string(jsonPayload)))
 			} else {
 				// Payload is a json from separate file
@@ -122,7 +122,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 				payloadFromFile, err := utils.GetJSONPayloadFromAbsolutePath(payloadPath)
 				if err != nil {
 					utils.LogError("Error: ", err)
-					updateAdminWithLatest(err.Error(), utils.EventTypeError)
+					updateAdminWithLatest(err.Error(), utils.EventTypeError, map[string]interface{}{})
 
 					return
 				}
@@ -134,7 +134,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, payloadPath), utils.EventTypeMock)
+				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, payloadPath), utils.EventTypeMock, map[string]interface{}{})
 				fmt.Println(utils.GetMockEventString(mockEntity, true, payloadPath))
 			}
 
@@ -174,7 +174,8 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 				// headers
 				var sBuilder strings.Builder
 				for name, values := range req.Header {
-					sBuilder.WriteString(fmt.Sprintf("%s: %s, ", name, strings.Join(values, ", ")))
+					hValues := strings.Join(values, ", ")
+					sBuilder.WriteString(fmt.Sprintf("%s: %s | ", name, hValues))
 				}
 
 				headerString := sBuilder.String()
@@ -192,25 +193,19 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 					return
 				}
 
-				if bodyStr := string(bodyBytes); bodyStr != "" {
-					fmt.Println(bodyStr)
+				bodyStr := string(bodyBytes)
+				fmt.Println(bodyStr)
 
-					updateAdminWithLatest(htmlBreak+
-						req.Method+" "+reqURL+utils.RightArrow+newURL+
-						htmlBreak+headerString+
-						htmlBreak+bodyStr+htmlBreak, utils.EventTypeProxy)
-				} else {
-					updateAdminWithLatest(htmlBreak+
-						req.Method+" "+reqURL+utils.RightArrow+newURL+
-						htmlBreak+headerString+htmlBreak, utils.EventTypeProxy)
-				}
+				extras := map[string]interface{}{"body": bodyStr, "headers": headerString, "httpMethod": req.Method}
+
+				updateAdminWithLatest(reqURL+utils.RightArrow+newURL+htmlBreak, utils.EventTypeProxy, extras)
 
 				// Restore the body for further processing
 				req.Body = io.NopCloser(strings.NewReader(string(bodyBytes)))
 
 				fmt.Println(" ")
 			} else {
-				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy)
+				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy, map[string]interface{}{})
 				fmt.Println(utils.GetProxyEventString(reqURL, proxyEntity.Target, "", false))
 			}
 
@@ -220,7 +215,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 
 	if newURL == "" {
 		newURL = DefaultRoute + reqURL
-		updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy)
+		updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy, map[string]interface{}{})
 		fmt.Println(utils.GetProxyEventString(reqURL, DefaultRoute, "", true))
 	}
 
@@ -235,7 +230,7 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 		utils.LogError("", resperr)
 		fmt.Fprintf(resWriter, "Error: No response from %s", newURL)
 
-		updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError)
+		updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError, map[string]interface{}{})
 
 		return
 	}
@@ -252,6 +247,6 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 
 	if _, err := io.Copy(resWriter, fresp.Body); err != nil {
 		utils.LogError("Failed to copy response body: ", err)
-		updateAdminWithLatest("Failed to copy response body", utils.EventTypeError)
+		updateAdminWithLatest("Failed to copy response body", utils.EventTypeError, map[string]interface{}{})
 	}
 }

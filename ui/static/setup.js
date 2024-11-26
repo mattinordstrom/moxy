@@ -42,9 +42,18 @@ const wsSetup = () => {
 
     wSocket.onmessage = (event) => {
         const evtJson = JSON.parse(event.data);
-        let logMsg = '<span class="square"></span> ' + evtJson.message + '<br />';
-        if(evtJson.type === 'mock') {
-            logMsg = '<span class="square square-purple"></span> ' + evtJson.message + '<br />';
+        let logMsg = '';
+        if(evtJson.type === 'mock' || evtJson.type === 'proxy') {
+            let output = evtJson.message;
+            if(evtJson.type === 'mock') {
+                logMsg = '<span class="square square-purple"></span> ' + output + '<br />';
+            } else {
+                if(evtJson.extras && evtJson.extras.httpMethod !== "") {
+                    output = "<br/>"+evtJson.extras.httpMethod + " " + evtJson.message +
+                        "<i>"+evtJson.extras.headers+"</i><br/>"+evtJson.extras.body+"<br/>";
+                }
+                logMsg = '<span class="square"></span> ' + output + '<br />'; 
+            }
         } else if(evtJson.type === 'error') {
             logMsg = '<span class="square square-red"></span> ' + evtJson.message + '<br />';
         }
