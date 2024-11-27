@@ -3,8 +3,10 @@ const initFunc = () => {
     fetchProxyDef();
     fetchSettings();
 
+    // TODO make this better
     document.getElementById("close-list-payloadfiles").innerHTML = SVGModule.getX(17, 17);
     document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + ' Toggle fullscreen log ' + SVGModule.getUpArrow(12, 12);
+    document.getElementById("close-curl-dialog").innerHTML = SVGModule.getX(17, 17);
 
     darkModeSetup();
 

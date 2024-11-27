@@ -190,9 +190,22 @@ footer .action-btn {
 
 #cover {
     position: absolute;
-    z-index: 999999;
+    z-index: 999998;
     width: 97%;
     height: 100%;
     background-color: #a99c9c;
+    padding: 20px;
+}
+
+#curl-dialog {
+    position: absolute;
+    overflow: scroll;
+    border: 5px solid #000000;
+    z-index: 999999;
+    width: 650px;
+    height: 500px;
+    left: 150px;
+    top: 250px;
+    background-color: #9ec5aa;
     padding: 20px;
 }

@@ -35,6 +35,53 @@ const clickEvtSetup = () => {
     });
 }
 
+const getCurlString = (evtJson, consolelog) => {
+    const NEWLINE = consolelog ? "\n" : "<br/>";
+    /*
+    const curlString = 
+        "curl --request PUT --location 'localhost:9097/api/test' \\"  + NEWLINE +
+        "--header 'content-type: application/json' \\"  + NEWLINE +
+        "--data '{"  + NEWLINE +
+        "    \"matti123\": 5555666777" + NEWLINE +
+        "}'";
+    */
+
+    const targetUrl = evtJson.message.substring(evtJson.message.lastIndexOf(' http') + 1)
+    let curlString = "curl --request " + evtJson.extras.httpMethod + " --location '" + targetUrl + "' \\" + NEWLINE;
+
+    let headers = evtJson.extras.headers.split(" | ");
+    for(let i = 0; i < headers.length; i++) {
+        if(!consolelog) {
+            if(headers[i].toLowerCase().startsWith("content-length") || headers[i].toLowerCase().startsWith("accept-encoding")) {
+                continue;
+            }
+        }
+
+        curlString += "--header '" + headers[i] + "' \\" + NEWLINE;
+    }
+
+    curlString += "--data '" + evtJson.extras.body.replace(/'/g, "'\\''") + "'";
+
+    if(!consolelog) {
+        curlString += "<br/><br/><hr/><b>Some headers might not be included in the curl command above. See console for all</b>";
+    }
+
+    return curlString;
+}
+
+const showCurl = (el, evtData) => {
+    const evtJson = JSON.parse(decodeURIComponent(evtData));
+    document.getElementById("curl-dialog").style.display = "block";
+
+    console.log(getCurlString(evtJson, true));
+
+    document.getElementById("curl-dialog-content").innerHTML = getCurlString(evtJson, false);
+}
+
+const closeCurlDialog = () => {
+    document.getElementById("curl-dialog").style.display = "none";
+}
+
 const wsSetup = () => {
     WSModule.createWSocket();
     const wSocket = WSModule.getWSocket();
@@ -50,9 +97,13 @@ const wsSetup = () => {
             } else {
                 if(evtJson.extras && evtJson.extras.httpMethod !== "") {
                     output = "<br/>"+evtJson.extras.httpMethod + " " + evtJson.message +
-                        "<i>"+evtJson.extras.headers+"</i><br/>"+evtJson.extras.body+"<br/>";
+                        "<br/><i>"+evtJson.extras.headers+"</i><br/>"+evtJson.extras.body+"<br/>";
+
+                        const dataString = encodeURIComponent(event.data).replace(/'/g, '%27');
+                    logMsg = `<span style="cursor:pointer" class="square" onclick="showCurl(this, '${dataString}')"></span> ${output}<br />`;
+                } else {
+                    logMsg = '<span class="square"></span> ' + output + '<br />'; 
                 }
-                logMsg = '<span class="square"></span> ' + output + '<br />'; 
             }
         } else if(evtJson.type === 'error') {
             logMsg = '<span class="square square-red"></span> ' + evtJson.message + '<br />';

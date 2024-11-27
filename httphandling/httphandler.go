@@ -27,8 +27,6 @@ var (
 	ServerIdleTimeout  = 45
 )
 
-var htmlBreak = "<br />"
-
 func CreateHTTPListener() {
 	// Start listening
 	fmt.Printf("Now listening on port %s...\n", strconv.Itoa(Port))
@@ -202,7 +200,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 
 				extras := map[string]interface{}{"body": bodyStr, "headers": headerString, "httpMethod": req.Method}
 
-				updateAdminWithLatest(reqURL+utils.RightArrow+newURL+htmlBreak, utils.EventTypeProxy, extras)
+				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy, extras)
 
 				// Restore the body for further processing
 				req.Body = io.NopCloser(strings.NewReader(string(bodyBytes)))
