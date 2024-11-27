@@ -198,7 +198,7 @@ footer .action-btn {
 }
 
 #curl-dialog {
-    position: absolute;
+    position: fixed;
     overflow: scroll;
     border: 5px solid #000000;
     z-index: 999999;
