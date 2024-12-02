@@ -15,9 +15,9 @@ import (
 var bullet = "\u2022"
 
 func main() {
-	pFlag := flag.Int("p", hh.Port, "specify port to run on")
-	lFlag := flag.Bool("l", false, "list redirects without starting server")
-	sFlag := flag.Bool("s", false, "WIP! run on https")
+	pFlag := flag.Int("p", hh.Port, "Specify port to run on")
+	lFlag := flag.Bool("l", false, "List redirects without starting server")
+	sFlag := flag.Bool("s", false, "Run on https")
 
 	flag.Parse()
 

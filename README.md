@@ -18,8 +18,8 @@ alias moxy="cd /home/matti/projects/moxy && go run main.go"
 #### Edit config
 First time starting moxy a config.yml file will be created
 <br>
-
-
+  
+  
 ## Run:  
 #### Run (on default port 9097)  
 ```sh
@@ -30,15 +30,21 @@ $ moxy
 #### Run on another port    
 ```sh
 $ moxy -p 9098
-```
-<br>
+```  
   
-  
+    
+#### See help    
+```sh
+$ moxy -h
+```  
+<br>  
+    
+    
 ## Admin UI:
 Go to http://localhost:9097/moxyadminui
+<br>  
   
-
-  
+    
 ## Quick notes:
 - Json files will be read for every request (cached 2 sec), so no need to restart moxy after change in json file
 - Mocks will always go before proxies.  
@@ -52,7 +58,7 @@ Go to http://localhost:9097/moxyadminui
   
 <br>  
 <br>
-_______________________
+______________________________________________
 <br>  
 <br>
 
