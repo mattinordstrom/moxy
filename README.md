@@ -47,6 +47,8 @@ Go to http://localhost:9097/moxyadminui
 - URLs will be matched "if contains", so the order and precision in the json urlpart is important
 - If payload and payloadFromFile are both defined payload will be used
 - .* can be used in urlpart in mocks and proxies
+- Want to run on https? Check out the README in the https directory
+- Want to copy a request as curl? Click on the small square in the log next to the request (Note that Verbose must be checked)
   
 <br>  
 <br>
