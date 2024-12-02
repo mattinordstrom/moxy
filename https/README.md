@@ -1,6 +1,6 @@
 # moxy https
 
-To run moxy on https:
+## Run moxy on https:
 
 ```sh  
 cd moxy/https
@@ -14,4 +14,15 @@ sudo update-ca-certificates
 
 ```sh  
 moxy -p 9097 -s
+```
+
+## Making requests
+Request from python:
+```sh 
+requests.get("https://localhost:9097/api/test", verify=False)
+```
+
+Request from java:
+```sh 
+keytool -importcert -file moxyserver.crt -keystore $JAVA_HOME/lib/security/cacerts -alias my-proxy-cert
 ```
