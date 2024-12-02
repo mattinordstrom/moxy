@@ -17,6 +17,7 @@ var bullet = "\u2022"
 func main() {
 	pFlag := flag.Int("p", hh.Port, "specify port to run on")
 	lFlag := flag.Bool("l", false, "list redirects without starting server")
+	sFlag := flag.Bool("s", false, "WIP! run on https")
 
 	flag.Parse()
 
@@ -31,19 +32,24 @@ func main() {
 
 	hh.DefaultRoute = config.AppConfig.Defaults.DefaultRoute
 
+	protocol := "http"
+	if *sFlag {
+		protocol = "https"
+	}
+
 	fmt.Println(ut.ColorBold + "::::::::::::::: MOXY :::::::::::::::" + ut.ColorReset)
 	fmt.Println(ut.ColorGray + "mocking and proxying requests on localhost" + ut.ColorReset)
 	fmt.Println(" ")
-	fmt.Println(bullet + " Run on:        http://localhost:" + strconv.Itoa(hh.Port))
+	fmt.Println(bullet + " Run on:        " + protocol + "://localhost:" + strconv.Itoa(hh.Port))
 	fmt.Println(bullet + " Default route: " + hh.DefaultRoute)
-	fmt.Println(bullet + " Admin UI:      http://localhost:" + strconv.Itoa(hh.Port) + "/moxyadminui")
+	fmt.Println(bullet + " Admin UI:      " + protocol + "://localhost:" + strconv.Itoa(hh.Port) + "/moxyadminui")
 	fmt.Println(" ")
 	fmt.Println(" ")
 
 	PrintInitSetup()
 
 	if !*lFlag {
-		hh.CreateHTTPListener()
+		hh.CreateHTTPListener(*sFlag)
 	}
 }
 

@@ -4,3 +4,5 @@ config.yml
 mockdef.json
 proxydef.json
 node_modules
+https/moxyserver.crt
+https/moxyserver.key

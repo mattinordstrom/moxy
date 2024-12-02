@@ -27,7 +27,7 @@ var (
 	ServerIdleTimeout  = 45
 )
 
-func CreateHTTPListener() {
+func CreateHTTPListener(sFlag bool) {
 	// Start listening
 	fmt.Printf("Now listening on port %s...\n", strconv.Itoa(Port))
 
@@ -54,7 +54,15 @@ func CreateHTTPListener() {
 		IdleTimeout:  time.Duration(ServerIdleTimeout) * time.Second,
 	}
 
-	log.Fatal(server.ListenAndServe())
+	if sFlag {
+		if err := server.ListenAndServeTLS("https/moxyserver.crt", "https/moxyserver.key"); err != nil {
+			log.Fatalf("Failed to start HTTPS server: %v", err)
+		}
+	} else {
+		if err := server.ListenAndServe(); err != nil {
+			log.Fatalf("Failed to start HTTP server: %v", err)
+		}
+	}
 }
 
 func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
