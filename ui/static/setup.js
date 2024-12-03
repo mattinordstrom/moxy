@@ -63,7 +63,7 @@ const getCurlString = (evtJson, consolelog) => {
     curlString += "--data '" + evtJson.extras.body.replace(/'/g, "'\\''") + "'";
 
     if(!consolelog) {
-        curlString += "<br/><br/><hr/><b>Some headers might not be included in the curl command above. See console for all</b>";
+        curlString += "<br/><br/><hr/><b>Some headers might not be included in the curl command above. See console for all</b><br/><br/>";
     }
 
     return curlString;
@@ -71,7 +71,7 @@ const getCurlString = (evtJson, consolelog) => {
 
 const showCurl = (el, evtData) => {
     const evtJson = JSON.parse(decodeURIComponent(evtData));
-    document.getElementById("curl-dialog").style.display = "block";
+    document.getElementById("curl-dialog").style.display = "flex";
 
     console.log(getCurlString(evtJson, true));
 

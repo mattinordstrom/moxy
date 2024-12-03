@@ -199,13 +199,14 @@ footer .action-btn {
 
 #curl-dialog {
     position: fixed;
-    overflow: scroll;
+    display: flex;
+    flex-direction: column;
     border: 5px solid #000000;
     z-index: 999999;
-    width: 650px;
-    height: 500px;
-    left: 150px;
-    top: 250px;
+    width: 70%;
+    height: 60%;
+    left: 10%;
+    top: 20%;
     background-color: #9ec5aa;
     padding: 20px;
 }
