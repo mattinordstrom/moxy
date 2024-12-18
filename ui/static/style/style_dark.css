@@ -1,5 +1,5 @@
 body, html {
-    background-color: #666666;
+    background-color: #312b2b;
 }
 
 footer {
@@ -13,6 +13,10 @@ h2, h3, h4, h5 {
 
 header {
     background-color: #1a1a1a;
+}
+
+.page-title {
+    color: #67d76c;
 }
 
 .header-info {

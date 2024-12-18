@@ -1,35 +1,27 @@
 input, select, textarea {
     border: 1px solid #ccc;
-    border-radius: 2px;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
     background-color: #fff;
 }
 
 input:focus, select:focus, textarea:focus {
-    border-color: #66afe9;
+    border-color: #67d76c;
     outline: none;
 }
 
 input[type="checkbox"] {
-    -webkit-appearance: none;
-    appearance: none;
     cursor: pointer;
     width: 18px;
     height: 18px;
 }
 
 input[type="checkbox"]:before {
-    content: "";
-    display: inline-block;
     width: 18px;
     height: 18px;
-    background-color: white;
-    border: 2px solid #000000;
     margin-right: 10px;
 }
 
 input[type="checkbox"]:checked:before {
-    content: "✓";
     color: #fff;
     background-color: #15b720;
     text-align: center;
