@@ -20,7 +20,7 @@ header {
 
 button {
     border-radius: 3px;
-    border: 2px solid #333;
+    border: 2px solid #666;
     cursor: pointer;
     min-height: 25px;
     background-color: #FFFFFF;
@@ -104,7 +104,7 @@ footer.expanded {
 .bullet {
     height: 10px;
     width: 10px;
-    background-color: green;
+    background-color: #67d76c;
     border-radius: 50%;
     display: inline-block;
 }
