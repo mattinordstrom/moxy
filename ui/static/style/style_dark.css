@@ -2,6 +2,10 @@ body, html {
     background-color: #312b2b;
 }
 
+input, select, textarea {
+    background-color: #cbcbcb;
+}
+
 footer {
     background-color: #242424;
     color: #FFFFFF;

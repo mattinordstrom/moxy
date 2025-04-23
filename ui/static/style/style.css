@@ -30,6 +30,7 @@ button {
     cursor: pointer;
     min-height: 34px;
     background-color: #FFFFFF;
+    font-weight: bold;
 }
 
 button:hover {
@@ -193,8 +194,9 @@ footer.expanded {
 
 .action-btn {
     min-width: 60px; 
-    min-height: 34px;
     margin-right: 3px;
+    padding: 8px;
+    margin-top: 5px;
 }
 
 #compactlist {
