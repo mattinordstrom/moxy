@@ -8,13 +8,21 @@ const initFunc = () => {
     // TODO make this better
     document.getElementById("close-list-payloadfiles").innerHTML = SVGModule.getX(17, 17);
 
-    document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
-    ' Toggle fullscreen log ' + 
-    SVGModule.getUpArrow(12, 12) + 
-    '<br/><span style="color:#666; font-size:11px">Ctrl + Space</span>';
-
+    // TODO
+    if (localStorage.getItem('useHotKeys') === 'true' || localStorage.getItem('useHotKeys') === null) {
+        document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
+        ' Toggle fullscreen log ' + 
+        SVGModule.getUpArrow(12, 12) + 
+        '<br/><span style="color:#666; font-size:11px">Ctrl + Space</span>';
+    } else {
+        document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
+        ' Toggle fullscreen log ' + 
+        SVGModule.getUpArrow(12, 12);
+    }
+    
     document.getElementById("close-curl-dialog").innerHTML = SVGModule.getX(17, 17);
 
+    hotKeysSetup();
     darkModeSetup();
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -26,14 +34,6 @@ const initFunc = () => {
     } else {
         document.getElementById("cover").style.display = "none";
     }
-
-    document.addEventListener('keydown', function(event) {
-        if (event.ctrlKey && event.code === 'Space') {
-            event.preventDefault();
-            
-            document.querySelector('footer').classList.toggle('expanded');
-        }
-    });
 
     //click events setup
     clickEvtSetup();

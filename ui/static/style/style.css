@@ -18,11 +18,17 @@ header {
     padding: 8px;
 }
 
+hr {
+    border: none;
+    height: 1px;
+    background-color: #333;
+}
+
 button {
     border-radius: 3px;
-    border: 2px solid #666;
+    border: none;
     cursor: pointer;
-    min-height: 25px;
+    min-height: 34px;
     background-color: #FFFFFF;
 }
 
@@ -38,6 +44,7 @@ button:hover {
 
 .page-title-sub {
     color: #ccc;
+    font-size: 12px;
 }
 
 .header-info {
@@ -140,6 +147,7 @@ footer.expanded {
     margin-left: 14px;
     margin-bottom: 10px;
     padding: 10px;
+    border-radius: 7px;
 }
 
 .proxymock-entity {
@@ -175,6 +183,7 @@ footer.expanded {
     justify-content: center;
     align-items: center;
     margin-left: 2px;
+    min-height: 25px;
 }
 
 .small-btn-close {

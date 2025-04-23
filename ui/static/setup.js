@@ -1,3 +1,19 @@
+const hotKeysSetup = () => {
+    document.getElementById('toggleHotKeys').addEventListener('click', toggleHotKeys);
+
+    document.addEventListener('keydown', (event) => {
+        if (localStorage.getItem('useHotKeys') === 'false') {
+            return;
+        }
+
+        if (event.ctrlKey && event.code === 'Space') {
+            event.preventDefault();
+            
+            document.querySelector('footer').classList.toggle('expanded');
+        }
+    });
+}
+
 const darkModeSetup = () => {
     document.getElementById('toggleDarkMode').addEventListener('click', toggleDarkMode);
 
@@ -6,8 +22,29 @@ const darkModeSetup = () => {
     }
 }
 
+const toggleHotKeys = () => {
+    if (localStorage.getItem('useHotKeys') === 'true' || localStorage.getItem('useHotKeys') === null) {
+        localStorage.setItem('useHotKeys', 'false');
+
+        // TODO
+        document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
+        ' Toggle fullscreen log ' + 
+        SVGModule.getUpArrow(12, 12);
+
+    } else {
+        localStorage.setItem('useHotKeys', 'true');
+
+        // TODO
+        document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
+        ' Toggle fullscreen log ' + 
+        SVGModule.getUpArrow(12, 12) + 
+        '<br/><span style="color:#666; font-size:11px">Ctrl + Space</span>';
+
+    }
+}
+
 const toggleDarkMode = () => {
-    var darkModeLink = document.getElementById('darkModeStylesheet');
+    let darkModeLink = document.getElementById('darkModeStylesheet');
     if (darkModeLink) {
         darkModeLink.remove();
         localStorage.setItem('moxyDarkMode', 'false');

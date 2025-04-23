@@ -3,7 +3,7 @@ body, html {
 }
 
 footer {
-    background-color: #3d3b32;
+    background-color: #242424;
     color: #FFFFFF;
 }
 
@@ -21,4 +21,16 @@ header {
 
 .header-info {
     color: #9f9d9d;
+}
+
+.proxymock-content {
+    background-color: #413e3e;
+}
+
+.proxy-obj, .mock-obj {
+    color: #e5e5e5;
+}
+
+.action-btn {
+    background-color: #92cb95;
 }
