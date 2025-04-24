@@ -38,3 +38,7 @@ header {
 .action-btn {
     background-color: #92cb95;
 }
+
+.action-btn:hover {
+    background-color: #7db47f;
+}

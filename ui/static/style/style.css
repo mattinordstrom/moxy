@@ -34,7 +34,7 @@ button {
 }
 
 button:hover {
-    background-color: #cacaca;
+    background-color: #e0e0e0;
 }
 
 .page-title {
@@ -46,6 +46,17 @@ button:hover {
 .page-title-sub {
     color: #ccc;
     font-size: 12px;
+}
+
+.header-logo {
+    display: flex;
+    justify-content: space-between;
+}
+
+.hotkeys-info {
+    color: #9f9d9d;
+    font-size: 10px;
+    padding: 3px;
 }
 
 .header-info {
@@ -125,6 +136,7 @@ footer.expanded {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    min-height: 45px;
 }
 
 .logextrabutton {
@@ -192,6 +204,10 @@ footer.expanded {
     margin-left: 6px;
 }
 
+.small-btn-close:hover {
+    background-color: #c78282;
+}
+
 .action-btn {
     min-width: 60px; 
     margin-right: 3px;
@@ -205,6 +221,7 @@ footer.expanded {
     padding: 18px;
     margin-top: 50px;
     font-size: 14px;
+    border-radius: 7px;
 }
 
 footer .action-btn {

@@ -6,12 +6,23 @@ const hotKeysSetup = () => {
             return;
         }
 
+        //Fullscreen log
         if (event.ctrlKey && event.code === 'Space') {
             event.preventDefault();
-            
             document.querySelector('footer').classList.toggle('expanded');
         }
+
+        //Show only mocks
+        if (event.ctrlKey && event.altKey && event.code === 'KeyS') {
+            event.preventDefault();
+            showOnlyMocks();
+        }
     });
+
+    if (localStorage.getItem('useHotKeys') === 'false') {
+        document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#333';
+        document.getElementsByClassName('hotkeys-info')[0].style.display = 'none';
+    }
 }
 
 const darkModeSetup = () => {
@@ -26,20 +37,13 @@ const toggleHotKeys = () => {
     if (localStorage.getItem('useHotKeys') === 'true' || localStorage.getItem('useHotKeys') === null) {
         localStorage.setItem('useHotKeys', 'false');
 
-        // TODO
-        document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
-        ' Toggle fullscreen log ' + 
-        SVGModule.getUpArrow(12, 12);
-
+        document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#333';
+        document.getElementsByClassName('hotkeys-info')[0].style.display = 'none';
     } else {
         localStorage.setItem('useHotKeys', 'true');
 
-        // TODO
-        document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
-        ' Toggle fullscreen log ' + 
-        SVGModule.getUpArrow(12, 12) + 
-        '<br/><span style="color:#666; font-size:11px">Ctrl + Space</span>';
-
+        document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#3c7f63';
+        document.getElementsByClassName('hotkeys-info')[0].style.display = '';
     }
 }
 
@@ -48,6 +52,8 @@ const toggleDarkMode = () => {
     if (darkModeLink) {
         darkModeLink.remove();
         localStorage.setItem('moxyDarkMode', 'false');
+
+        document.getElementById('toggleDarkMode_bullet').style.backgroundColor = '#333';
     } else {
         darkModeLink = document.createElement('link');
         darkModeLink.id = 'darkModeStylesheet';
@@ -55,6 +61,8 @@ const toggleDarkMode = () => {
         darkModeLink.href = '/ui/static/style/style_dark.css';
         document.head.appendChild(darkModeLink);
         localStorage.setItem('moxyDarkMode', 'true');
+
+        document.getElementById('toggleDarkMode_bullet').style.backgroundColor = '#3c7f63';
     }
 }
 

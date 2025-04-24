@@ -8,17 +8,9 @@ const initFunc = () => {
     // TODO make this better
     document.getElementById("close-list-payloadfiles").innerHTML = SVGModule.getX(17, 17);
 
-    // TODO
-    if (localStorage.getItem('useHotKeys') === 'true' || localStorage.getItem('useHotKeys') === null) {
-        document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
-        ' Toggle fullscreen log ' + 
-        SVGModule.getUpArrow(12, 12) + 
-        '<br/><span style="color:#666; font-size:11px">Ctrl + Space</span>';
-    } else {
-        document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
-        ' Toggle fullscreen log ' + 
-        SVGModule.getUpArrow(12, 12);
-    }
+    document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
+    ' Toggle fullscreen log ' + 
+    SVGModule.getUpArrow(12, 12);
     
     document.getElementById("close-curl-dialog").innerHTML = SVGModule.getX(17, 17);
 
@@ -183,6 +175,7 @@ const showCompactList = () => {
     if(document.getElementsByClassName('proxymock-content-container')[0].firstChild.id === 'compactlist') {
         document.getElementById('mock-content-container').innerHTML = "";
         renderMockdefs();
+        document.getElementById('toggle_compactlist_bullet').style.backgroundColor = '#333';
         return;
     }
 
@@ -192,15 +185,18 @@ const showCompactList = () => {
     });
 
     document.getElementsByClassName('proxymock-content-container')[0].innerHTML = `<div id="compactlist">${compactlist}</div>`;
+    document.getElementById('toggle_compactlist_bullet').style.backgroundColor = '#3c7f63';
 }
 
 const showOnlyMocks = () => {
     if(document.getElementsByClassName('right')[0].style.display === 'none') {
         document.getElementsByClassName('right')[0].style.display = 'block';
+        document.getElementById('toggle_only_mocks_bullet').style.backgroundColor = '#333';
         return;
     }
 
     document.getElementsByClassName('right')[0].style.display = 'none';
+    document.getElementById('toggle_only_mocks_bullet').style.backgroundColor = '#3c7f63';
 
     maximizeMock(0);
     maximizeMock(1);
@@ -220,6 +216,8 @@ const listPayloadFiles = async (evtSource) => {
         closeListPayloadFiles();
         return false;
     }
+
+    document.getElementById('payload_files_btn_bullet').style.backgroundColor = '#3c7f63';
 
     const response = await fetch('/moxyadminui/settings');
     const data = await response.json();
@@ -297,6 +295,7 @@ const updatePayloadFile = async (el) => {
 
 const closeListPayloadFiles = () => {
     document.getElementById('payloadFiles').style.display = 'none';
+    document.getElementById('payload_files_btn_bullet').style.backgroundColor = '#333';
 }
 
 const addMock = () => {
