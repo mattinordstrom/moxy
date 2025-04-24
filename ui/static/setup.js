@@ -42,7 +42,7 @@ const toggleHotKeys = () => {
     } else {
         localStorage.setItem('useHotKeys', 'true');
 
-        document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#3c7f63';
+        document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#67d76c';
         document.getElementsByClassName('hotkeys-info')[0].style.display = '';
     }
 }
@@ -62,7 +62,7 @@ const toggleDarkMode = () => {
         document.head.appendChild(darkModeLink);
         localStorage.setItem('moxyDarkMode', 'true');
 
-        document.getElementById('toggleDarkMode_bullet').style.backgroundColor = '#3c7f63';
+        document.getElementById('toggleDarkMode_bullet').style.backgroundColor = '#67d76c';
     }
 }
 

@@ -185,7 +185,7 @@ const showCompactList = () => {
     });
 
     document.getElementsByClassName('proxymock-content-container')[0].innerHTML = `<div id="compactlist">${compactlist}</div>`;
-    document.getElementById('toggle_compactlist_bullet').style.backgroundColor = '#3c7f63';
+    document.getElementById('toggle_compactlist_bullet').style.backgroundColor = 'white';
 }
 
 const showOnlyMocks = () => {
@@ -196,7 +196,7 @@ const showOnlyMocks = () => {
     }
 
     document.getElementsByClassName('right')[0].style.display = 'none';
-    document.getElementById('toggle_only_mocks_bullet').style.backgroundColor = '#3c7f63';
+    document.getElementById('toggle_only_mocks_bullet').style.backgroundColor = 'white';
 
     maximizeMock(0);
     maximizeMock(1);
@@ -217,7 +217,7 @@ const listPayloadFiles = async (evtSource) => {
         return false;
     }
 
-    document.getElementById('payload_files_btn_bullet').style.backgroundColor = '#3c7f63';
+    document.getElementById('payload_files_btn_bullet').style.backgroundColor = 'white';
 
     const response = await fetch('/moxyadminui/settings');
     const data = await response.json();
