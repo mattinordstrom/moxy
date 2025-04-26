@@ -9,7 +9,7 @@ const hotKeysSetup = () => {
         //Fullscreen log
         if (event.ctrlKey && event.code === 'Space') {
             event.preventDefault();
-            document.querySelector('footer').classList.toggle('expanded');
+            toggleFullcreen();
         }
 
         //Show only mocks
@@ -66,9 +66,23 @@ const toggleDarkMode = () => {
     }
 }
 
+const toggleFullcreen = () => {
+    if (document.querySelector('footer').classList.contains('expanded')) {
+        document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
+            ' Fullscreen log ' + 
+            SVGModule.getUpArrow(12, 12);
+    } else {
+        document.getElementById("expand-button").innerHTML = SVGModule.getDownArrow(12, 12) + 
+            ' Fullscreen log ' + 
+            SVGModule.getDownArrow(12, 12);
+    }
+
+    document.querySelector('footer').classList.toggle('expanded');
+}
+
 const clickEvtSetup = () => {
     document.getElementById('expand-button').addEventListener('click', () => {
-        document.querySelector('footer').classList.toggle('expanded');
+        toggleFullcreen();
     });
 
     document.getElementById('clear-log-button').addEventListener('click', () => {

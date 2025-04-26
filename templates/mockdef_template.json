@@ -7,6 +7,7 @@
     "payload": {
       "response": "abc123"
     },
+    "payloadFromFile": "",
     "statuscode": 404,
     "urlpart": "/api/whatever/someendpoint"
   },
@@ -18,6 +19,7 @@
     "payload": {
       "response": "abc123"
     },
+    "payloadFromFile": "",
     "statuscode": 200,
     "urlpart": "/api/whatever/someendpoint/.*/meta"
   },
@@ -25,6 +27,7 @@
     "active": true,
     "freezetimems": 0,
     "method": "GET",
+    "payload": null,
     "payloadFromFile": "/home/matti/projects/moxy/archive/example.json",
     "statuscode": 200,
     "urlpart": "/api/entities"

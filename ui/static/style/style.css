@@ -132,12 +132,6 @@ footer.expanded {
     background-color: red;
 }
 
-.expbutton {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    min-height: 45px;
-}
 
 .logextrabutton {
     position: absolute;
@@ -213,6 +207,15 @@ footer.expanded {
     margin-right: 3px;
     padding: 8px;
     margin-top: 5px;
+    background-color: #e1d1bc;
+}
+
+.expbutton {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    min-height: 45px;
+    min-width: 180px;
 }
 
 #compactlist {
