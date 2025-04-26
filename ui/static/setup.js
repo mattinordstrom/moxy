@@ -2,7 +2,7 @@ const hotKeysSetup = () => {
     document.getElementById('toggleHotKeys').addEventListener('click', toggleHotKeys);
 
     document.addEventListener('keydown', (event) => {
-        if (localStorage.getItem('useHotKeys') === 'false') {
+        if (localStorage.getItem('moxyUseHotKeys') === 'false') {
             return;
         }
 
@@ -17,9 +17,21 @@ const hotKeysSetup = () => {
             event.preventDefault();
             showOnlyMocks();
         }
+
+        //Show compact list
+        if (event.ctrlKey && event.altKey && event.code === 'KeyC') {
+            event.preventDefault();
+            showCompactList();
+        }
+
+        //Payload files
+        if (event.ctrlKey && event.altKey && event.code === 'KeyF') {
+            event.preventDefault();
+            listPayloadFiles('payload_files_btn');
+        }
     });
 
-    if (localStorage.getItem('useHotKeys') === 'false') {
+    if (localStorage.getItem('moxyUseHotKeys') === 'false') {
         document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#333';
         document.getElementsByClassName('hotkeys-info')[0].style.display = 'none';
     }
@@ -34,13 +46,13 @@ const darkModeSetup = () => {
 }
 
 const toggleHotKeys = () => {
-    if (localStorage.getItem('useHotKeys') === 'true' || localStorage.getItem('useHotKeys') === null) {
-        localStorage.setItem('useHotKeys', 'false');
+    if (localStorage.getItem('moxyUseHotKeys') === 'true' || localStorage.getItem('moxyUseHotKeys') === null) {
+        localStorage.setItem('moxyUseHotKeys', 'false');
 
         document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#333';
         document.getElementsByClassName('hotkeys-info')[0].style.display = 'none';
     } else {
-        localStorage.setItem('useHotKeys', 'true');
+        localStorage.setItem('moxyUseHotKeys', 'true');
 
         document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#67d76c';
         document.getElementsByClassName('hotkeys-info')[0].style.display = '';
