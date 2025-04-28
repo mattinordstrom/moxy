@@ -10,10 +10,6 @@
     z-index: 9999;
 }
 
-.payload-files-btn {
-    background-color: #e1d1bc;
-}
-
 .payload-files-container {
     display: flex;
     flex-direction: column;

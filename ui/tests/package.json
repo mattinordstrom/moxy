@@ -4,7 +4,7 @@
     "test-chrome": "TEST_HEADLESS=false mocha --exit './uitests/*.test.js'"
   },
   "devDependencies": {
-    "mocha": "10.7.3",
-    "puppeteer": "23.1.0"
+    "mocha": "11.1.0",
+    "puppeteer": "24.7.2"
   }
 }

@@ -5,15 +5,6 @@ const initFunc = () => {
     fetchProxyDef();
     fetchSettings();
 
-    // TODO make this better
-    document.getElementById("close-list-payloadfiles").innerHTML = SVGModule.getX(17, 17);
-
-    document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
-    ' Fullscreen log ' + 
-    SVGModule.getUpArrow(12, 12);
-    
-    document.getElementById("close-curl-dialog").innerHTML = SVGModule.getX(17, 17);
-
     hotKeysSetup();
     darkModeSetup();
 
@@ -86,11 +77,11 @@ const renderMockdefs = () => {
                 <div class="proxymock-entity">
                     <div style="display:flex">
                         <div><input placeholder="comment here" onchange="updateMockdef(this)" class="comment-input" type="text" spellcheck="false" name="comment_mock_${i}" id="comment_mock_${i}" value="${mockEntityData['comment'] || ""}"></input></div>
-                        <div><button class="small-btn" onclick="moveMock(this)" id="movemock_first_btn_${i}">${SVGModule.getUpArrows(12, 12)}</button></div>
-                        <div><button class="small-btn" onclick="moveMock(this)" id="movemock_up_btn_${i}">${SVGModule.getUpArrow(12, 12)}</button></div>
-                        <div><button class="small-btn" onclick="moveMock(this)" id="movemock_down_btn_${i}">${SVGModule.getDownArrow(12, 12)}</button></div>
-                        <div><button class="small-btn" onclick="moveMock(this)" id="movemock_last_btn_${i}">${SVGModule.getDownArrows(12, 12)}</button></div>
-                        <div><button class="small-btn small-btn-close" onclick="removeMock(this)" id="x_btn_${i}">${SVGModule.getX(17, 17)}</button></div>
+                        <div><button class="small-btn" onclick="moveMock(this)" id="movemock_first_btn_${i}"><i class="fa-solid fa-angles-up"></i></button></div>
+                        <div><button class="small-btn" onclick="moveMock(this)" id="movemock_up_btn_${i}"><i class="fa-solid fa-angle-up"></i></button></div>
+                        <div><button class="small-btn" onclick="moveMock(this)" id="movemock_down_btn_${i}"><i class="fa-solid fa-angle-down"></i></button></div>
+                        <div><button class="small-btn" onclick="moveMock(this)" id="movemock_last_btn_${i}"><i class="fa-solid fa-angles-down"></i></button></div>
+                        <div><button class="small-btn small-btn-close" onclick="removeMock(this)" id="x_btn_${i}"><i class="fa-solid fa-xmark"></i></button></div>
                     </div>
                 </div>
                 <div class="mock-obj"><label for="active_mock_${i}">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_${i}" id="active_mock_${i}" ${mockEntityData['active'] ? "checked" : ""}></input></div>
@@ -121,7 +112,7 @@ const renderMockdefs = () => {
                         payloadFromFile:
                         <br />
                         <button class="mock-file-edit payload-files-btn small-btn" id="mock_file_edit_${i}" onclick="editFileFromMock(this)">
-                        ${SVGModule.getPen(12, 12)}
+                        <i class="fa-solid fa-pen"></i>
                         </button>
                     </label>
                     <textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="45" class="fixed-textarea" name="payloadFromFile_${i}" id="payloadFromFile_${i}">${mockEntityData['payloadFromFile']}</textarea>
@@ -149,11 +140,11 @@ const renderProxydefs = () => {
                 <div class="proxymock-entity">
                     <div style="display:flex">
                         <div><input placeholder="comment here" onchange="updateProxydef(this)" class="comment-input" type="text" spellcheck="false" name="comment_proxy_${i}" id="comment_proxy_${i}" value="${proxyEntityData['comment'] || ""}"></input></div>
-                        <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_first_btn_${i}">${SVGModule.getUpArrows(12, 12)}</button></div>
-                        <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_up_btn_${i}">${SVGModule.getUpArrow(12, 12)}</button></div>
-                        <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_down_btn_${i}">${SVGModule.getDownArrow(12, 12)}</button></div>
-                        <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_last_btn_${i}">${SVGModule.getDownArrows(12, 12)}</button></div>
-                        <div><button class="small-btn small-btn-close" onclick="removeProxy(this)" id="x_btn_${i}">${SVGModule.getX(17, 17)}</button></div>
+                        <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_first_btn_${i}"><i class="fa-solid fa-angles-up"></i></button></div>
+                        <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_up_btn_${i}"><i class="fa-solid fa-angle-up"></i></button></div>
+                        <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_down_btn_${i}"><i class="fa-solid fa-angle-down"></i></button></div>
+                        <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_last_btn_${i}"><i class="fa-solid fa-angles-down"></i></button></div>
+                        <div><button class="small-btn small-btn-close" onclick="removeProxy(this)" id="x_btn_${i}"><i class="fa-solid fa-xmark"></i></button></div>
                     </div>
                 </div>
                 <div class="proxy-obj"><label for="active_proxy_${i}">active:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="active_proxy_${i}" id="active_proxy_${i}" ${proxyEntityData['active'] ? "checked" : ""}></input></div>    

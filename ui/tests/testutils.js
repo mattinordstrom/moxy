@@ -7,6 +7,10 @@ const handleJsAndCssRequests = (interceptedRequest) => {
     const filename = requestUrl.split('/').pop();
 
     if (requestUrl.endsWith('.css')) {
+        if (requestUrl.endsWith('.min.css')) {
+            interceptedRequest.respond({ contentType: 'text/css', body: '' }); //font awesome
+            return true;
+        }
         const cssPath = path.resolve(__dirname, '../static/style/'+filename);
         const cssContent = fs.readFileSync(cssPath, 'utf8');
 

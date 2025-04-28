@@ -80,13 +80,9 @@ const toggleDarkMode = () => {
 
 const toggleFullcreen = () => {
     if (document.querySelector('footer').classList.contains('expanded')) {
-        document.getElementById("expand-button").innerHTML = SVGModule.getUpArrow(12, 12) + 
-            ' Fullscreen log ' + 
-            SVGModule.getUpArrow(12, 12);
+        document.getElementById("expand-button").innerHTML = '<i class="fa-solid fa-angle-up"></i> Fullscreen log <i class="fa-solid fa-angle-up"></i>';
     } else {
-        document.getElementById("expand-button").innerHTML = SVGModule.getDownArrow(12, 12) + 
-            ' Fullscreen log ' + 
-            SVGModule.getDownArrow(12, 12);
+        document.getElementById("expand-button").innerHTML = '<i class="fa-solid fa-angle-down"></i> Fullscreen log <i class="fa-solid fa-angle-down"></i>';
     }
 
     document.querySelector('footer').classList.toggle('expanded');
