@@ -32,7 +32,7 @@ const hotKeysSetup = () => {
     });
 
     if (localStorage.getItem('moxyUseHotKeys') === 'false') {
-        document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#333';
+        document.getElementById('toggleHotKeys_bullet').classList.toggle('toggle-btn-bullet-active');
         document.getElementsByClassName('hotkeys-info')[0].style.display = 'none';
     }
 }
@@ -46,26 +46,27 @@ const darkModeSetup = () => {
 }
 
 const toggleHotKeys = () => {
+    document.getElementById('toggleHotKeys_bullet').classList.toggle('toggle-btn-bullet-active');
+
     if (localStorage.getItem('moxyUseHotKeys') === 'true' || localStorage.getItem('moxyUseHotKeys') === null) {
         localStorage.setItem('moxyUseHotKeys', 'false');
 
-        document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#333';
         document.getElementsByClassName('hotkeys-info')[0].style.display = 'none';
     } else {
         localStorage.setItem('moxyUseHotKeys', 'true');
 
-        document.getElementById('toggleHotKeys_bullet').style.backgroundColor = '#67d76c';
         document.getElementsByClassName('hotkeys-info')[0].style.display = '';
     }
 }
 
 const toggleDarkMode = () => {
+    document.getElementById('toggleDarkMode_bullet').classList.toggle('toggle-btn-bullet-active');
+
     let darkModeLink = document.getElementById('darkModeStylesheet');
     if (darkModeLink) {
         darkModeLink.remove();
         localStorage.setItem('moxyDarkMode', 'false');
 
-        document.getElementById('toggleDarkMode_bullet').style.backgroundColor = '#333';
     } else {
         darkModeLink = document.createElement('link');
         darkModeLink.id = 'darkModeStylesheet';
@@ -74,7 +75,6 @@ const toggleDarkMode = () => {
         document.head.appendChild(darkModeLink);
         localStorage.setItem('moxyDarkMode', 'true');
 
-        document.getElementById('toggleDarkMode_bullet').style.backgroundColor = '#67d76c';
     }
 }
 

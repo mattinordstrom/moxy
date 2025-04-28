@@ -1,3 +1,9 @@
+:root {
+    --action-btn: #e1d1bc;
+    --action-btn-hover: #e0e0e0;
+    --btn-hover: #e0e0e0;
+}
+
 body, html {
     margin: 0;
     padding: 0;
@@ -24,18 +30,6 @@ hr {
     background-color: #333;
 }
 
-button {
-    border-radius: 3px;
-    border: none;
-    cursor: pointer;
-    min-height: 34px;
-    background-color: #FFFFFF;
-    font-weight: bold;
-}
-
-button:hover {
-    background-color: #e0e0e0;
-}
 
 .page-title {
     color: #67d76c;
@@ -106,7 +100,9 @@ footer.expanded {
 
 #footer-log {
     margin-top: 75px;
-    margin-left: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+    word-wrap: break-word;
 }
 
 .square {
@@ -183,44 +179,6 @@ footer.expanded {
     align-self: flex-end;
 }
     
-.small-btn {
-    padding-block-end: 0;
-    padding-block-start: 0;
-    padding-inline-start: 0;
-    padding-inline-end: 0;
-    width: 25px;
-    height: 25px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-left: 2px;
-    min-height: 25px;
-}
-
-.small-btn-close {
-    background-color: #d19999;
-    margin-left: 6px;
-}
-
-.small-btn-close:hover {
-    background-color: #c78282;
-}
-
-.action-btn {
-    min-width: 60px; 
-    margin-right: 3px;
-    padding: 8px;
-    margin-top: 5px;
-    background-color: #e1d1bc;
-}
-
-.expbutton {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    min-height: 45px;
-    min-width: 180px;
-}
 
 #compactlist {
     width: 75%;

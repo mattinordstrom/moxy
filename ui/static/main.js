@@ -163,10 +163,11 @@ const maximizeMock = (index) => {
 }
 
 const showCompactList = () => {
+    document.getElementById('toggle_compactlist_bullet').classList.toggle('action-btn-bullet-active');
+
     if(document.getElementsByClassName('proxymock-content-container')[0].firstChild.id === 'compactlist') {
         document.getElementById('mock-content-container').innerHTML = "";
         renderMockdefs();
-        document.getElementById('toggle_compactlist_bullet').style.backgroundColor = '#333';
         return;
     }
 
@@ -176,18 +177,16 @@ const showCompactList = () => {
     });
 
     document.getElementsByClassName('proxymock-content-container')[0].innerHTML = `<div id="compactlist">${compactlist}</div>`;
-    document.getElementById('toggle_compactlist_bullet').style.backgroundColor = 'white';
 }
 
 const showOnlyMocks = () => {
+    document.getElementById('toggle_only_mocks_bullet').classList.toggle('action-btn-bullet-active');
     if(document.getElementsByClassName('right')[0].style.display === 'none') {
         document.getElementsByClassName('right')[0].style.display = 'block';
-        document.getElementById('toggle_only_mocks_bullet').style.backgroundColor = '#333';
         return;
     }
 
     document.getElementsByClassName('right')[0].style.display = 'none';
-    document.getElementById('toggle_only_mocks_bullet').style.backgroundColor = 'white';
 
     maximizeMock(0);
     maximizeMock(1);
@@ -208,7 +207,7 @@ const listPayloadFiles = async (evtSource) => {
         return false;
     }
 
-    document.getElementById('payload_files_btn_bullet').style.backgroundColor = 'white';
+    document.getElementById('payload_files_btn_bullet').classList.toggle('action-btn-bullet-active');
 
     const response = await fetch('/moxyadminui/settings');
     const data = await response.json();
@@ -286,7 +285,7 @@ const updatePayloadFile = async (el) => {
 
 const closeListPayloadFiles = () => {
     document.getElementById('payloadFiles').style.display = 'none';
-    document.getElementById('payload_files_btn_bullet').style.backgroundColor = '#333';
+    document.getElementById('payload_files_btn_bullet').classList.toggle('action-btn-bullet-active');
 }
 
 const addMock = () => {

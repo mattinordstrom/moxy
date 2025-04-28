@@ -1,3 +1,8 @@
+:root {
+    --action-btn: #92cb95;
+    --action-btn-hover: #7db47f;
+}
+
 body, html {
     background-color: #312b2b;
 }
@@ -33,12 +38,4 @@ header {
 
 .proxy-obj, .mock-obj {
     color: #e5e5e5;
-}
-
-.action-btn {
-    background-color: #92cb95;
-}
-
-.action-btn:hover {
-    background-color: #7db47f;
 }

@@ -6,6 +6,7 @@
     <title>moxy</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="/ui/static/style/inputs.css">
+    <link rel="stylesheet" href="/ui/static/style/buttons.css">
     <link rel="stylesheet" href="/ui/static/style/payloadfiles.css">
     <link rel="stylesheet" href="/ui/static/style/style.css">
     <link id="darkModeStylesheet" rel="stylesheet" href="/ui/static/style/style_dark.css">
@@ -36,7 +37,7 @@
             <div>
                 <b>Port:</b> <span id="header-port"></span>&nbsp;&nbsp;|&nbsp;&nbsp;<b>Default route:</b> <span id="header-route"></span>&nbsp;&nbsp;|&nbsp;&nbsp;<b>WS:</b> <span id="header-ws"></span>
             </div>
-            <div><button id="toggleHotKeys">Use hot keys <span id="toggleHotKeys_bullet" style="background-color:#67d76c" class="bullet"></span></button> <button id="toggleDarkMode">Dark mode <span id="toggleDarkMode_bullet" style="background-color:#67d76c" class="bullet"></span></button></div>
+            <div><button id="toggleHotKeys">Use hot keys <span id="toggleHotKeys_bullet" class="btn-bullet toggle-btn-bullet-active"></span></button> <button id="toggleDarkMode">Dark mode <span id="toggleDarkMode_bullet" class="btn-bullet toggle-btn-bullet-active"></span></button></div>
         </div>
     </header>
 
@@ -65,9 +66,9 @@
             <div style="margin-left: 20px;">
                 <h3>mock definitions</h3>
                 <button class="action-btn" onclick="addMock()">Add</button>
-                <button class="action-btn" onclick="showOnlyMocks()">Show only mocks <span id="toggle_only_mocks_bullet" style="background-color:#333" class="bullet"></span></button>
-                <button class="action-btn" onclick="showCompactList()">Compact list <span id="toggle_compactlist_bullet" style="background-color:#333" class="bullet"></span></button>
-                <button class="action-btn payload-files-btn" onclick="listPayloadFiles('payload_files_btn')">Payload files <span id="payload_files_btn_bullet" style="background-color:#333" class="bullet"></span></button>
+                <button class="action-btn" onclick="showOnlyMocks()">Show only mocks <span id="toggle_only_mocks_bullet" class="btn-bullet"></span></button>
+                <button class="action-btn" onclick="showCompactList()">Compact list <span id="toggle_compactlist_bullet" class="btn-bullet"></span></button>
+                <button class="action-btn payload-files-btn" onclick="listPayloadFiles('payload_files_btn')">Payload files <span id="payload_files_btn_bullet" class="btn-bullet"></span></button>
                 <br /><br />
             </div>
             <div id="mock-content-container" class="proxymock-content-container"></div>
