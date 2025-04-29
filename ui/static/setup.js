@@ -132,10 +132,6 @@ const getCurlString = (evtJson, consolelog) => {
 
     curlString += "--data '" + evtJson.extras.body.replace(/'/g, "'\\''") + "'";
 
-    if(!consolelog) {
-        curlString += "<br/><br/><hr/><b>Some headers might not be included in the curl command above. See console for all</b><br/><br/>";
-    }
-
     return curlString;
 }
 
@@ -146,6 +142,20 @@ const showCurl = (el, evtData) => {
     console.log(getCurlString(evtJson, true));
 
     document.getElementById("curl-dialog-content").innerHTML = getCurlString(evtJson, false);
+}
+
+const copyCurl = () => {
+    const curlContent = document.getElementById('curl-dialog-content')
+        .innerText
+        .replace(/\\\n--/g, '--');
+
+    navigator.clipboard.writeText(curlContent)
+        .then(() => {
+            console.log('Curl request copied to clipboard');
+        })
+        .catch(err => {
+            console.error('Failed to copy curl: ', err);
+        });
 }
 
 const closeCurlDialog = () => {

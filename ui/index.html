@@ -96,11 +96,13 @@
     </footer>
     <div id="curl-dialog" style="display:none">
         <div style="display: flex; justify-content: end; padding-bottom: 10px;">
+            <button class="small-btn" id="copy-curl-button" onclick="copyCurl()"><i class="fa-solid fa-copy"></i></button>
             <button id="close-curl-dialog" class="small-btn small-btn-close" onclick="closeCurlDialog()"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div style="overflow: scroll; background-color: #cadbd0; padding:3px">
-            <div id="curl-dialog-content"></div>
+        <div style="overflow: scroll; background-color: #cadbd0; padding: 15px">
+            <div id="curl-dialog-content"></div>  
         </div>
+        <br/><br/><hr/><b>Some headers might not be included in the curl command above. See console for all</b><br/>
     </div>
 </body>
 </html>

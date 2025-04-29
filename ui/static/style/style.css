@@ -211,3 +211,7 @@ footer .action-btn {
     background-color: #889b8e;
     padding: 20px;
 }
+
+#curl-dialog-content {
+    word-wrap: break-word;
+}
