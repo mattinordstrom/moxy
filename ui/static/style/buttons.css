@@ -26,12 +26,12 @@ button:hover {
 }
 
 .small-btn-close {
-    background-color: #d19999;
+    background-color: var(--main-red);
     margin-left: 6px;
 }
 
 .small-btn-close:hover {
-    background-color: #c78282;
+    background-color: var(--main-red-hover);
 }
 
 .action-btn {
@@ -39,11 +39,11 @@ button:hover {
     margin-right: 3px;
     padding: 8px;
     margin-top: 5px;
-    background-color: var(--action-btn);
+    background-color: var(--main-green);
 }
 
 .action-btn:hover {
-    background-color: var(--action-btn-hover);
+    background-color: var(--main-green-hover);
 }
 
 .btn-bullet {
@@ -68,4 +68,12 @@ button:hover {
     transform: translateX(-50%);
     min-height: 45px;
     min-width: 180px;
+}
+
+.logextrabutton-btn-red {
+    background-color: var(--main-red);
+}
+
+.logextrabutton-btn-red:hover {
+    background-color: var(--main-red-hover);
 }

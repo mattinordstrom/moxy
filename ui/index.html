@@ -66,8 +66,8 @@
             <div style="margin-left: 20px;">
                 <h3>mock definitions</h3>
                 <button class="action-btn" onclick="addMock()">Add</button>
-                <button class="action-btn" onclick="showOnlyMocks()">Show only mocks <span id="toggle_only_mocks_bullet" class="btn-bullet"></span></button>
                 <button class="action-btn" onclick="showCompactList()">Compact list <span id="toggle_compactlist_bullet" class="btn-bullet"></span></button>
+                <button class="action-btn" onclick="showOnlyMocks()">Show only mocks <span id="toggle_only_mocks_bullet" class="btn-bullet"></span></button>
                 <button class="action-btn payload-files-btn" onclick="listPayloadFiles('payload_files_btn')">Payload files <span id="payload_files_btn_bullet" class="btn-bullet"></span></button>
                 <br /><br />
             </div>
@@ -87,8 +87,8 @@
     <footer>
         <button class="action-btn expbutton" id="expand-button"><i class="fa-solid fa-angle-up"></i> Fullscreen log <i class="fa-solid fa-angle-up"></i></button>
         <div class="logextrabutton">
-            <button class="logextrabutton-btn action-btn" id="clear-log-button">Clear log</button>
             <button class="logextrabutton-btn action-btn" id="add-lines-button">Add 5 empty lines</button>
+            <button class="logextrabutton-btn logextrabutton-btn-red action-btn" id="clear-log-button">Clear log &nbsp;<i class="fa-solid fa-trash-can"></i></button>
         </div>
         <div id="footer-log">------------<br/></div>
     </footer>

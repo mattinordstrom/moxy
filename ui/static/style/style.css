@@ -1,7 +1,11 @@
 :root {
-    --action-btn: #e1d1bc;
-    --action-btn-hover: #e0e0e0;
     --btn-hover: #e0e0e0;
+
+    --main-green: #92cb95;
+    --main-green-hover: #7db47f;
+
+    --main-red: #d19999;
+    --main-red-hover: #c78282;
 }
 
 body, html {
