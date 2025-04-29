@@ -85,7 +85,7 @@ const renderMockdefs = () => {
                     </div>
                 </div>
                 <div class="mock-obj"><label for="active_mock_${i}">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_${i}" id="active_mock_${i}" ${mockEntityData['active'] ? "checked" : ""}></input></div>
-                <div class="mock-obj"><label for="freezetimems_${i}">freezetimems:</label><input onchange="updateMockdef(this)" type="number" name="freezetimems_${i}" id="freezetimems_${i}" value="${mockEntityData['freezetimems']}"></input></div>
+                <div class="mock-obj mock_compact_exclude"><label for="freezetimems_${i}">freezetimems:</label><input onchange="updateMockdef(this)" type="number" name="freezetimems_${i}" id="freezetimems_${i}" value="${mockEntityData['freezetimems']}"></input></div>
                 <div class="mock-obj"><label for="method_${i}">method:</label><select onchange="updateMockdef(this)" class="slct" name="method_${i}" id="method_${i}">
                     <option value="GET" ${mockEntityData['method'] === "GET" ? "selected" : ""}>GET</option>
                     <option value="POST" ${mockEntityData['method'] === "POST" ? "selected" : ""}>POST</option>
@@ -101,13 +101,13 @@ const renderMockdefs = () => {
         }
 
         mockEntity += `
-                <div class="mock-obj">
+                <div class="mock-obj mock_compact_exclude">
                     <label for="payload_${i}">payload:</label>
                     <textarea onchange="updateMockdef(this)" spellcheck="false" rows="20" cols="60" name="payload_${i}" id="payload_${i}">${payload}</textarea>
                 </div>`;
 
         mockEntity += `
-                <div class="mock-obj">
+                <div class="mock-obj mock_compact_exclude">
                     <label style="display:flex; flex-direction: column" for="payloadFromFile_${i}">
                         payloadFromFile:
                         <br />
@@ -119,7 +119,7 @@ const renderMockdefs = () => {
                 </div>`;
 
         mockEntity += `
-                <div class="mock-obj">
+                <div class="mock-obj mock_compact_exclude">
                     <label for="statuscode_${i}">statuscode:</label>
                     <input onchange="updateMockdef(this)" type="number" name="statuscode_${i}" id="statuscode_${i}" value="${mockEntityData['statuscode']}"></input>
                 </div>
@@ -148,9 +148,9 @@ const renderProxydefs = () => {
                     </div>
                 </div>
                 <div class="proxy-obj"><label for="active_proxy_${i}">active:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="active_proxy_${i}" id="active_proxy_${i}" ${proxyEntityData['active'] ? "checked" : ""}></input></div>    
-                <div class="proxy-obj"><label for="target_${i}">target:</label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="target_${i}" id="target_${i}" value="${proxyEntityData['target']}"></input></div>
+                <div class="proxy-obj proxy_compact_exclude"><label for="target_${i}">target:</label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="target_${i}" id="target_${i}" value="${proxyEntityData['target']}"></input></div>
                 <div class="proxy-obj"><label for="urlpart_proxy_${i}"><b>urlpart:</b></label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_proxy_${i}" id="urlpart_proxy_${i}" value="${proxyEntityData['urlpart']}"></input></div>
-                <div class="proxy-obj"><label for="verbose_${i}">verbose:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="verbose_${i}" id="verbose_${i}" ${proxyEntityData['verbose'] ? "checked" : ""}></input></div> 
+                <div class="proxy-obj proxy_compact_exclude"><label for="verbose_${i}">verbose:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="verbose_${i}" id="verbose_${i}" ${proxyEntityData['verbose'] ? "checked" : ""}></input></div> 
             </div>`;
 
         document.getElementById('proxy-content-container').innerHTML += proxyEntity + "<br />";
@@ -162,21 +162,38 @@ const maximizeMock = (index) => {
     document.getElementById('payload_'+index).style.width = '680px';
 }
 
-const showCompactList = () => {
-    document.getElementById('toggle_compactlist_bullet').classList.toggle('action-btn-bullet-active');
-
-    if(document.getElementsByClassName('proxymock-content-container')[0].firstChild.id === 'compactlist') {
-        document.getElementById('mock-content-container').innerHTML = "";
-        renderMockdefs();
-        return;
+const showCompactList = (forceActive) => {
+    if(forceActive) {
+        document.getElementById('toggle_compactlist_bullet').classList.add('action-btn-bullet-active');
+    } else {
+        document.getElementById('toggle_compactlist_bullet').classList.toggle('action-btn-bullet-active');
     }
 
-    let compactlist = '';
-    MockDefModule.get().forEach((mockEntityData, i) => {
-        compactlist += `<div><strong>[${mockEntityData['active'] ? '<span class="square"></span>' : ' '}]</strong> ${mockEntityData['method']} ${mockEntityData['urlpart']}</div><br /><br />`;
+    const elements = document.querySelectorAll('.mock_compact_exclude');
+    elements.forEach(el => {
+      if (el.style.display === 'none' && !forceActive) {
+        el.style.display = '';
+      } else {
+        el.style.display = 'none';
+      }
     });
+}
 
-    document.getElementsByClassName('proxymock-content-container')[0].innerHTML = `<div id="compactlist">${compactlist}</div>`;
+const showCompactListProxy = (forceActive) => {
+    if(forceActive) {
+        document.getElementById('toggle_compactlist_proxy_bullet').classList.add('action-btn-bullet-active');
+    } else {
+        document.getElementById('toggle_compactlist_proxy_bullet').classList.toggle('action-btn-bullet-active');
+    }
+
+    const elements = document.querySelectorAll('.proxy_compact_exclude');
+    elements.forEach(el => {
+      if (el.style.display === 'none' && !forceActive) {
+        el.style.display = '';
+      } else {
+        el.style.display = 'none';
+      }
+    });
 }
 
 const showOnlyMocks = () => {
@@ -464,10 +481,19 @@ const resetAndSync = (type) => {
         renderMockdefs();
         updateMockdef();
 
+        const compactIsActive = document.getElementById('toggle_compactlist_bullet').classList.contains('action-btn-bullet-active');
+        if(compactIsActive) {
+            showCompactList(true);
+        }
         return;
     }
 
     document.getElementById('proxy-content-container').innerHTML = "";
     renderProxydefs();
     updateProxydef();
+
+    const compactIsActive = document.getElementById('toggle_compactlist_proxy_bullet').classList.contains('action-btn-bullet-active');
+    if(compactIsActive) {
+        showCompactListProxy(true);
+    }
 }

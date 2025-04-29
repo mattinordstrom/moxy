@@ -3,6 +3,7 @@
 
     --main-green: #92cb95;
     --main-green-hover: #7db47f;
+    --bright-green: #67d76c;
 
     --main-red: #d19999;
     --main-red-hover: #c78282;
@@ -36,7 +37,7 @@ hr {
 
 
 .page-title {
-    color: #67d76c;
+    color: var(--bright-green);
     margin: 4px;
     font-size: 18px;
 }
@@ -127,7 +128,7 @@ footer.expanded {
 .bullet {
     height: 8px;
     width: 8px;
-    background-color: #67d76c;
+    background-color: var(--bright-green);
     border-radius: 50%;
     display: inline-block;
 }
@@ -183,15 +184,6 @@ footer.expanded {
     align-self: flex-end;
 }
     
-
-#compactlist {
-    width: 75%;
-    background-color: #e1e0e0;
-    padding: 18px;
-    margin-top: 50px;
-    font-size: 14px;
-    border-radius: 7px;
-}
 
 footer .action-btn {
     margin-top: 20px;

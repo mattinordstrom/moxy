@@ -21,7 +21,10 @@ const hotKeysSetup = () => {
         //Show compact list
         if (event.ctrlKey && event.altKey && event.code === 'KeyC') {
             event.preventDefault();
-            showCompactList();
+            const compactIsActive = document.getElementById('toggle_compactlist_bullet').classList.contains('action-btn-bullet-active');
+            const compactProxyIsActive = document.getElementById('toggle_compactlist_proxy_bullet').classList.contains('action-btn-bullet-active');
+            showCompactList(compactIsActive !== compactProxyIsActive);
+            showCompactListProxy(compactIsActive !== compactProxyIsActive);
         }
 
         //Payload files
