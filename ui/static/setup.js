@@ -151,14 +151,15 @@ const copyCurl = () => {
 
     navigator.clipboard.writeText(curlContent)
         .then(() => {
-            console.log('Curl request copied to clipboard');
+            document.getElementById("copy-curl-status").innerHTML = "Copied!";
         })
         .catch(err => {
-            console.error('Failed to copy curl: ', err);
+            document.getElementById("copy-curl-status").innerHTML = "ERROR failed to copy";
         });
 }
 
 const closeCurlDialog = () => {
+    document.getElementById("copy-curl-status").innerHTML = "";
     document.getElementById("curl-dialog").style.display = "none";
 }
 

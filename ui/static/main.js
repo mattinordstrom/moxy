@@ -1,12 +1,22 @@
-const initFunc = () => {
+const initFunc = async () => {
     console.log("initFunc");
 
-    fetchMockDef();
-    fetchProxyDef();
-    fetchSettings();
+    await fetchMockDef();
+    await fetchProxyDef();
+    await fetchSettings();
 
     hotKeysSetup();
     darkModeSetup();
+
+    if(localStorage.getItem('moxyMockCompactActive') === 'true') {
+        showCompactList(true);
+    }
+    if(localStorage.getItem('moxyProxyCompactActive') === 'true') {
+        showCompactListProxy(true);
+    }
+    if(localStorage.getItem('moxyShowOnlyMocks') === 'true') {
+        showOnlyMocks(true);
+    }
 
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
@@ -163,50 +173,63 @@ const maximizeMock = (index) => {
 }
 
 const showCompactList = (forceActive) => {
-    if(forceActive) {
-        document.getElementById('toggle_compactlist_bullet').classList.add('action-btn-bullet-active');
+    const isActive = localStorage.getItem('moxyMockCompactActive') === 'true'
+
+    const toggleButton = document.getElementById('toggle_compactlist_bullet');
+    const elements = document.querySelectorAll('.mock_compact_exclude');
+
+    const shouldHide = forceActive || !isActive;
+
+    localStorage.setItem('moxyMockCompactActive', shouldHide.toString());
+
+    if (forceActive || shouldHide) {
+        toggleButton.classList.add('action-btn-bullet-active');
     } else {
-        document.getElementById('toggle_compactlist_bullet').classList.toggle('action-btn-bullet-active');
+        toggleButton.classList.remove('action-btn-bullet-active');
     }
 
-    const elements = document.querySelectorAll('.mock_compact_exclude');
     elements.forEach(el => {
-      if (el.style.display === 'none' && !forceActive) {
-        el.style.display = '';
-      } else {
-        el.style.display = 'none';
-      }
+        el.style.display = shouldHide ? 'none' : '';
     });
 }
 
 const showCompactListProxy = (forceActive) => {
-    if(forceActive) {
-        document.getElementById('toggle_compactlist_proxy_bullet').classList.add('action-btn-bullet-active');
+    const isActive = localStorage.getItem('moxyProxyCompactActive') === 'true'
+
+    const toggleButton = document.getElementById('toggle_compactlist_proxy_bullet');
+    const elements = document.querySelectorAll('.proxy_compact_exclude');
+
+    const shouldHide = forceActive || !isActive;
+
+    localStorage.setItem('moxyProxyCompactActive', shouldHide.toString());
+
+    if (forceActive || shouldHide) {
+        toggleButton.classList.add('action-btn-bullet-active');
     } else {
-        document.getElementById('toggle_compactlist_proxy_bullet').classList.toggle('action-btn-bullet-active');
+        toggleButton.classList.remove('action-btn-bullet-active');
     }
 
-    const elements = document.querySelectorAll('.proxy_compact_exclude');
     elements.forEach(el => {
-      if (el.style.display === 'none' && !forceActive) {
-        el.style.display = '';
-      } else {
-        el.style.display = 'none';
-      }
+        el.style.display = shouldHide ? 'none' : '';
     });
 }
 
-const showOnlyMocks = () => {
+const showOnlyMocks = (forceActive) => {
+    const isActive = localStorage.getItem('moxyShowOnlyMocks') === 'true'
+
+    localStorage.setItem('moxyShowOnlyMocks', forceActive || !isActive);
+
     document.getElementById('toggle_only_mocks_bullet').classList.toggle('action-btn-bullet-active');
-    if(document.getElementsByClassName('right')[0].style.display === 'none') {
-        document.getElementsByClassName('right')[0].style.display = 'block';
-        return;
+
+    if(forceActive || document.getElementsByClassName('right')[0].style.display === '') {
+        document.getElementsByClassName('right')[0].style.display = 'none';
+
+        maximizeMock(0);
+        maximizeMock(1);
+    } else {
+        document.getElementsByClassName('right')[0].style.display = '';
     }
-
-    document.getElementsByClassName('right')[0].style.display = 'none';
-
-    maximizeMock(0);
-    maximizeMock(1);
+    
 }
 
 const editFileFromMock = (el) => {
