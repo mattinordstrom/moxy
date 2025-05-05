@@ -391,6 +391,15 @@ const updateMockdef = async (evt) => {
             } else if(evt.type === "text") {
                 mock[name] = evt.value;
             } 
+
+            if(name === "freezetimems" || name === "statuscode") {
+                evt.value = Math.abs(parseInt(evt.value));
+                mock[name] = parseInt(evt.value);
+            }
+            if(name === "statuscode" && (!evt.value || evt.value === "0")) {
+                evt.value = "200";
+                mock[name] = parseInt(evt.value);
+            }
         } else if(evt.tagName.toLowerCase() === "select") {
             mock[name] = evt.value;
         } else if(evt.tagName.toLowerCase() === "textarea") {
