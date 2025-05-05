@@ -120,12 +120,11 @@ const renderMockdefs = () => {
                 <div class="mock-obj mock_compact_exclude">
                     <label style="display:flex; flex-direction: column" for="payloadFromFile_${i}">
                         payloadFromFile:
-                        <br />
-                        <button class="mock-file-edit payload-files-btn small-btn" id="mock_file_edit_${i}" onclick="editFileFromMock(this)">
-                        <i class="fa-solid fa-pen"></i>
-                        </button>
                     </label>
                     <textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="45" class="fixed-textarea" name="payloadFromFile_${i}" id="payloadFromFile_${i}">${mockEntityData['payloadFromFile']}</textarea>
+                    <button class="mock-file-edit payload-files-btn small-btn" id="mock_file_edit_${i}" onclick="editFileFromMock(this)">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
                 </div>`;
 
         mockEntity += `
@@ -233,6 +232,11 @@ const showOnlyMocks = (forceActive) => {
 }
 
 const editFileFromMock = (el) => {
+    if(document.getElementById('payloadFiles').style.display === 'block'){
+        closeListPayloadFiles();
+        return;
+    }
+
     const index = Number(el.id.split('_').slice(-1)[0]);
     const fullPath = document.getElementById('payloadFromFile_'+index).value;
 
