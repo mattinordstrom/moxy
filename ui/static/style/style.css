@@ -203,6 +203,7 @@ footer .action-btn {
     display: flex;
     flex-direction: column;
     border: 5px solid #000000;
+    border-radius: 7px;
     z-index: 999999;
     width: 70%;
     height: 60%;

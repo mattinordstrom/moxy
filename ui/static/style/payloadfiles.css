@@ -1,12 +1,13 @@
 .payload-files {
     position: absolute; 
+    border-radius: 7px;
     top: 0;
     left: 50%; 
     display: none; 
-    background-color: #c3bfa5;
+    background-color: #949b93;
     padding: 14px;
-    width: 45%; 
-    height: 85%;
+    width: -webkit-fill-available; 
+    height: 89%;
     z-index: 9999;
 }
 
