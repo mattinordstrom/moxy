@@ -10,7 +10,8 @@
             "request": "launch",
             "mode": "debug",
             "program": "main.go",
-            "args": ["-p", "9097", "-s"]
+            "args": ["-p", "9097"],
+            //"args": ["-p", "9097", "-s"]
         }
     ]
 }

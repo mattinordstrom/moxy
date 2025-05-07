@@ -403,7 +403,7 @@ const updateMockdef = async (evt) => {
         } else if(evt.tagName.toLowerCase() === "select") {
             mock[name] = evt.value;
         } else if(evt.tagName.toLowerCase() === "textarea") {
-            if(name === "payload" && !isNaN(evt.value)) {
+            if(name === "payload" && !isNaN(evt.value) && evt.value !== "") {
                 mock[name] = parseFloat(evt.value);
             } else if(name === "payloadFromFile" && evt.value.startsWith('~')) {
                 alert('Absolute path cannot start with ~');

@@ -238,6 +238,7 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 	fresp, resperr := ForwardClient.Do(freq)
 	if resperr != nil {
 		utils.LogError("", resperr)
+		resWriter.WriteHeader(http.StatusBadGateway)
 		fmt.Fprintf(resWriter, "Error: No response from %s", newURL)
 
 		updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError, map[string]interface{}{})

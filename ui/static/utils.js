@@ -1,5 +1,5 @@
 const safelyParseJSON = (data) => {
-    if (typeof data === 'number') {
+    if (typeof data === 'number' || data === '') {
         return data;
     }
 
