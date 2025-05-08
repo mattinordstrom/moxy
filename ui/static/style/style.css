@@ -220,3 +220,8 @@ footer .action-btn {
 #curl-dialog-content {
     word-wrap: break-word;
 }
+
+.timestamp-small {
+    font-size: 11px;
+    color: #666;
+}

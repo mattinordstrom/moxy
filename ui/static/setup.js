@@ -174,22 +174,22 @@ const wsSetup = () => {
         if(evtJson.type === 'mock' || evtJson.type === 'proxy') {
             let output = evtJson.message;
             if(evtJson.type === 'mock') {
-                logMsg = '<span class="square square-purple"></span> ' + output + '<br />';
+                logMsg = '<span class="square square-purple"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + output + '<br />';
             } else {
                 if(evtJson.extras && evtJson.extras.httpMethod !== "") {
                     output = "<br/>"+evtJson.extras.httpMethod + " " + evtJson.message +
                         "<br/><i>"+evtJson.extras.headers+"</i><br/>"+evtJson.extras.body+"<br/>";
 
                         const dataString = encodeURIComponent(event.data).replace(/'/g, '%27');
-                    logMsg = `<span style="cursor:pointer" class="square" onclick="showCurl(this, '${dataString}')"></span> ${output}<br />`;
+                    logMsg = `<span style="cursor:pointer" class="square" onclick="showCurl(this, '${dataString}')"></span>  <span class="timestamp-small">${evtJson.timestamp} </span>${output}<br />`;
                 } else {
-                    logMsg = '<span class="square"></span> ' + output + '<br />'; 
+                    logMsg = '<span class="square"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + output + '<br />'; 
                 }
             }
         } else if(evtJson.type === 'wsmock') {
-            logMsg = '<span class="square square-yellow"></span> ' + evtJson.message + '<br />';
+            logMsg = '<span class="square square-yellow"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + evtJson.message + '<br />';
         } else if(evtJson.type === 'error') {
-            logMsg = '<span class="square square-red"></span> ' + evtJson.message + '<br />';
+            logMsg = '<span class="square square-red"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + evtJson.message + '<br />';
         }
 
         document.getElementById("footer-log").insertAdjacentHTML('afterbegin', logMsg);

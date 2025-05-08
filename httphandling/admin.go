@@ -16,9 +16,10 @@ import (
 )
 
 type WebSocketMessage struct {
-	Type    string                 `json:"type"`
-	Message string                 `json:"message"`
-	Extras  map[string]interface{} `json:"extras,omitempty"`
+	Type      string                 `json:"type"`
+	Message   string                 `json:"message"`
+	Extras    map[string]interface{} `json:"extras,omitempty"`
+	Timestamp string                 `json:"timestamp"`
 }
 
 type Settings struct {
@@ -258,10 +259,13 @@ func closeConnectionWithMessage(conn *websocket.Conn, message string) {
 
 func updateAdminWithLatest(evtStr string, evtType string, extras map[string]interface{}) {
 	if currentWSConnection != nil {
+		timestamp := time.Now().Format("2006-01-02 15:04:05")
+
 		msg := WebSocketMessage{
-			Type:    evtType,
-			Message: evtStr,
-			Extras:  extras,
+			Type:      evtType,
+			Message:   evtStr,
+			Extras:    extras,
+			Timestamp: timestamp,
 		}
 
 		jsonMsg, jErr := json.Marshal(msg)
