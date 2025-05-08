@@ -46,10 +46,13 @@ Go to http://localhost:9097/moxyadminui
     
   
 ## Websocket mock:
+Any message sent to ws://localhost:9097/moxywsmock will echo broadcast to all connected clients.
+Test in terminal:
 ```sh
 $ npm install -g wscat  
 $ wscat -c ws://localhost:9097/moxywsmock
 ```  
+or you can use https://github.com/mattinordstrom/moxy_ws_mock   
 <br>  
   
 
