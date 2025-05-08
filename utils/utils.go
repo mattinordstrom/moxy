@@ -16,6 +16,7 @@ var (
 	ColorRed    = "\033[31m"
 	ColorGreen  = "\033[32m"
 	ColorPurple = "\033[35m"
+	ColorYellow = "\033[33m"
 	ColorGray   = "\033[37m"
 	ColorBold   = "\033[1m"
 	ColorReset  = "\033[0m"
