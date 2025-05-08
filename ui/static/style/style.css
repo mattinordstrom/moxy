@@ -142,9 +142,9 @@ footer.expanded {
 }
 
 
-.logextrabutton {
+.logextrabutton-container {
     position: absolute;
-    right: 2%;
+    right: 1%;
 }
 
 .proxymock-content-container {
