@@ -186,6 +186,8 @@ const wsSetup = () => {
                     logMsg = '<span class="square"></span> ' + output + '<br />'; 
                 }
             }
+        } else if(evtJson.type === 'wsmock') {
+            logMsg = '<span class="square square-yellow"></span> ' + evtJson.message + '<br />';
         } else if(evtJson.type === 'error') {
             logMsg = '<span class="square square-red"></span> ' + evtJson.message + '<br />';
         }

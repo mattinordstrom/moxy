@@ -125,6 +125,10 @@ footer.expanded {
     background-color: red;
 }
 
+.square-yellow {
+    background-color: rgb(212, 193, 14);
+}
+
 .bullet {
     height: 8px;
     width: 8px;

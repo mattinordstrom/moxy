@@ -43,8 +43,17 @@ $ moxy -h
 ## Admin UI:
 Go to http://localhost:9097/moxyadminui
 <br>  
-  
     
+  
+## Websocket mock:
+```sh
+$ npm install -g wscat  
+$ wscat -c ws://localhost:9097/moxywsmock
+```  
+<br>  
+  
+
+
 ## Quick notes:
 - Json files will be read for every request (cached 2 sec), so no need to restart moxy after change in json file
 - Mocks will always go before proxies.  

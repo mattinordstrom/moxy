@@ -45,6 +45,10 @@ func CreateHTTPListener(sFlag bool) {
 	fs := http.FileServer(http.Dir("ui/static"))
 	http.Handle("/ui/static/", http.StripPrefix("/ui/static/", fs))
 	http.HandleFunc("/moxyws", handleWebSocket)
+
+	http.HandleFunc("/moxywsmock", handleWebSocketWSMock)
+	go handleWSMockMessages()
+
 	http.HandleFunc("/", HTTPHandler)
 
 	server := &http.Server{

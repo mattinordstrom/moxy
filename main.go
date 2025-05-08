@@ -41,6 +41,7 @@ func main() {
 	fmt.Println(ut.ColorGray + "mocking and proxying requests on localhost" + ut.ColorReset)
 	fmt.Println(" ")
 	fmt.Println(bullet + " Run on:        " + protocol + "://localhost:" + strconv.Itoa(hh.Port))
+	fmt.Println(bullet + " WS mock        " + "ws://localhost:" + strconv.Itoa(hh.Port) + "/moxywsmock")
 	fmt.Println(bullet + " Default route: " + hh.DefaultRoute)
 	fmt.Println(bullet + " Admin UI:      " + protocol + "://localhost:" + strconv.Itoa(hh.Port) + "/moxyadminui")
 	fmt.Println(" ")
