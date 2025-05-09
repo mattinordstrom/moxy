@@ -42,9 +42,10 @@ $ moxy -h
     
 ## Admin UI:
 Go to http://localhost:9097/moxyadminui
-<br>  
+<br>  <br>  
     
-  
+
+    
 ## Websocket mock:
 Any message sent to ws://localhost:9097/moxywsmock will echo broadcast to all connected clients.
 Test in terminal:
