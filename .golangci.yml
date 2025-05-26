@@ -1,16 +1,38 @@
+version: "2"
 linters:
-  enable-all: true
+  default: all
   disable:
     - cyclop
     - depguard
-    - exhaustivestruct
     - exhaustruct
     - forbidigo
     - funlen
-    - gocognit
     - gochecknoglobals
+    - gocognit
     - godox
-    - maligned
     - nestif
     - noctx
     - wsl
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

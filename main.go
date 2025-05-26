@@ -5,7 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
+	"strings"
 
 	"github.com/mattinordstrom/moxy/config"
 	hh "github.com/mattinordstrom/moxy/httphandling"
@@ -98,18 +102,49 @@ func getInactiveStr(active bool) string {
 }
 
 func firstTimeSetup() {
-	err := ut.CopyFile("templates/config_template.yml", "config.yml")
+	targetExisted, err := ut.CopyFile("templates/config_template.yml", "config.yml")
+	if err != nil {
+		fmt.Println("File copy failed:", err)
+	} else if !targetExisted {
+		replaceAbsPaths("config.yml")
+	}
+
+	targetExisted, err = ut.CopyFile("templates/mockdef_template.json", "mockdef.json")
+	if err != nil {
+		fmt.Println("File copy failed:", err)
+	} else if !targetExisted {
+		replaceAbsPaths("mockdef.json")
+	}
+
+	_, err = ut.CopyFile("templates/proxydef_template.json", "proxydef.json")
 	if err != nil {
 		fmt.Println("File copy failed:", err)
 	}
+}
 
-	err = ut.CopyFile("templates/mockdef_template.json", "mockdef.json")
+func replaceAbsPaths(filename string) {
+	_, mainFileFullPath, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("Could not get caller info")
+	}
+	dir := filepath.Dir(mainFileFullPath)
+	absDir, err := filepath.Abs(dir)
 	if err != nil {
-		fmt.Println("File copy failed:", err)
+		panic(err)
 	}
 
-	err = ut.CopyFile("templates/proxydef_template.json", "proxydef.json")
+	placeholder := "/absolute_path_to_proj_dir/moxy"
+
+	data, err := os.ReadFile(filename)
 	if err != nil {
-		fmt.Println("File copy failed:", err)
+		log.Fatal(err)
+	}
+
+	updated := strings.ReplaceAll(string(data), placeholder, absDir)
+
+	const filePermission = 0o664
+	errr := os.WriteFile(filename, []byte(updated), filePermission)
+	if errr != nil {
+		log.Fatal(errr)
 	}
 }

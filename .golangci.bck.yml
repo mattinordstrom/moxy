@@ -1,0 +1,16 @@
+linters:
+  enable-all: true
+  disable:
+    - cyclop
+    - depguard
+    - exhaustivestruct
+    - exhaustruct
+    - forbidigo
+    - funlen
+    - gocognit
+    - gochecknoglobals
+    - godox
+    - maligned
+    - nestif
+    - noctx
+    - wsl

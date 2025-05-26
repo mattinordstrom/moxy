@@ -133,35 +133,35 @@ func LogError(str string, err error) {
 	log.Println(ColorRed + str + " " + err.Error() + ColorReset)
 }
 
-func CopyFile(src, dst string) error {
+func CopyFile(src, dst string) (bool, error) {
 	if _, err := os.Stat(dst); err == nil {
 		// Destination file exists, do nothing
-		return nil
+		return true, nil
 	} else if !os.IsNotExist(err) {
-		return fmt.Errorf("error checking destination file: %w", err)
+		return false, fmt.Errorf("error checking destination file: %w", err)
 	}
 
 	sourceFile, err := os.Open(src)
 	if err != nil {
-		return fmt.Errorf("error opening source file: %w", err)
+		return false, fmt.Errorf("error opening source file: %w", err)
 	}
 	defer sourceFile.Close()
 
 	destFile, err := os.Create(dst)
 	if err != nil {
-		return fmt.Errorf("error creating destination file: %w", err)
+		return false, fmt.Errorf("error creating destination file: %w", err)
 	}
 	defer destFile.Close()
 
 	_, err = io.Copy(destFile, sourceFile)
 	if err != nil {
-		return fmt.Errorf("error copying file contents: %w", err)
+		return false, fmt.Errorf("error copying file contents: %w", err)
 	}
 
 	err = destFile.Sync()
 	if err != nil {
-		return fmt.Errorf("error syncing destination file: %w", err)
+		return false, fmt.Errorf("error syncing destination file: %w", err)
 	}
 
-	return nil
+	return false, nil
 }
