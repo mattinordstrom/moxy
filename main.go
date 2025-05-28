@@ -133,6 +133,7 @@ func replaceAbsPaths(filename string) {
 		panic(err)
 	}
 
+	normalizedPath := filepath.ToSlash(absDir)
 	placeholder := "/absolute_path_to_proj_dir/moxy"
 
 	data, err := os.ReadFile(filename)
@@ -140,9 +141,9 @@ func replaceAbsPaths(filename string) {
 		log.Fatal(err)
 	}
 
-	updated := strings.ReplaceAll(string(data), placeholder, absDir)
+	updated := strings.ReplaceAll(string(data), placeholder, normalizedPath)
 
-	const filePermission = 0o664
+	const filePermission = 0o600
 	errr := os.WriteFile(filename, []byte(updated), filePermission)
 	if errr != nil {
 		log.Fatal(errr)

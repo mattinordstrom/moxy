@@ -134,8 +134,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			const filePermission = 0o644
-
+			const filePermission = 0o600
 			errr := os.WriteFile(jsonName+".json", jsonData, filePermission)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
@@ -216,8 +215,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			const filePermission = 0o644
-
+			const filePermission = 0o600
 			errr := os.WriteFile(data.File, jsonData, filePermission)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)

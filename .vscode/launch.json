@@ -10,6 +10,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "main.go",
+            //"dlvFlags": ["--check-go-version=false"],
             "args": ["-p", "9097"],
             //"args": ["-p", "9097", "-s"]
         }
