@@ -232,9 +232,10 @@ const showOnlyMocks = (forceActive) => {
 }
 
 const editFileFromMock = (el) => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     if(document.getElementById('payloadFiles').style.display === 'block'){
         closeListPayloadFiles();
-        return;
     }
 
     const index = Number(el.id.split('_').slice(-1)[0]);
