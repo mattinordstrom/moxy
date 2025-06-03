@@ -43,7 +43,7 @@ func UsePayloadFromFile(mockEntity models.Mock) bool {
 	usePayloadFromFile := false
 	payloadFromFileSet := payloadFromFile != ""
 
-	if (payload == nil || payload == "") && payloadFromFileSet {
+	if (payload == nil || string(payload) == "" || string(payload) == "\"\"") && payloadFromFileSet {
 		usePayloadFromFile = true
 	}
 

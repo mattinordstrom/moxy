@@ -59,7 +59,7 @@ or you can use https://github.com/mattinordstrom/moxy_ws_mock
 
 
 ## Quick notes:
-- Json files will be read for every request (cached 2 sec), so no need to restart moxy after change in json file
+- Json files will be read for every request (cached for 1.5 sec), so no need to restart moxy after change in json file
 - Mocks will always go before proxies.  
 - Json files are read from top to bottom and request is processed at first match.
 - If no match is found in Json the "Default route" will be used

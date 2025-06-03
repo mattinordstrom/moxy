@@ -18,9 +18,7 @@ func TestGetMockEventString(t *testing.T) {
 	testData.Method = "GET"
 	testData.URLPart = "/api/test/someendpoint"
 	testData.StatusCode = 404
-	testData.Payload = map[string]interface{}{
-		"response": "test123",
-	}
+	testData.Payload = json.RawMessage(`{"response":"test123"}`)
 	testData.FreezeTimeMS = 500
 
 	payloadM, err := json.Marshal(testData.Payload)
@@ -72,9 +70,7 @@ func TestUsePayloadFromFile(t *testing.T) {
 	}
 
 	// Test with both
-	testData.Payload = map[string]interface{}{
-		"response": "test123",
-	}
+	testData.Payload = json.RawMessage(`{"response":"test123"}`)
 	res = utils.UsePayloadFromFile(testData)
 	expected = false
 

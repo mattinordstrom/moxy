@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/mattinordstrom/moxy/config"
+	"github.com/mattinordstrom/moxy/models"
 	"github.com/mattinordstrom/moxy/utils"
 )
 
@@ -119,6 +120,9 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			defer req.Body.Close()
 
 			var data interface{}
+			if !config.AppConfig.Admin.AutoSortJSONKeys {
+				data = &[]models.Mock{}
+			}
 
 			err = json.Unmarshal(jsonData, &data)
 			if err != nil {
@@ -196,8 +200,17 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				File    string      `json:"file"`
 				Payload interface{} `json:"payload"`
 			}
+			type RequestDataNoAutoSort struct {
+				File    string          `json:"file"`
+				Payload json.RawMessage `json:"payload"`
+			}
 
-			var data RequestData
+			var data interface{}
+			if !config.AppConfig.Admin.AutoSortJSONKeys {
+				data = &RequestDataNoAutoSort{}
+			} else {
+				data = &RequestData{}
+			}
 
 			err = json.Unmarshal(jsonData, &data)
 			if err != nil {
@@ -206,9 +219,30 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			// log.Println("File path: " + data.File)
+			var payload interface{}
+			var filePath string
 
-			jsonData, err = json.MarshalIndent(data.Payload, "", "  ")
+			if !config.AppConfig.Admin.AutoSortJSONKeys {
+				reqData, ok := data.(*RequestDataNoAutoSort)
+				if !ok {
+					http.Error(resWriter, "Invalid data type", http.StatusBadRequest)
+
+					return
+				}
+				payload = reqData.Payload
+				filePath = reqData.File
+			} else {
+				reqData, ok := data.(*RequestData)
+				if !ok {
+					http.Error(resWriter, "Invalid data type", http.StatusBadRequest)
+
+					return
+				}
+				payload = reqData.Payload
+				filePath = reqData.File
+			}
+
+			jsonData, err = json.MarshalIndent(payload, "", "  ")
 			if err != nil {
 				http.Error(resWriter, err.Error(), http.StatusInternalServerError)
 
@@ -216,7 +250,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			}
 
 			const filePermission = 0o600
-			errr := os.WriteFile(data.File, jsonData, filePermission)
+			errr := os.WriteFile(filePath, jsonData, filePermission)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
 

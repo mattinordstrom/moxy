@@ -16,7 +16,7 @@ type CacheItem struct {
 var (
 	cache         = make(map[string]CacheItem)
 	rwMu          sync.RWMutex
-	cacheDuration = 2 * time.Second
+	cacheDuration = 1500 * time.Millisecond
 )
 
 func readJSONFileWithCache(filePath string) ([]byte, error) {

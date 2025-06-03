@@ -10,11 +10,15 @@ import (
 
 type Config struct {
 	Defaults DefaultConfig `yaml:"defaults"`
+	Admin    AdminConfig   `yaml:"admin"`
 }
 
 type DefaultConfig struct {
 	DefaultRoute       string `yaml:"route"`
 	PayloadArchivePath string `yaml:"payloadArchivePath"`
+}
+type AdminConfig struct {
+	AutoSortJSONKeys bool `yaml:"autoSortJsonKeys"`
 }
 
 var AppConfig Config
