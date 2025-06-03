@@ -120,7 +120,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			defer req.Body.Close()
 
 			var data interface{}
-			if !config.AppConfig.Admin.AutoSortJSONKeys {
+			if reqURL == "/moxyadminui/mockdef" && !config.AppConfig.Admin.AutoSortJSONKeys {
 				data = &[]models.Mock{}
 			}
 
