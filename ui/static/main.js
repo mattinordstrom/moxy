@@ -101,6 +101,7 @@ const renderMockdefs = () => {
                     <option value="POST" ${mockEntityData['method'] === "POST" ? "selected" : ""}>POST</option>
                     <option value="PUT" ${mockEntityData['method'] === "PUT" ? "selected" : ""}>PUT</option>
                     <option value="DELETE" ${mockEntityData['method'] === "DELETE" ? "selected" : ""}>DELETE</option>
+                    <option value="PATCH" ${mockEntityData['method'] === "PATCH" ? "selected" : ""}>PATCH</option>
                     </select>
                 </div>`;
 

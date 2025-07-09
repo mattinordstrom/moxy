@@ -49,7 +49,28 @@ func CreateHTTPListener(sFlag bool) {
 	http.HandleFunc("/moxywsmock", handleWebSocketWSMock)
 	go handleWSMockMessages()
 
-	http.HandleFunc("/", HTTPHandler)
+	// http.HandleFunc("/", HTTPHandler)
+	http.HandleFunc("/", func(resWriter http.ResponseWriter, req *http.Request) {
+		// Add CORS headers
+		origin := req.Header.Get("Origin")
+		if origin != "" {
+			resWriter.Header().Set("Access-Control-Allow-Origin", origin)
+		} else {
+			resWriter.Header().Set("Access-Control-Allow-Origin", "*")
+		}
+		resWriter.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
+		resWriter.Header().Set("Access-Control-Allow-Headers", "*")
+		resWriter.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		// Handle preflight
+		if req.Method == http.MethodOptions {
+			resWriter.WriteHeader(http.StatusOK)
+
+			return
+		}
+
+		HTTPHandler(resWriter, req)
+	})
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", Port),
