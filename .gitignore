@@ -4,5 +4,7 @@ config.yml
 mockdef.json
 proxydef.json
 node_modules
+ui/tests/playwright-report/
+ui/tests/test-results/
 https/moxyserver.crt
 https/moxyserver.key

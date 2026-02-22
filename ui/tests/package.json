@@ -1,10 +1,9 @@
 {
   "scripts": {
-    "test": "TEST_HEADLESS=true mocha --exit './uitests/*.test.js'",
-    "test-chrome": "TEST_HEADLESS=false mocha --exit './uitests/*.test.js'"
+    "test": "playwright test",
+    "test-chrome": "playwright test --headed"
   },
   "devDependencies": {
-    "mocha": "11.1.0",
-    "puppeteer": "24.7.2"
+    "@playwright/test": "^1.50.0"
   }
 }
