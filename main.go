@@ -60,7 +60,11 @@ func main() {
 
 func PrintInitSetup() {
 	// Mockdef
-	mockObjArr := ut.GetMockJSON()
+	mockObjArr, err := ut.GetMockJSON()
+	if err != nil {
+		log.Fatalf("Failed to load mock definitions: %v", err)
+	}
+
 	fmt.Println(ut.ColorPurple + "-------- Mockdef --------" + ut.ColorReset)
 
 	for _, mockEntity := range mockObjArr {
@@ -81,7 +85,10 @@ func PrintInitSetup() {
 	fmt.Println(ut.ColorPurple + "-------------------------\n" + ut.ColorReset)
 
 	// Proxydef
-	proxyObjArr := ut.GetProxyJSON()
+	proxyObjArr, err := ut.GetProxyJSON()
+	if err != nil {
+		log.Fatalf("Failed to load proxy definitions: %v", err)
+	}
 	fmt.Println(ut.ColorGreen + "-------- Proxydef --------" + ut.ColorReset)
 
 	for _, proxyEntity := range proxyObjArr {

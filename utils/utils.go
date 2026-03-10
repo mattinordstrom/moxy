@@ -77,28 +77,36 @@ func GetProxyEventString(url string, target string, extraInfo string, defaultRou
 	return ColorGreen + extraInfo + url + RightArrow + newURL + ColorReset
 }
 
-func GetMockJSON() []models.Mock {
+func GetMockJSON() ([]models.Mock, error) {
 	var result []models.Mock
-	byteValue, _ := getJSONResultBytes(MockFile, false)
 
-	err := json.Unmarshal(byteValue, &result)
+	byteValue, err := getJSONResultBytes(MockFile, false)
 	if err != nil {
-		log.Fatalf("Error occurred during unmarshalling (obj) in file %s: %v", MockFile, err)
+		return nil, fmt.Errorf("error reading %s: %w", MockFile, err)
 	}
 
-	return result
+	err = json.Unmarshal(byteValue, &result)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling %s: %w", MockFile, err)
+	}
+
+	return result, nil
 }
 
-func GetProxyJSON() []models.Proxy {
+func GetProxyJSON() ([]models.Proxy, error) {
 	var result []models.Proxy
-	byteValue, _ := getJSONResultBytes(ProxyFile, false)
 
-	err := json.Unmarshal(byteValue, &result)
+	byteValue, err := getJSONResultBytes(ProxyFile, false)
 	if err != nil {
-		log.Fatalf("Error occurred during unmarshalling (obj) in file %s: %v", ProxyFile, err)
+		return nil, fmt.Errorf("error reading %s: %w", ProxyFile, err)
 	}
 
-	return result
+	err = json.Unmarshal(byteValue, &result)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling %s: %w", ProxyFile, err)
+	}
+
+	return result, nil
 }
 
 func GetJSONPayloadFromAbsolutePath(absoluteFilePath string) ([]byte, error) {

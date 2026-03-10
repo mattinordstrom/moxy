@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -57,13 +58,11 @@ func NewWebSocketConnection(conn *websocket.Conn) *WebSocketConnection {
 }
 
 func (wc *WebSocketConnection) enqueueMessage(message []byte) {
-	if len(wc.Send) < cap(wc.Send) {
-		wc.Send <- message
-
-		return
+	select {
+	case wc.Send <- message:
+	default:
+		log.Println("Send channel is full, dropping message")
 	}
-
-	log.Println("Send channel is full, dropping message")
 }
 
 func (wc *WebSocketConnection) writePump() {
@@ -85,12 +84,13 @@ func (wc *WebSocketConnection) writePump() {
 }
 
 func handleWebSocket(resWriter http.ResponseWriter, req *http.Request) {
-	if currentWSConnection != nil {
-		closeConnectionWithMessage(currentWSConnection.Conn, "ws_takeover")
-	}
-
 	connMutex.Lock()
-	defer connMutex.Unlock()
+	oldConn := currentWSConnection
+	connMutex.Unlock()
+
+	if oldConn != nil {
+		closeConnectionWithMessage(oldConn.Conn, "ws_takeover")
+	}
 
 	conn, err := upgrader.Upgrade(resWriter, req, nil)
 	if err != nil {
@@ -99,8 +99,10 @@ func handleWebSocket(resWriter http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	connMutex.Lock()
 	currentWSConnection = NewWebSocketConnection(conn)
 	go currentWSConnection.writePump()
+	connMutex.Unlock()
 }
 
 func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
@@ -266,7 +268,22 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			http.ServeFile(resWriter, req, config.AppConfig.Defaults.PayloadArchivePath+value[0])
+			basePath, err := filepath.Abs(config.AppConfig.Defaults.PayloadArchivePath)
+			if err != nil {
+				http.Error(resWriter, "Invalid archive path", http.StatusInternalServerError)
+
+				return
+			}
+
+			requestedPath := filepath.Join(basePath, value[0])
+			resolvedPath, err := filepath.Abs(requestedPath)
+			if err != nil || !strings.HasPrefix(resolvedPath, basePath) {
+				http.Error(resWriter, "Invalid file path", http.StatusBadRequest)
+
+				return
+			}
+
+			http.ServeFile(resWriter, req, resolvedPath)
 			// log.Println(req.Method + " " + fmt.Sprintf(value[0]))
 		}
 	default:
@@ -290,7 +307,11 @@ func closeConnectionWithMessage(conn *websocket.Conn, message string) {
 }
 
 func updateAdminWithLatest(evtStr string, evtType string, extras map[string]interface{}) {
-	if currentWSConnection != nil {
+	connMutex.Lock()
+	wsConn := currentWSConnection
+	connMutex.Unlock()
+
+	if wsConn != nil {
 		timestamp := time.Now().Format("2006-01-02 15:04:05")
 
 		msg := WebSocketMessage{
@@ -305,6 +326,6 @@ func updateAdminWithLatest(evtStr string, evtType string, extras map[string]inte
 			utils.LogError("Error: json marshal websocket msg ", jErr)
 		}
 
-		currentWSConnection.enqueueMessage(jsonMsg)
+		wsConn.enqueueMessage(jsonMsg)
 	}
 }

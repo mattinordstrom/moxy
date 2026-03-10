@@ -91,8 +91,24 @@ func CreateHTTPListener(sFlag bool) {
 }
 
 func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
-	mockObjArr := utils.GetMockJSON()
-	proxyObjArr := utils.GetProxyJSON()
+	mockObjArr, mockErr := utils.GetMockJSON()
+	if mockErr != nil {
+		utils.LogError("Failed to load mock definitions: ", mockErr)
+		resWriter.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(resWriter, "Error loading mock definitions")
+
+		return
+	}
+
+	proxyObjArr, proxyErr := utils.GetProxyJSON()
+	if proxyErr != nil {
+		utils.LogError("Failed to load proxy definitions: ", proxyErr)
+		resWriter.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(resWriter, "Error loading proxy definitions")
+
+		return
+	}
+
 	reqURL := fmt.Sprint(req.URL)
 
 	if strings.HasPrefix(reqURL, "/moxyadminui") {
@@ -112,6 +128,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 			regex, err := regexp.Compile(trimmedURL)
 			if err != nil {
 				utils.LogError("Error compiling regex: ", err)
+				http.Error(resWriter, "Error compiling regex in mock definition", http.StatusInternalServerError)
 
 				return
 			}
@@ -193,6 +210,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 			regex, err := regexp.Compile(trimmedURL)
 			if err != nil {
 				utils.LogError("Error compiling regex (proxy): ", err)
+				http.Error(resWriter, "Error compiling regex in proxy definition", http.StatusInternalServerError)
 
 				return
 			}
@@ -258,7 +276,15 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 }
 
 func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string) {
-	freq := createReqFromReq(req, newURL)
+	freq, err := createReqFromReq(req, newURL)
+	if err != nil {
+		utils.LogError("", err)
+		resWriter.WriteHeader(http.StatusBadGateway)
+		fmt.Fprintf(resWriter, "Error: Failed to create request for %s", newURL)
+		updateAdminWithLatest("Error: Failed to create request for "+newURL, utils.EventTypeError, map[string]interface{}{})
+
+		return
+	}
 
 	fresp, resperr := ForwardClient.Do(freq)
 	if resperr != nil {

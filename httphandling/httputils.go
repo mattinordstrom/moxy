@@ -1,16 +1,16 @@
 package httphandling
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 )
 
 var ForwardClient *http.Client
 
-func createReqFromReq(req *http.Request, newURL string) *http.Request {
+func createReqFromReq(req *http.Request, newURL string) (*http.Request, error) {
 	freq, reqerror := http.NewRequest(req.Method, newURL, req.Body)
 	if reqerror != nil {
-		log.Fatalln(reqerror)
+		return nil, fmt.Errorf("failed to create forward request: %w", reqerror)
 	}
 
 	freq.Header = make(http.Header)
@@ -30,5 +30,5 @@ func createReqFromReq(req *http.Request, newURL string) *http.Request {
 	// https://go.dev/src/net/http/transport.go#L190
 	freq.Header.Del("Accept-Encoding")
 
-	return freq
+	return freq, nil
 }
