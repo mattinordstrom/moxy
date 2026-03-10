@@ -1,7 +1,8 @@
 {
   "scripts": {
     "test": "playwright test",
-    "test-chrome": "playwright test --headed"
+    "test-chrome": "playwright test --headed",
+    "test-debug": "PWDEBUG=1 playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0"

@@ -150,6 +150,43 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 		} else {
 			http.ServeFile(resWriter, req, jsonName+".json")
 		}
+	case "/moxyadminui/uisettings":
+		if req.Method == http.MethodPost {
+			jsonData, err := io.ReadAll(req.Body)
+			if err != nil {
+				http.Error(resWriter, err.Error(), http.StatusInternalServerError)
+
+				return
+			}
+			defer req.Body.Close()
+
+			var data map[string]interface{}
+
+			err = json.Unmarshal(jsonData, &data)
+			if err != nil {
+				http.Error(resWriter, err.Error(), http.StatusBadRequest)
+
+				return
+			}
+
+			jsonData, err = json.MarshalIndent(data, "", "  ")
+			if err != nil {
+				http.Error(resWriter, err.Error(), http.StatusInternalServerError)
+
+				return
+			}
+
+			const filePermission = 0o600
+
+			errr := os.WriteFile("ui/settings.json", jsonData, filePermission)
+			if errr != nil {
+				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
+
+				return
+			}
+		} else {
+			http.ServeFile(resWriter, req, "ui/settings.json")
+		}
 	case "/moxyadminui/settings":
 		payloadFilesInDir, err := os.ReadDir(config.AppConfig.Defaults.PayloadArchivePath)
 		if err != nil {

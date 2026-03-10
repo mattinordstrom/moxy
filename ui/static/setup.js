@@ -2,7 +2,7 @@ const hotKeysSetup = () => {
     document.getElementById('toggleHotKeys').addEventListener('click', toggleHotKeys);
 
     document.addEventListener('keydown', (event) => {
-        if (localStorage.getItem('moxyUseHotKeys') === 'false') {
+        if (!uiSettings.useHotkeys) {
             return;
         }
 
@@ -34,7 +34,7 @@ const hotKeysSetup = () => {
         }
     });
 
-    if (localStorage.getItem('moxyUseHotKeys') === 'false') {
+    if (!uiSettings.useHotkeys) {
         document.getElementById('toggleHotKeys_bullet').classList.toggle('toggle-btn-bullet-active');
         document.getElementsByClassName('hotkeys-info')[0].style.display = 'none';
     }
@@ -43,7 +43,7 @@ const hotKeysSetup = () => {
 const darkModeSetup = () => {
     document.getElementById('toggleDarkMode').addEventListener('click', toggleDarkMode);
 
-    if (localStorage.getItem('moxyDarkMode') === 'false') {
+    if (!uiSettings.darkMode) {
         toggleDarkMode();
     }
 }
@@ -51,15 +51,15 @@ const darkModeSetup = () => {
 const toggleHotKeys = () => {
     document.getElementById('toggleHotKeys_bullet').classList.toggle('toggle-btn-bullet-active');
 
-    if (localStorage.getItem('moxyUseHotKeys') === 'true' || localStorage.getItem('moxyUseHotKeys') === null) {
-        localStorage.setItem('moxyUseHotKeys', 'false');
+    uiSettings.useHotkeys = !uiSettings.useHotkeys;
 
+    if (!uiSettings.useHotkeys) {
         document.getElementsByClassName('hotkeys-info')[0].style.display = 'none';
     } else {
-        localStorage.setItem('moxyUseHotKeys', 'true');
-
         document.getElementsByClassName('hotkeys-info')[0].style.display = '';
     }
+
+    saveUISettings();
 }
 
 const toggleDarkMode = () => {
@@ -68,17 +68,17 @@ const toggleDarkMode = () => {
     let darkModeLink = document.getElementById('darkModeStylesheet');
     if (darkModeLink) {
         darkModeLink.remove();
-        localStorage.setItem('moxyDarkMode', 'false');
-
+        uiSettings.darkMode = false;
     } else {
         darkModeLink = document.createElement('link');
         darkModeLink.id = 'darkModeStylesheet';
         darkModeLink.rel = 'stylesheet';
         darkModeLink.href = '/ui/static/style/style_dark.css';
         document.head.appendChild(darkModeLink);
-        localStorage.setItem('moxyDarkMode', 'true');
-
+        uiSettings.darkMode = true;
     }
+
+    saveUISettings();
 }
 
 const toggleFullcreen = () => {

@@ -8,3 +8,4 @@ ui/tests/playwright-report/
 ui/tests/test-results/
 https/moxyserver.crt
 https/moxyserver.key
+ui/settings.json

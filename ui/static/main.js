@@ -1,9 +1,34 @@
+let uiSettings = { darkMode: true, useHotkeys: true };
+
+const fetchUISettings = async () => {
+    try {
+        const response = await fetch('/moxyadminui/uisettings');
+        if (response.ok) {
+            uiSettings = await response.json();
+        }
+    } catch (error) {
+        console.error('Fetch error uisettings:', error);
+    }
+}
+
+const saveUISettings = async () => {
+    try {
+        await fetch('/moxyadminui/uisettings', {
+            method: "POST",
+            body: JSON.stringify(uiSettings),
+        });
+    } catch (error) {
+        console.error('POST error uisettings:', error);
+    }
+}
+
 const initFunc = async () => {
     console.log("initFunc");
 
     await fetchMockDef();
     await fetchProxyDef();
     await fetchSettings();
+    await fetchUISettings();
 
     hotKeysSetup();
     darkModeSetup();

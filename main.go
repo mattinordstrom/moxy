@@ -127,6 +127,11 @@ func firstTimeSetup() {
 	if err != nil {
 		fmt.Println("File copy failed:", err)
 	}
+
+	_, err = ut.CopyFile("templates/settings_template.json", "ui/settings.json")
+	if err != nil {
+		fmt.Println("File copy failed:", err)
+	}
 }
 
 func replaceAbsPaths(filename string) {
