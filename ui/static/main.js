@@ -490,20 +490,96 @@ const updateProxydef = async (evt) => {
 
 const moveMock = (evt) => {
     let mocks = MockDefModule.get();
+    const index = Number(evt.id.split('_').slice(-1)[0]);
+    const way = evt.id.split('_')[1];
 
     if(moveEntity(evt, mocks)) {
         MockDefModule.set(mocks);
-        resetAndSync("mock");
+
+        const container = document.getElementById('mock-content-container');
+        const targetIndex = way === 'up' ? index - 1 : way === 'down' ? index + 1 : way === 'first' ? 0 : mocks.length - 1;
+
+        animateMove(container, index, targetIndex, () => resetAndSync("mock"));
     }
 }
 
 const moveProxy = (evt) => {
     let proxies = ProxyDefModule.get();
+    const index = Number(evt.id.split('_').slice(-1)[0]);
+    const way = evt.id.split('_')[1];
 
     if(moveEntity(evt, proxies)) {
         ProxyDefModule.set(proxies);
-        resetAndSync("proxy");
+
+        const container = document.getElementById('proxy-content-container');
+        const targetIndex = way === 'up' ? index - 1 : way === 'down' ? index + 1 : way === 'first' ? 0 : proxies.length - 1;
+
+        animateMove(container, index, targetIndex, () => resetAndSync("proxy"));
     }
+}
+
+const animateMove = (container, fromIndex, toIndex, callback) => {
+    const cards = container.querySelectorAll('.proxymock-content');
+    const movedCard = cards[fromIndex];
+
+    if (!movedCard || fromIndex === toIndex) {
+        callback();
+        return;
+    }
+
+    const rects = [];
+    cards.forEach(card => rects.push(card.getBoundingClientRect()));
+
+    const movedTarget = rects[toIndex].top;
+    const movedDelta = movedTarget - rects[fromIndex].top;
+
+    const minIdx = Math.min(fromIndex, toIndex);
+    const maxIdx = Math.max(fromIndex, toIndex);
+    const movingUp = toIndex < fromIndex;
+
+    const affectedCards = [];
+    for (let i = minIdx; i <= maxIdx; i++) {
+        if (i === fromIndex) continue;
+        const card = cards[i];
+        const shiftTarget = movingUp ? rects[i + 1].top : rects[i - 1].top;
+        const shiftDelta = shiftTarget - rects[i].top;
+        affectedCards.push({ card, delta: shiftDelta });
+    }
+
+    movedCard.style.transition = 'none';
+    movedCard.style.transform = '';
+    movedCard.style.zIndex = '1';
+    affectedCards.forEach(({ card }) => {
+        card.style.transition = 'none';
+        card.style.transform = '';
+    });
+
+    const duration = Math.abs(fromIndex - toIndex) === 1 ? '0.25s' : '0.35s';
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            movedCard.style.transition = `transform ${duration} ease`;
+            movedCard.style.transform = `translateY(${movedDelta}px)`;
+
+            affectedCards.forEach(({ card, delta }) => {
+                card.style.transition = `transform ${duration} ease`;
+                card.style.transform = `translateY(${delta}px)`;
+            });
+        });
+    });
+
+    movedCard.addEventListener('transitionend', function handler(e) {
+        if (e.propertyName !== 'transform') return;
+        movedCard.removeEventListener('transitionend', handler);
+        movedCard.style.transition = '';
+        movedCard.style.transform = '';
+        movedCard.style.zIndex = '';
+        affectedCards.forEach(({ card }) => {
+            card.style.transition = '';
+            card.style.transform = '';
+        });
+        callback();
+    });
 }
 
 const moveEntity = (evt, arr) => {
