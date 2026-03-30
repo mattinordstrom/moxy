@@ -113,7 +113,7 @@ footer.expanded {
 .square {
     height: 10px;
     width: 10px;
-    background-color: green;
+    background-color: rgb(83, 167, 195);
     display: inline-block;
 }
 
