@@ -307,7 +307,25 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 
 	resWriter.WriteHeader(fresp.StatusCode)
 
-	if _, err := io.Copy(resWriter, fresp.Body); err != nil {
+	// NOTE: Use this to temporarily log response body for specific URL
+	urlMatchForLogging := "api/someurl-test-123-test"
+	if strings.Contains(newURL, urlMatchForLogging) {
+		bodyBytes, err := io.ReadAll(fresp.Body)
+		if err != nil {
+			utils.LogError("Failed to read response body: ", err)
+			updateAdminWithLatest("Failed to read response body", utils.EventTypeError, map[string]interface{}{})
+
+			return
+		}
+
+		fmt.Printf("\n\x1b[36m[Response body for %s]\x1b[0m\n", urlMatchForLogging)
+		fmt.Println(string(bodyBytes))
+
+		if _, err := resWriter.Write(bodyBytes); err != nil {
+			utils.LogError("Failed to write response body: ", err)
+			updateAdminWithLatest("Failed to write response body", utils.EventTypeError, map[string]interface{}{})
+		}
+	} else if _, err := io.Copy(resWriter, fresp.Body); err != nil {
 		utils.LogError("Failed to copy response body: ", err)
 		updateAdminWithLatest("Failed to copy response body", utils.EventTypeError, map[string]interface{}{})
 	}
