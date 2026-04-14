@@ -291,6 +291,20 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				filePath = reqData.File
 			}
 
+			basePath, err := filepath.Abs(config.AppConfig.Defaults.PayloadArchivePath)
+			if err != nil {
+				http.Error(resWriter, "Invalid archive path", http.StatusInternalServerError)
+
+				return
+			}
+
+			resolvedPath, err := filepath.Abs(filePath)
+			if err != nil || !strings.HasPrefix(resolvedPath, basePath) {
+				http.Error(resWriter, "Invalid file path", http.StatusBadRequest)
+
+				return
+			}
+
 			jsonData, err = json.MarshalIndent(payload, "", "  ")
 			if err != nil {
 				http.Error(resWriter, err.Error(), http.StatusInternalServerError)
@@ -299,7 +313,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			}
 
 			const filePermission = 0o600
-			errr := os.WriteFile(filePath, jsonData, filePermission)
+			errr := os.WriteFile(resolvedPath, jsonData, filePermission)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
 
