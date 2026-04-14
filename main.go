@@ -89,6 +89,7 @@ func PrintInitSetup() {
 	if err != nil {
 		log.Fatalf("Failed to load proxy definitions: %v", err)
 	}
+
 	fmt.Println(ut.ColorGreen + "-------- Proxydef --------" + ut.ColorReset)
 
 	for _, proxyEntity := range proxyObjArr {
@@ -148,6 +149,7 @@ func replaceAbsPaths(filename string) {
 	normalizedPath := filepath.ToSlash(absDir)
 	placeholder := "/absolute_path_to_proj_dir/moxy"
 
+	filename = filepath.Clean(filename)
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -156,7 +158,7 @@ func replaceAbsPaths(filename string) {
 	updated := strings.ReplaceAll(string(data), placeholder, normalizedPath)
 
 	const filePermission = 0o600
-	errr := os.WriteFile(filename, []byte(updated), filePermission)
+	errr := os.WriteFile(filepath.Clean(filename), []byte(updated), filePermission) //nolint:gosec // only called with hardcoded filenames
 	if errr != nil {
 		log.Fatal(errr)
 	}

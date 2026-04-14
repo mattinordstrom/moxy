@@ -47,6 +47,7 @@ func CreateHTTPListener(sFlag bool) {
 	http.HandleFunc("/moxyws", handleWebSocket)
 
 	http.HandleFunc("/moxywsmock", handleWebSocketWSMock)
+
 	go handleWSMockMessages()
 
 	// http.HandleFunc("/", HTTPHandler)
@@ -58,6 +59,7 @@ func CreateHTTPListener(sFlag bool) {
 		} else {
 			resWriter.Header().Set("Access-Control-Allow-Origin", "*")
 		}
+
 		resWriter.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
 		resWriter.Header().Set("Access-Control-Allow-Headers", "*")
 		resWriter.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -80,11 +82,13 @@ func CreateHTTPListener(sFlag bool) {
 	}
 
 	if sFlag {
-		if err := server.ListenAndServeTLS("https/moxyserver.crt", "https/moxyserver.key"); err != nil {
+		err := server.ListenAndServeTLS("https/moxyserver.crt", "https/moxyserver.key")
+		if err != nil {
 			log.Fatalf("Failed to start HTTPS server: %v", err)
 		}
 	} else {
-		if err := server.ListenAndServe(); err != nil {
+		err := server.ListenAndServe()
+		if err != nil {
 			log.Fatalf("Failed to start HTTP server: %v", err)
 		}
 	}
@@ -162,7 +166,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 				}
 
 				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, string(jsonPayload)),
-					utils.EventTypeMock, map[string]interface{}{})
+					utils.EventTypeMock, map[string]any{})
 
 				fmt.Println(utils.GetMockEventString(mockEntity, true, string(jsonPayload)))
 			} else {
@@ -172,7 +176,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 				payloadFromFile, err := utils.GetJSONPayloadFromAbsolutePath(payloadPath)
 				if err != nil {
 					utils.LogError("Error: ", err)
-					updateAdminWithLatest(err.Error(), utils.EventTypeError, map[string]interface{}{})
+					updateAdminWithLatest(err.Error(), utils.EventTypeError, map[string]any{})
 
 					return
 				}
@@ -185,7 +189,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 				}
 
 				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, payloadPath),
-					utils.EventTypeMock, map[string]interface{}{})
+					utils.EventTypeMock, map[string]any{})
 
 				fmt.Println(utils.GetMockEventString(mockEntity, true, payloadPath))
 			}
@@ -226,9 +230,10 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 				fmt.Println(utils.GetProxyEventString(reqURL, proxyEntity.Target, req.Method+" ", false))
 				// headers
 				var sBuilder strings.Builder
+
 				for name, values := range req.Header {
 					hValues := strings.Join(values, ", ")
-					sBuilder.WriteString(fmt.Sprintf("%s: %s | ", name, hValues))
+					fmt.Fprintf(&sBuilder, "%s: %s | ", name, hValues)
 				}
 
 				headerString := sBuilder.String()
@@ -249,7 +254,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 				bodyStr := string(bodyBytes)
 				fmt.Println(bodyStr)
 
-				extras := map[string]interface{}{"body": bodyStr, "headers": headerString, "httpMethod": req.Method}
+				extras := map[string]any{"body": bodyStr, "headers": headerString, "httpMethod": req.Method}
 
 				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy, extras)
 
@@ -258,7 +263,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 
 				fmt.Println(" ")
 			} else {
-				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy, map[string]interface{}{})
+				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy, map[string]any{})
 				fmt.Println(utils.GetProxyEventString(reqURL, proxyEntity.Target, "", false))
 			}
 
@@ -268,7 +273,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 
 	if newURL == "" {
 		newURL = DefaultRoute + reqURL
-		updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy, map[string]interface{}{})
+		updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy, map[string]any{})
 		fmt.Println(utils.GetProxyEventString(reqURL, DefaultRoute, "", true))
 	}
 
@@ -279,20 +284,18 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 	freq, err := createReqFromReq(req, newURL)
 	if err != nil {
 		utils.LogError("", err)
-		resWriter.WriteHeader(http.StatusBadGateway)
-		fmt.Fprintf(resWriter, "Error: Failed to create request for %s", newURL)
-		updateAdminWithLatest("Error: Failed to create request for "+newURL, utils.EventTypeError, map[string]interface{}{})
+		http.Error(resWriter, "Error: Failed to create request for "+newURL, http.StatusBadGateway)
+		updateAdminWithLatest("Error: Failed to create request for "+newURL, utils.EventTypeError, map[string]any{})
 
 		return
 	}
 
-	fresp, resperr := ForwardClient.Do(freq)
+	fresp, resperr := ForwardClient.Do(freq) //nolint:gosec // SSRF is intentional — Moxy is a proxy that forwards to configured targets
 	if resperr != nil {
 		utils.LogError("", resperr)
-		resWriter.WriteHeader(http.StatusBadGateway)
-		fmt.Fprintf(resWriter, "Error: No response from %s", newURL)
+		http.Error(resWriter, "Error: No response from "+newURL, http.StatusBadGateway)
 
-		updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError, map[string]interface{}{})
+		updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError, map[string]any{})
 
 		return
 	}
@@ -313,7 +316,7 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 		bodyBytes, err := io.ReadAll(fresp.Body)
 		if err != nil {
 			utils.LogError("Failed to read response body: ", err)
-			updateAdminWithLatest("Failed to read response body", utils.EventTypeError, map[string]interface{}{})
+			updateAdminWithLatest("Failed to read response body", utils.EventTypeError, map[string]any{})
 
 			return
 		}
@@ -323,10 +326,10 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 
 		if _, err := resWriter.Write(bodyBytes); err != nil {
 			utils.LogError("Failed to write response body: ", err)
-			updateAdminWithLatest("Failed to write response body", utils.EventTypeError, map[string]interface{}{})
+			updateAdminWithLatest("Failed to write response body", utils.EventTypeError, map[string]any{})
 		}
 	} else if _, err := io.Copy(resWriter, fresp.Body); err != nil {
 		utils.LogError("Failed to copy response body: ", err)
-		updateAdminWithLatest("Failed to copy response body", utils.EventTypeError, map[string]interface{}{})
+		updateAdminWithLatest("Failed to copy response body", utils.EventTypeError, map[string]any{})
 	}
 }

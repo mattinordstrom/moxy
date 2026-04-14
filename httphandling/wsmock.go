@@ -44,6 +44,7 @@ func handleWebSocketWSMock(w http.ResponseWriter, r *http.Request) {
 
 			break
 		}
+
 		broadcast <- msg
 	}
 }
@@ -53,7 +54,7 @@ func handleWSMockMessages() {
 		msg := <-broadcast
 
 		fmt.Print(utils.ColorYellow + string(msg) + utils.ColorReset + "\n")
-		updateAdminWithLatest(string(msg), utils.EventTypeWSMock, map[string]interface{}{})
+		updateAdminWithLatest(string(msg), utils.EventTypeWSMock, map[string]any{})
 
 		lock.Lock()
 		for client := range clients {

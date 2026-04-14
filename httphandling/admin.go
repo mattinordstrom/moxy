@@ -18,10 +18,10 @@ import (
 )
 
 type WebSocketMessage struct {
-	Type      string                 `json:"type"`
-	Message   string                 `json:"message"`
-	Extras    map[string]interface{} `json:"extras,omitempty"`
-	Timestamp string                 `json:"timestamp"`
+	Type      string         `json:"type"`
+	Message   string         `json:"message"`
+	Extras    map[string]any `json:"extras,omitempty"`
+	Timestamp string         `json:"timestamp"`
 }
 
 type Settings struct {
@@ -74,12 +74,12 @@ func (wc *WebSocketConnection) writePump() {
 		}
 
 		wc.mutex.Lock()
-		if err := wc.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
-			wc.mutex.Unlock()
+		err := wc.Conn.WriteMessage(websocket.TextMessage, message)
+		wc.mutex.Unlock()
 
+		if err != nil {
 			break
 		}
-		wc.mutex.Unlock()
 	}
 }
 
@@ -100,6 +100,7 @@ func handleWebSocket(resWriter http.ResponseWriter, req *http.Request) {
 	}
 
 	connMutex.Lock()
+
 	currentWSConnection = NewWebSocketConnection(conn)
 	go currentWSConnection.writePump()
 	connMutex.Unlock()
@@ -110,7 +111,10 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 
 	switch reqURL {
 	case "/moxyadminui/mockdef", "/moxyadminui/proxydef":
-		jsonName := reqURL[strings.LastIndex(reqURL, "/")+1:]
+		jsonName := "mockdef"
+		if reqURL == "/moxyadminui/proxydef" {
+			jsonName = "proxydef"
+		}
 
 		if req.Method == http.MethodPost {
 			jsonData, err := io.ReadAll(req.Body)
@@ -121,7 +125,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			}
 			defer req.Body.Close()
 
-			var data interface{}
+			var data any
 			if reqURL == "/moxyadminui/mockdef" && !config.AppConfig.Admin.AutoSortJSONKeys {
 				data = &[]models.Mock{}
 			}
@@ -141,6 +145,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			}
 
 			const filePermission = 0o600
+
 			errr := os.WriteFile(jsonName+".json", jsonData, filePermission)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
@@ -160,7 +165,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			}
 			defer req.Body.Close()
 
-			var data map[string]interface{}
+			var data map[string]any
 
 			err = json.Unmarshal(jsonData, &data)
 			if err != nil {
@@ -218,7 +223,8 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 
 		resWriter.Header().Set("Content-Type", "application/json")
 
-		if _, err := resWriter.Write(jsonResponse); err != nil {
+		_, err = resWriter.Write(jsonResponse)
+		if err != nil {
 			// Since headers are already sent, we can't send a new HTTP status code.
 			// Log the error instead.
 			utils.LogError("Error writing response: ", err)
@@ -236,15 +242,16 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			defer req.Body.Close()
 
 			type RequestData struct {
-				File    string      `json:"file"`
-				Payload interface{} `json:"payload"`
+				File    string `json:"file"`
+				Payload any    `json:"payload"`
 			}
+
 			type RequestDataNoAutoSort struct {
 				File    string          `json:"file"`
 				Payload json.RawMessage `json:"payload"`
 			}
 
-			var data interface{}
+			var data any
 			if !config.AppConfig.Admin.AutoSortJSONKeys {
 				data = &RequestDataNoAutoSort{}
 			} else {
@@ -258,7 +265,8 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			var payload interface{}
+			var payload any
+
 			var filePath string
 
 			if !config.AppConfig.Admin.AutoSortJSONKeys {
@@ -268,6 +276,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 
 					return
 				}
+
 				payload = reqData.Payload
 				filePath = reqData.File
 			} else {
@@ -277,6 +286,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 
 					return
 				}
+
 				payload = reqData.Payload
 				filePath = reqData.File
 			}
@@ -297,6 +307,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			}
 		} else {
 			queryParams := req.URL.Query()
+
 			value, exists := queryParams["file"]
 			if !exists {
 				log.Println("Parameter 'file' not found")
@@ -332,18 +343,21 @@ func closeConnectionWithMessage(conn *websocket.Conn, message string) {
 	msg := websocket.FormatCloseMessage(websocket.CloseNormalClosure, message)
 
 	deadline := time.Now().Add(time.Second * time.Duration(closeMessageDeadLine))
-	if err := conn.SetWriteDeadline(deadline); err != nil {
+
+	err := conn.SetWriteDeadline(deadline)
+	if err != nil {
 		utils.LogError("Error SetWriteDeadline: ", err)
 	}
 
-	if err := conn.WriteMessage(websocket.CloseMessage, msg); err != nil {
+	err = conn.WriteMessage(websocket.CloseMessage, msg)
+	if err != nil {
 		utils.LogError("Error WriteMessage close msg: ", err)
 	}
 
 	conn.Close()
 }
 
-func updateAdminWithLatest(evtStr string, evtType string, extras map[string]interface{}) {
+func updateAdminWithLatest(evtStr string, evtType string, extras map[string]any) {
 	connMutex.Lock()
 	wsConn := currentWSConnection
 	connMutex.Unlock()

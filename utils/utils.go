@@ -115,7 +115,9 @@ func GetJSONPayloadFromAbsolutePath(absoluteFilePath string) ([]byte, error) {
 
 func getJSONResultBytes(filename string, absolutePath bool) ([]byte, error) {
 	var fullJSONPath string
+
 	var jsonPath string
+
 	var err error
 
 	if absolutePath {
@@ -142,7 +144,8 @@ func LogError(str string, err error) {
 }
 
 func CopyFile(src, dst string) (bool, error) {
-	if _, err := os.Stat(dst); err == nil {
+	_, err := os.Stat(dst)
+	if err == nil {
 		// Destination file exists, do nothing
 		return true, nil
 	} else if !os.IsNotExist(err) {
