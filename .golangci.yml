@@ -9,10 +9,15 @@ linters:
     - funlen
     - gochecknoglobals
     - gocognit
+    - gocyclo
     - godox
+    - lll
+    - maintidx
     - nestif
+    - noinlineerr
     - noctx
     - wsl
+    - wsl_v5
   exclusions:
     generated: lax
     presets:

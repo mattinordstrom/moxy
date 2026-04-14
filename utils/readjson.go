@@ -21,12 +21,13 @@ var (
 
 func readJSONFileWithCache(filePath string) ([]byte, error) {
 	rwMu.RLock()
+
 	item, exists := cache[filePath]
+
 	rwMu.RUnlock()
 
 	if exists && time.Since(item.Timestamp) < cacheDuration {
 		// fmt.Println("READJSON: Using cached data for", filePath)
-
 		return item.Data, nil
 	}
 

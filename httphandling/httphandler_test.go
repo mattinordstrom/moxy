@@ -39,7 +39,7 @@ func TestProxyResponseFail(t *testing.T) {
 	resRecorder := testhelper.GetRecorder(req)
 
 	actualBody := resRecorder.Body.String()
-	expectedBody := "Error: No response from http://localhost:8088/api/test123"
+	expectedBody := "Error: No response from http://localhost:8088/api/test123\n"
 
 	if actualBody != expectedBody {
 		testhelper.PrintAssertError(t, expectedBody, actualBody,
