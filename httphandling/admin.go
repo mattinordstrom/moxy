@@ -25,10 +25,11 @@ type WebSocketMessage struct {
 }
 
 type Settings struct {
-	Port         int      `json:"port"`
-	DefaultRoute string   `json:"defaultRoute"`
-	PayloadFiles []string `json:"payloadFiles"`
-	PayloadPath  string   `json:"payloadPath"`
+	Port          int      `json:"port"`
+	DefaultRoute  string   `json:"defaultRoute"`
+	PayloadFiles  []string `json:"payloadFiles"`
+	PayloadPath   string   `json:"payloadPath"`
+	MaxLogEntries *int     `json:"maxLogEntries"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -208,10 +209,11 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 		}
 
 		data := Settings{
-			Port:         Port,
-			DefaultRoute: DefaultRoute,
-			PayloadFiles: payloadFiles,
-			PayloadPath:  config.AppConfig.Defaults.PayloadArchivePath,
+			Port:          Port,
+			DefaultRoute:  DefaultRoute,
+			PayloadFiles:  payloadFiles,
+			PayloadPath:   config.AppConfig.Defaults.PayloadArchivePath,
+			MaxLogEntries: config.AppConfig.Admin.MaxLogEntries,
 		}
 
 		jsonResponse, err := json.Marshal(data)

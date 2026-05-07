@@ -192,7 +192,16 @@ const wsSetup = () => {
             logMsg = '<span class="square square-red"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + evtJson.message + '<br />';
         }
 
-        document.getElementById("footer-log").insertAdjacentHTML('afterbegin', logMsg);
+        const footer = document.getElementById("footer-log");
+        footer.insertAdjacentHTML('afterbegin', '<span class="log-entry">' + logMsg + '</span>');
+
+        const max = window.MoxyMaxLogEntries;
+        if (typeof max === 'number' && max > 0) {
+            const entries = footer.querySelectorAll('.log-entry');
+            for (let i = entries.length - 1; i >= max; i--) {
+                entries[i].remove();
+            }
+        }
     };
 
     wSocket.onopen = () => {

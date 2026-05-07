@@ -100,6 +100,16 @@ const fetchSettings = async () => {
 
         PayloadFromFileModule.setPayloadPath(data['payloadPath']);
         PayloadFromFileModule.setPayloadFiles(data['payloadFiles']);
+
+        const maxLogEntries = data['maxLogEntries'];
+        window.MoxyMaxLogEntries = (typeof maxLogEntries === 'number') ? maxLogEntries : null;
+        const maxLogLabel = document.getElementById('max-log-entries-label');
+        if (window.MoxyMaxLogEntries !== null) {
+            maxLogLabel.textContent = 'Max log entries: ' + window.MoxyMaxLogEntries;
+            maxLogLabel.style.display = '';
+        } else {
+            maxLogLabel.style.display = 'none';
+        }
     } catch (error) {
         console.error('Fetch error settings:', error);
     }

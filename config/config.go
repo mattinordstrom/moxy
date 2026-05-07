@@ -19,6 +19,7 @@ type DefaultConfig struct {
 }
 type AdminConfig struct {
 	AutoSortJSONKeys bool `yaml:"autoSortJsonKeys"`
+	MaxLogEntries    *int `yaml:"maxLogEntries"`
 }
 
 var AppConfig Config

@@ -52,6 +52,7 @@ async function setupRoutes(page: Page): Promise<void> {
         defaultRoute: 'http://localhost:8089',
         payloadFiles: ['/home/testuser/projects/moxyarchive/payloads/example.json'],
         payloadPath: '/home/testuser/projects/moxyarchive/payloads/',
+        maxLogEntries: null,
       }),
     });
   });

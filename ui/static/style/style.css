@@ -147,6 +147,12 @@ footer.expanded {
     right: 1%;
 }
 
+.max-log-label {
+    font-size: 11px;
+    color: #888;
+    margin-right: 8px;
+}
+
 .proxymock-content-container {
     margin-left: 2px;
     margin-right: 6px;
