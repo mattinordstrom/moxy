@@ -57,13 +57,20 @@ const initFunc = async () => {
     clickEvtSetup();
 }
 
+let lastDefsText = { mock: null, proxy: null };
+
+const fetchDefsText = async (type) => {
+    const response = await fetch('/moxyadminui/' + type + 'def');
+    return await response.text();
+}
+
 const fetchMockDef = async () => {
     try {
-        const response = await fetch('/moxyadminui/mockdef');
-        const data = await response.json();
-        
-        MockDefModule.set(MockDefModule.stringifyPayload(data));
-        renderMockdefs(data);
+        const text = await fetchDefsText('mock');
+        lastDefsText.mock = text;
+
+        MockDefModule.set(MockDefModule.stringifyPayload(JSON.parse(text)));
+        rerenderDefs('mock');
     } catch (error) {
         console.error('Fetch error mockdef:', error);
     }
@@ -71,14 +78,108 @@ const fetchMockDef = async () => {
 
 const fetchProxyDef = async () => {
     try {
-        const response = await fetch('/moxyadminui/proxydef');
-        const data = await response.json();
-        
-        ProxyDefModule.set(data);
-        renderProxydefs(data);
+        const text = await fetchDefsText('proxy');
+        lastDefsText.proxy = text;
+
+        ProxyDefModule.set(JSON.parse(text));
+        rerenderDefs('proxy');
     } catch (error) {
         console.error('Fetch error proxydef:', error);
     }
+}
+
+const normalizeFieldValue = (value) => {
+    const parsed = safelyParseJSON(value);
+    return (parsed !== null && typeof parsed === 'object') ? JSON.stringify(parsed) : String(parsed);
+}
+
+// Only keystrokes that are not saved yet are worth protecting from a rebuild
+const focusedFieldHasUnsavedEdit = (type) => {
+    const container = document.getElementById(type + '-content-container');
+    const focused = document.activeElement;
+
+    if(!container || !focused || !container.contains(focused)) {
+        return false;
+    }
+
+    const tag = focused.tagName.toLowerCase();
+    if(tag !== 'textarea' && !(tag === 'input' && focused.type !== 'checkbox')) {
+        return false;
+    }
+
+    const name = focused.id.split('_')[0];
+    const index = Number(focused.id.split('_').slice(-1)[0]);
+    const entity = (type === 'mock' ? MockDefModule.get() : ProxyDefModule.get())[index];
+
+    if(!entity) {
+        return false;
+    }
+
+    if(name === 'payload') {
+        return normalizeFieldValue(focused.value) !== normalizeFieldValue(entity.payload);
+    }
+
+    return focused.value !== String(entity[name] === undefined || entity[name] === null ? '' : entity[name]);
+}
+
+let pendingReload = { mock: false, proxy: false };
+
+const schedulePendingReload = (type) => {
+    if(pendingReload[type]) {
+        return;
+    }
+
+    pendingReload[type] = true;
+    const container = document.getElementById(type + '-content-container');
+
+    const onFocusOut = () => {
+        container.removeEventListener('focusout', onFocusOut);
+        pendingReload[type] = false;
+
+        // let the change handler's POST land first, otherwise we refetch the pre-save content
+        setTimeout(() => {
+            reloadDefsFromDisk(type + 'def.json').then((result) => {
+                if(result) {
+                    appendLogEntry('<span class="square"></span> ' + result + '<br />');
+                }
+            });
+        }, 300);
+    };
+
+    container.addEventListener('focusout', onFocusOut);
+}
+
+const reloadDefsFromDisk = async (file) => {
+    const type = file === 'proxydef.json' ? 'proxy' : 'mock';
+
+    let text;
+    try {
+        text = await fetchDefsText(type);
+    } catch (error) {
+        console.error('Fetch error on reload:', error);
+        return null;
+    }
+
+    if(text === lastDefsText[type]) {
+        return null;
+    }
+
+    if(focusedFieldHasUnsavedEdit(type)) {
+        schedulePendingReload(type);
+        return type + 'def.json changed on disk &mdash; will reload when you finish editing';
+    }
+
+    lastDefsText[type] = text;
+
+    if(type === 'mock') {
+        MockDefModule.set(MockDefModule.stringifyPayload(JSON.parse(text)));
+    } else {
+        ProxyDefModule.set(JSON.parse(text));
+    }
+
+    rerenderDefs(type);
+
+    return type + 'def.json changed on disk &mdash; reloaded';
 }
 
 const fetchSettings = async () => {
@@ -461,6 +562,8 @@ const updateMockdef = async (evt) => {
             body: JSON.stringify(mocksWithJSONPayload),
         });
 
+        lastDefsText.mock = await fetchDefsText('mock');
+
         console.log("Success POST mockdef");
     } catch (error) {
         console.error('POST error mockdef:', error);
@@ -491,6 +594,8 @@ const updateProxydef = async (evt) => {
             method: "POST",
             body: JSON.stringify(ProxyDefModule.get()),
         });
+
+        lastDefsText.proxy = await fetchDefsText('proxy');
 
         console.log("Success POST proxydef");
     } catch (error) {
@@ -624,11 +729,10 @@ const moveEntity = (evt, arr) => {
     return changed;
 }
 
-const resetAndSync = (type) => {
+const rerenderDefs = (type) => {
     if(type === "mock") {
         document.getElementById('mock-content-container').innerHTML = "";
         renderMockdefs();
-        updateMockdef();
 
         const compactIsActive = document.getElementById('toggle_compactlist_bullet').classList.contains('action-btn-bullet-active');
         if(compactIsActive) {
@@ -639,10 +743,20 @@ const resetAndSync = (type) => {
 
     document.getElementById('proxy-content-container').innerHTML = "";
     renderProxydefs();
-    updateProxydef();
 
     const compactIsActive = document.getElementById('toggle_compactlist_proxy_bullet').classList.contains('action-btn-bullet-active');
     if(compactIsActive) {
         showCompactListProxy(true);
     }
+}
+
+const resetAndSync = (type) => {
+    rerenderDefs(type);
+
+    if(type === "mock") {
+        updateMockdef();
+        return;
+    }
+
+    updateProxydef();
 }

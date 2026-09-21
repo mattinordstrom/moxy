@@ -163,6 +163,19 @@ const closeCurlDialog = () => {
     document.getElementById("curl-dialog").style.display = "none";
 }
 
+const appendLogEntry = (logMsg) => {
+    const footer = document.getElementById("footer-log");
+    footer.insertAdjacentHTML('afterbegin', '<span class="log-entry">' + logMsg + '</span>');
+
+    const max = window.MoxyMaxLogEntries;
+    if (typeof max === 'number' && max > 0) {
+        const entries = footer.querySelectorAll('.log-entry');
+        for (let i = entries.length - 1; i >= max; i--) {
+            entries[i].remove();
+        }
+    }
+}
+
 const wsSetup = () => {
     WSModule.createWSocket();
     const wSocket = WSModule.getWSocket();
@@ -170,6 +183,16 @@ const wsSetup = () => {
 
     wSocket.onmessage = (event) => {
         const evtJson = JSON.parse(event.data);
+
+        if(evtJson.type === 'defschanged') {
+            reloadDefsFromDisk(evtJson.extras && evtJson.extras.file).then((result) => {
+                if(result) {
+                    appendLogEntry('<span class="square"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + result + '<br />');
+                }
+            });
+            return;
+        }
+
         let logMsg = '';
         if(evtJson.type === 'mock' || evtJson.type === 'proxy') {
             let output = evtJson.message;
@@ -192,16 +215,7 @@ const wsSetup = () => {
             logMsg = '<span class="square square-red"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + evtJson.message + '<br />';
         }
 
-        const footer = document.getElementById("footer-log");
-        footer.insertAdjacentHTML('afterbegin', '<span class="log-entry">' + logMsg + '</span>');
-
-        const max = window.MoxyMaxLogEntries;
-        if (typeof max === 'number' && max > 0) {
-            const entries = footer.querySelectorAll('.log-entry');
-            for (let i = entries.length - 1; i >= max; i--) {
-                entries[i].remove();
-            }
-        }
+        appendLogEntry(logMsg);
     };
 
     wSocket.onopen = () => {

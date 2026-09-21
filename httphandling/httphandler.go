@@ -43,12 +43,14 @@ func CreateHTTPListener(sFlag bool) {
 	}
 
 	fs := http.FileServer(http.Dir("ui/static"))
-	http.Handle("/ui/static/", http.StripPrefix("/ui/static/", fs))
+	http.Handle("/ui/static/", http.StripPrefix("/ui/static/", revalidate(fs)))
 	http.HandleFunc("/moxyws", handleWebSocket)
 
 	http.HandleFunc("/moxywsmock", handleWebSocketWSMock)
 
 	go handleWSMockMessages()
+
+	go watchDefFiles()
 
 	// http.HandleFunc("/", HTTPHandler)
 	http.HandleFunc("/", func(resWriter http.ResponseWriter, req *http.Request) {
@@ -92,6 +94,14 @@ func CreateHTTPListener(sFlag bool) {
 			log.Fatalf("Failed to start HTTP server: %v", err)
 		}
 	}
+}
+
+// Without this the browser heuristically caches the admin UI js and silently runs a stale build.
+func revalidate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(resWriter http.ResponseWriter, req *http.Request) {
+		resWriter.Header().Set("Cache-Control", "no-cache")
+		next.ServeHTTP(resWriter, req)
+	})
 }
 
 func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {

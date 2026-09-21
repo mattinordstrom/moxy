@@ -30,10 +30,11 @@ var (
 )
 
 var (
-	EventTypeMock   = "mock"
-	EventTypeProxy  = "proxy"
-	EventTypeWSMock = "wsmock"
-	EventTypeError  = "error"
+	EventTypeMock        = "mock"
+	EventTypeProxy       = "proxy"
+	EventTypeWSMock      = "wsmock"
+	EventTypeError       = "error"
+	EventTypeDefsChanged = "defschanged"
 )
 
 func UsePayloadFromFile(mockEntity models.Mock) bool {

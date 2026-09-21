@@ -58,6 +58,13 @@ or you can use https://github.com/mattinordstrom/moxy_ws_mock
   
 
 
+## Claude Code skill:
+Set up mocks and proxies by asking instead of editing json by hand ("mock GET /api/users/123 as a 500").
+See [claude-skill/README.md](claude-skill/README.md) for how to install it.
+<br>  
+  
+
+
 ## Quick notes:
 - Json files will be read for every request (cached for 1.5 sec), so no need to restart moxy after change in json file
 - Mocks will always go before proxies.  
