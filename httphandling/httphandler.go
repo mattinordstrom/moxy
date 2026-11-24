@@ -17,8 +17,9 @@ import (
 )
 
 var (
-	Port         = 9097
-	DefaultRoute = ""
+	Port                = 9097
+	DefaultRoute        = ""
+	DefaultPreserveHost = false
 )
 
 var (
@@ -215,6 +216,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []models.Proxy, reqURL string) {
 	newURL := ""
+	preserveHost := DefaultPreserveHost
 
 	for _, proxyEntity := range objArr {
 		trimmedURL := strings.TrimRight(strings.TrimLeft(proxyEntity.URLPart, "/"), "/")
@@ -234,6 +236,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 
 		if isMatch {
 			newURL = strings.TrimRight(proxyEntity.Target, "/") + "/" + strings.TrimLeft(reqURL, "/")
+			preserveHost = proxyEntity.PreserveHost
 
 			if proxyEntity.Verbose {
 				fmt.Println(" ")
@@ -287,11 +290,11 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 		fmt.Println(utils.GetProxyEventString(reqURL, DefaultRoute, "", true))
 	}
 
-	forwardReq(resWriter, req, newURL)
+	forwardReq(resWriter, req, newURL, preserveHost)
 }
 
-func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string) {
-	freq, err := createReqFromReq(req, newURL)
+func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string, preserveHost bool) {
+	freq, err := createReqFromReq(req, newURL, preserveHost)
 	if err != nil {
 		utils.LogError("", err)
 		http.Error(resWriter, "Error: Failed to create request for "+newURL, http.StatusBadGateway)

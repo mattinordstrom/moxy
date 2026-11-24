@@ -197,7 +197,7 @@ const fetchSettings = async () => {
         const data = await response.json();
 
         document.getElementById('header-port').innerHTML = data['port'];
-        document.getElementById('header-route').innerHTML = data['defaultRoute'];
+        document.getElementById('header-route').innerHTML = data['defaultRoute'] + (data['defaultPreserveHost'] ? ' (preserve host)' : '');
 
         PayloadFromFileModule.setPayloadPath(data['payloadPath']);
         PayloadFromFileModule.setPayloadFiles(data['payloadFiles']);
@@ -297,6 +297,7 @@ const renderProxydefs = () => {
                 <div class="proxy-obj proxy_compact_exclude"><label for="target_${i}">target:</label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="target_${i}" id="target_${i}" value="${proxyEntityData['target']}"></input></div>
                 <div class="proxy-obj"><label for="urlpart_proxy_${i}"><b>urlpart:</b></label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_proxy_${i}" id="urlpart_proxy_${i}" value="${proxyEntityData['urlpart']}"></input></div>
                 <div class="proxy-obj proxy_compact_exclude"><label for="verbose_${i}">verbose:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="verbose_${i}" id="verbose_${i}" ${proxyEntityData['verbose'] ? "checked" : ""}></input></div> 
+                <div class="proxy-obj proxy_compact_exclude"><label for="preserveHost_${i}" title="Forward the incoming Host header instead of the target's (never for localhost)">preserveHost:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="preserveHost_${i}" id="preserveHost_${i}" ${proxyEntityData['preserveHost'] ? "checked" : ""}></input></div>
             </div>`;
 
         document.getElementById('proxy-content-container').innerHTML += proxyEntity + "<br />";

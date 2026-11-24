@@ -1,5 +1,6 @@
 defaults:
   route: "http://localhost:8099"
+  preserveHost: false
   payloadArchivePath: "/absolute_path_to_proj_dir/moxy/archive/"
 
 admin:

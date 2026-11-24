@@ -36,6 +36,7 @@ moxyctl.py add-mock --urlpart /api/slow --freeze 30000                # simulate
 moxyctl.py add-mock --urlpart /api/boom --status 500 --payload '{"error":"nope"}'
 
 moxyctl.py add-proxy --urlpart /api/orders --target http://localhost:8080 --verbose
+moxyctl.py add-proxy --urlpart /api/common --target http://route-utv.fnox.se --preserve-host
 
 moxyctl.py set-active mock off --urlpart /api/users   # disable without deleting
 moxyctl.py set-active proxy on --index 0
@@ -114,8 +115,16 @@ responses, and dynamic/templated payloads. A mock is one fixed body per `urlpart
 `proxydef.json`:
 
 ```json
-{ "active": true, "comment": "optional", "target": "http://localhost:8080",
-  "urlpart": "/api/whatever", "verbose": false }
+{ "active": true, "comment": "optional", "preserveHost": false,
+  "target": "http://localhost:8080", "urlpart": "/api/whatever", "verbose": false }
 ```
 
 `verbose` on a proxy logs headers and body and enables "copy as curl" in the admin UI.
+
+`preserveHost` forwards the incoming `Host` header instead of the target's. Use it when the
+target routes on Host (an ingress like route-utv) and the client sets Host explicitly, e.g. a
+Java backend whose `httpClient` points at moxy. A loopback Host (`localhost:9097`) is never
+forwarded, so it is harmless for browsers. The default route has the same switch as
+`defaults.preserveHost` in moxy's `config.yml`, which needs a moxy restart; ask the user to
+change it rather than editing that file. Symptom of a missing `preserveHost`: the target
+answers a plain-text `404 page not found` for a path that works when called directly.

@@ -27,6 +27,7 @@ type WebSocketMessage struct {
 type Settings struct {
 	Port          int      `json:"port"`
 	DefaultRoute  string   `json:"defaultRoute"`
+	PreserveHost  bool     `json:"defaultPreserveHost"`
 	PayloadFiles  []string `json:"payloadFiles"`
 	PayloadPath   string   `json:"payloadPath"`
 	MaxLogEntries *int     `json:"maxLogEntries"`
@@ -211,6 +212,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 		data := Settings{
 			Port:          Port,
 			DefaultRoute:  DefaultRoute,
+			PreserveHost:  DefaultPreserveHost,
 			PayloadFiles:  payloadFiles,
 			PayloadPath:   config.AppConfig.Defaults.PayloadArchivePath,
 			MaxLogEntries: config.AppConfig.Admin.MaxLogEntries,

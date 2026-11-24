@@ -35,6 +35,7 @@ func main() {
 	}
 
 	hh.DefaultRoute = config.AppConfig.Defaults.DefaultRoute
+	hh.DefaultPreserveHost = config.AppConfig.Defaults.DefaultPreserveHost
 
 	protocol := "http"
 	if *sFlag {
@@ -46,7 +47,12 @@ func main() {
 	fmt.Println(" ")
 	fmt.Println(bullet + " Run on:        " + protocol + "://localhost:" + strconv.Itoa(hh.Port))
 	fmt.Println(bullet + " WS mock        " + "ws://localhost:" + strconv.Itoa(hh.Port) + "/moxywsmock")
-	fmt.Println(bullet + " Default route: " + hh.DefaultRoute)
+	defaultRouteInfo := hh.DefaultRoute
+	if hh.DefaultPreserveHost {
+		defaultRouteInfo += " (preserve host)"
+	}
+
+	fmt.Println(bullet + " Default route: " + defaultRouteInfo)
 	fmt.Println(bullet + " Admin UI:      " + protocol + "://localhost:" + strconv.Itoa(hh.Port) + "/moxyadminui")
 	fmt.Println(" ")
 	fmt.Println(" ")
