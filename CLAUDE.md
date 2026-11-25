@@ -14,6 +14,7 @@ go run main.go          # Default port 9097
 go run main.go -p 8080  # Custom port
 go run main.go -s       # HTTPS mode
 go run main.go -l       # List redirects without starting server
+go run main.go -a       # Listen on all interfaces (default: localhost only)
 ```
 
 ### Test

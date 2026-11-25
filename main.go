@@ -22,6 +22,7 @@ func main() {
 	pFlag := flag.Int("p", hh.Port, "Specify port to run on")
 	lFlag := flag.Bool("l", false, "List redirects without starting server")
 	sFlag := flag.Bool("s", false, "Run on https")
+	aFlag := flag.Bool("a", false, "Listen on all network interfaces (default: localhost only)")
 
 	flag.Parse()
 
@@ -60,7 +61,7 @@ func main() {
 	PrintInitSetup()
 
 	if !*lFlag {
-		hh.CreateHTTPListener(*sFlag)
+		hh.CreateHTTPListener(*sFlag, *aFlag)
 	}
 }
 

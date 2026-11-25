@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -28,9 +29,46 @@ var (
 	ServerIdleTimeout  = 45
 )
 
-func CreateHTTPListener(sFlag bool) {
-	// Start listening
-	fmt.Printf("Now listening on port %s...\n", strconv.Itoa(Port))
+func ListenAddrs(allInterfaces bool) []string {
+	port := strconv.Itoa(Port)
+	if allInterfaces {
+		return []string{":" + port}
+	}
+
+	return []string{net.JoinHostPort("127.0.0.1", port), net.JoinHostPort("::1", port)}
+}
+
+func listen(allInterfaces bool) []net.Listener {
+	var listeners []net.Listener
+
+	for i, addr := range ListenAddrs(allInterfaces) {
+		listener, err := net.Listen("tcp", addr)
+		if err != nil {
+			// The IPv6 loopback is optional since IPv6 can be disabled on the host
+			if i > 0 {
+				log.Printf("Not listening on %s: %v", addr, err)
+
+				continue
+			}
+
+			log.Fatalf("Failed to listen on %s: %v", addr, err)
+		}
+
+		listeners = append(listeners, listener)
+	}
+
+	return listeners
+}
+
+func CreateHTTPListener(sFlag bool, allInterfaces bool) {
+	listeners := listen(allInterfaces)
+
+	addrs := make([]string, 0, len(listeners))
+	for _, listener := range listeners {
+		addrs = append(addrs, listener.Addr().String())
+	}
+
+	fmt.Printf("Now listening on %s...\n", strings.Join(addrs, ", "))
 
 	transp := &http.Transport{
 		// #nosec G402
@@ -78,23 +116,24 @@ func CreateHTTPListener(sFlag bool) {
 	})
 
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", Port),
 		ReadTimeout:  time.Duration(ServerReadTimeout) * time.Second,
 		WriteTimeout: time.Duration(ServerWriteTimeout) * time.Second,
 		IdleTimeout:  time.Duration(ServerIdleTimeout) * time.Second,
 	}
 
-	if sFlag {
-		err := server.ListenAndServeTLS("https/moxyserver.crt", "https/moxyserver.key")
-		if err != nil {
-			log.Fatalf("Failed to start HTTPS server: %v", err)
-		}
-	} else {
-		err := server.ListenAndServe()
-		if err != nil {
-			log.Fatalf("Failed to start HTTP server: %v", err)
-		}
+	serveErrs := make(chan error, len(listeners))
+
+	for _, listener := range listeners {
+		go func() {
+			if sFlag {
+				serveErrs <- server.ServeTLS(listener, "https/moxyserver.crt", "https/moxyserver.key")
+			} else {
+				serveErrs <- server.Serve(listener)
+			}
+		}()
 	}
+
+	log.Fatalf("Server stopped: %v", <-serveErrs)
 }
 
 // Without this the browser heuristically caches the admin UI js and silently runs a stale build.

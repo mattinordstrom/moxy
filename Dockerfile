@@ -10,4 +10,4 @@ COPY . .
 EXPOSE 9097
 
 # Command to run the Go application directly
-CMD ["go", "run", "main.go"]
+CMD ["go", "run", "main.go", "-a"]
