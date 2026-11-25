@@ -2,12 +2,13 @@ package httphandling
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
@@ -295,19 +296,20 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				filePath = reqData.File
 			}
 
-			basePath, err := filepath.Abs(config.AppConfig.Defaults.PayloadArchivePath)
+			absPath, err := filepath.Abs(filePath)
 			if err != nil {
-				http.Error(resWriter, "Invalid archive path", http.StatusInternalServerError)
-
-				return
-			}
-
-			resolvedPath, err := filepath.Abs(filePath)
-			if err != nil || !strings.HasPrefix(resolvedPath, basePath) {
 				http.Error(resWriter, "Invalid file path", http.StatusBadRequest)
 
 				return
 			}
+
+			root, relPath, err := resolveInArchive(absPath)
+			if err != nil {
+				writeArchivePathError(resWriter, err)
+
+				return
+			}
+			defer root.Close()
 
 			jsonData, err = json.MarshalIndent(payload, "", "  ")
 			if err != nil {
@@ -317,7 +319,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			}
 
 			const filePermission = 0o600
-			errr := os.WriteFile(resolvedPath, jsonData, filePermission)
+			errr := root.WriteFile(relPath, jsonData, filePermission)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
 
@@ -334,27 +336,56 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			basePath, err := filepath.Abs(config.AppConfig.Defaults.PayloadArchivePath)
+			root, relPath, err := resolveInArchive(value[0])
 			if err != nil {
-				http.Error(resWriter, "Invalid archive path", http.StatusInternalServerError)
+				writeArchivePathError(resWriter, err)
 
 				return
 			}
+			defer root.Close()
 
-			requestedPath := filepath.Join(basePath, value[0])
-			resolvedPath, err := filepath.Abs(requestedPath)
-			if err != nil || !strings.HasPrefix(resolvedPath, basePath) {
-				http.Error(resWriter, "Invalid file path", http.StatusBadRequest)
-
-				return
-			}
-
-			http.ServeFile(resWriter, req, resolvedPath)
+			http.ServeFileFS(resWriter, req, root.FS(), filepath.ToSlash(relPath)) //nolint:gosec // root.FS() confines access to the archive
 			// log.Println(req.Method + " " + fmt.Sprintf(value[0]))
 		}
 	default:
 		return
 	}
+}
+
+var errOutsideArchive = errors.New("path is outside the payload archive")
+
+func resolveInArchive(path string) (*os.Root, string, error) {
+	basePath, err := filepath.Abs(config.AppConfig.Defaults.PayloadArchivePath)
+	if err != nil {
+		return nil, "", fmt.Errorf("resolve archive path: %w", err)
+	}
+
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(basePath, path)
+	}
+
+	relPath, err := filepath.Rel(basePath, path)
+	if err != nil || !filepath.IsLocal(relPath) {
+		return nil, "", errOutsideArchive
+	}
+
+	// os.Root also stops symlinks inside the archive from escaping it
+	root, err := os.OpenRoot(basePath)
+	if err != nil {
+		return nil, "", fmt.Errorf("open archive: %w", err)
+	}
+
+	return root, relPath, nil
+}
+
+func writeArchivePathError(resWriter http.ResponseWriter, err error) {
+	if errors.Is(err, errOutsideArchive) {
+		http.Error(resWriter, "Invalid file path", http.StatusBadRequest)
+
+		return
+	}
+
+	http.Error(resWriter, "Invalid archive path", http.StatusInternalServerError)
 }
 
 func closeConnectionWithMessage(conn *websocket.Conn, message string) {

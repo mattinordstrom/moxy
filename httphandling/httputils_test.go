@@ -10,19 +10,24 @@ import (
 func TestCreateReqFromReqHost(t *testing.T) {
 	t.Parallel()
 
+	const (
+		incomingHost = "apps-develop.alfa.fnox.se"
+		targetHost   = "route-utv.fnox.se"
+	)
+
 	tests := []struct {
 		name         string
 		incomingHost string
 		preserveHost bool
 		expectedHost string
 	}{
-		{"target host when not preserving", "apps-develop.alfa.fnox.se", false, "route-utv.fnox.se"},
-		{"incoming host when preserving", "apps-develop.alfa.fnox.se", true, "apps-develop.alfa.fnox.se"},
-		{"incoming host with port when preserving", "apps-develop.alfa.fnox.se:8443", true, "apps-develop.alfa.fnox.se:8443"},
-		{"target host when incoming is localhost", "localhost:9097", true, "route-utv.fnox.se"},
-		{"target host when incoming is 127.0.0.1", "127.0.0.1:9097", true, "route-utv.fnox.se"},
-		{"target host when incoming is ::1", "[::1]:9097", true, "route-utv.fnox.se"},
-		{"target host when incoming is empty", "", true, "route-utv.fnox.se"},
+		{"target host when not preserving", incomingHost, false, targetHost},
+		{"incoming host when preserving", incomingHost, true, incomingHost},
+		{"incoming host with port when preserving", incomingHost + ":8443", true, incomingHost + ":8443"},
+		{"target host when incoming is localhost", "localhost:9097", true, targetHost},
+		{"target host when incoming is 127.0.0.1", "127.0.0.1:9097", true, targetHost},
+		{"target host when incoming is ::1", "[::1]:9097", true, targetHost},
+		{"target host when incoming is empty", "", true, targetHost},
 	}
 
 	for _, test := range tests {
@@ -46,7 +51,7 @@ func TestCreateReqFromReqHost(t *testing.T) {
 				t.Errorf("expected Host %q, got %q", test.expectedHost, freq.Host)
 			}
 
-			if freq.URL.Host != "route-utv.fnox.se" {
+			if freq.URL.Host != targetHost {
 				t.Errorf("expected request to be sent to route-utv.fnox.se, got %q", freq.URL.Host)
 			}
 
