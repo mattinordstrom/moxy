@@ -16,8 +16,9 @@ var upgraderWSMock = websocket.Upgrader{
 }
 
 const (
-	wsMockClientQueue  = 256
-	wsMockWriteTimeout = 10 * time.Second
+	wsMockClientQueue    = 256
+	wsMockWriteTimeout   = 10 * time.Second
+	wsMockTerminalMaxLen = 1000
 )
 
 var (
@@ -98,7 +99,7 @@ func handleWSMockMessages() {
 	for {
 		msg := <-broadcast
 
-		fmt.Print(utils.ColorYellow + utils.SanitizeTerminal(string(msg)) + utils.ColorReset + "\n")
+		fmt.Print(utils.ColorYellow + utils.SanitizeTerminal(terminalPreview(msg)) + utils.ColorReset + "\n")
 		updateAdminWithLatest(string(msg), utils.EventTypeWSMock, map[string]any{})
 
 		lock.Lock()
@@ -115,4 +116,14 @@ func handleWSMockMessages() {
 		}
 		lock.Unlock()
 	}
+}
+
+// A big message would otherwise flood the terminal; the admin UI still gets all of it.
+func terminalPreview(msg []byte) string {
+	runes := []rune(string(msg))
+	if len(runes) <= wsMockTerminalMaxLen {
+		return string(msg)
+	}
+
+	return fmt.Sprintf("%s… (%d bytes)", string(runes[:wsMockTerminalMaxLen]), len(msg))
 }

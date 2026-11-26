@@ -42,3 +42,5 @@ var startWSMockBroadcaster sync.Once
 func StartWSMockBroadcaster() {
 	startWSMockBroadcaster.Do(func() { go handleWSMockMessages() })
 }
+
+var TerminalPreview = terminalPreview

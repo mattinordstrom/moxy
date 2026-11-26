@@ -89,3 +89,18 @@ func TestWSMockStuckClientDoesNotStallOthers(t *testing.T) {
 		t.Fatal("reading client stopped getting messages while another client was stuck")
 	}
 }
+
+func TestWSMockTerminalPreview(t *testing.T) {
+	t.Parallel()
+
+	if got := httphandling.TerminalPreview([]byte("short åäö")); got != "short åäö" {
+		t.Errorf("short message changed: %q", got)
+	}
+
+	long := strings.Repeat("ö", 1500)
+
+	got := httphandling.TerminalPreview([]byte(long))
+	if want := strings.Repeat("ö", 1000) + "… (3000 bytes)"; got != want {
+		t.Errorf("unexpected preview of %d chars: %q", len([]rune(got)), got[len(got)-20:])
+	}
+}
