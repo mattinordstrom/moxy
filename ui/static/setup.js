@@ -118,7 +118,7 @@ const getCurlString = (evtJson, consolelog) => {
     */
 
     const targetUrl = evtJson.message.substring(evtJson.message.lastIndexOf(' http') + 1)
-    let curlString = "curl --request " + esc(evtJson.extras.httpMethod) + " --location '" + esc(targetUrl) + "' \\" + NEWLINE;
+    let curlString = "curl --request " + esc(shellQuote(evtJson.extras.httpMethod)) + " --location " + esc(shellQuote(targetUrl)) + " \\" + NEWLINE;
 
     let headers = evtJson.extras.headers.split(" | ");
     for(let i = 0; i < headers.length; i++) {
@@ -128,10 +128,10 @@ const getCurlString = (evtJson, consolelog) => {
             }
         }
 
-        curlString += "--header '" + esc(headers[i]) + "' \\" + NEWLINE;
+        curlString += "--header " + esc(shellQuote(headers[i])) + " \\" + NEWLINE;
     }
 
-    curlString += "--data '" + esc(evtJson.extras.body.replace(/'/g, "'\\''")) + "'";
+    curlString += "--data " + esc(shellQuote(evtJson.extras.body));
 
     return curlString;
 }
@@ -145,12 +145,12 @@ const showCurl = (el, evtData) => {
     document.getElementById("curl-dialog-content").innerHTML = getCurlString(evtJson, false);
 }
 
-const copyCurl = () => {
-    const curlContent = document.getElementById('curl-dialog-content')
-        .innerText
-        .replace(/\\\n--/g, '--');
+const curlCopyText = () => document.getElementById('curl-dialog-content')
+    .innerText
+    .replace(/\\\n--/g, '--');
 
-    navigator.clipboard.writeText(curlContent)
+const copyCurl = () => {
+    navigator.clipboard.writeText(curlCopyText())
         .then(() => {
             document.getElementById("copy-curl-status").innerHTML = "Copied!";
         })

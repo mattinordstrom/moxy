@@ -2,6 +2,9 @@ const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'
 
 const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
 
+// Single quotes keep everything literal in sh/bash/zsh, so a logged request can't run code when its curl is pasted
+const shellQuote = (value) => "'" + String(value).replace(/'/g, "'\\''") + "'";
+
 // Works on the JSON source text so big ints, number formatting and key order survive; input must be valid JSON
 const JSONText = (() => {
     const WHITESPACE = ' \t\n\r';
