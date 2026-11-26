@@ -72,7 +72,13 @@ func getPayloadFile(t *testing.T, file string) *httptest.ResponseRecorder {
 func postPayloadFile(t *testing.T, file string) *httptest.ResponseRecorder {
 	t.Helper()
 
-	body := `{"file":` + strconv.Quote(file) + `,"payload":{"written":true}}`
+	return postPayloadFileContent(t, file, `{"written":true}`)
+}
+
+func postPayloadFileContent(t *testing.T, file, payload string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	body := `{"file":` + strconv.Quote(file) + `,"payload":` + payload + `}`
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, payloadFileURL, strings.NewReader(body))
 	req.Host = adminHost
 	req.Header.Set(headerOrigin, "http://"+adminHost)
@@ -117,5 +123,38 @@ func TestPostPayloadFileConfinedToArchive(t *testing.T) {
 
 	if _, err := os.Stat(filepath.Join(sibling, "evil.json")); !os.IsNotExist(err) {
 		t.Errorf("expected nothing written outside the archive, stat err: %v", err)
+	}
+}
+
+//nolint:paralleltest // mutates the global archive path and config
+func TestPostPayloadFileKeepsNumbers(t *testing.T) {
+	archive, _ := setupArchive(t)
+
+	for _, autoSort := range []bool{false, true} {
+		orig := config.AppConfig.Admin.AutoSortJSONKeys
+		config.AppConfig.Admin.AutoSortJSONKeys = autoSort
+
+		file := filepath.Join(archive, "numbers.json")
+		res := postPayloadFileContent(t, file, `{"b":1.10,"a":12345678901234567890}`)
+
+		config.AppConfig.Admin.AutoSortJSONKeys = orig
+
+		if res.Code != http.StatusOK {
+			t.Fatalf("autoSort=%v: expected save to succeed, got %d %q", autoSort, res.Code, res.Body.String())
+		}
+
+		content, err := os.ReadFile(file)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		want := "{\n  \"b\": 1.10,\n  \"a\": 12345678901234567890\n}"
+		if autoSort {
+			want = "{\n  \"a\": 12345678901234567890,\n  \"b\": 1.10\n}"
+		}
+
+		if string(content) != want {
+			t.Errorf("autoSort=%v: expected %q, got %q", autoSort, want, content)
+		}
 	}
 }

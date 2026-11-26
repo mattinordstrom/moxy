@@ -11,23 +11,42 @@ const fetchUISettings = async () => {
     }
 }
 
-const saveUISettings = async () => {
+const saveUISettings = () => postJSON('/moxyadminui/uisettings', JSON.stringify(uiSettings), 'UI settings');
+
+const logError = (message) => {
+    console.error(message);
+    appendLogEntry('<span class="square square-red"></span> ' + escapeHTML(message) + '<br />');
+}
+
+const logInfo = (message) => {
+    appendLogEntry('<span class="square"></span> ' + escapeHTML(message) + '<br />');
+}
+
+const postJSON = async (url, body, what) => {
     try {
-        await fetch('/moxyadminui/uisettings', {
+        const response = await fetch(url, {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(uiSettings),
+            body: body,
         });
+
+        if (!response.ok) {
+            logError('Saving ' + what + ' failed (' + response.status + '): ' + (await response.text()).trim());
+            return false;
+        }
+
+        return true;
     } catch (error) {
-        console.error('POST error uisettings:', error);
+        logError('Saving ' + what + ' failed: ' + error.message);
+        return false;
     }
 }
 
 const initFunc = async () => {
     console.log("initFunc");
 
-    await fetchMockDef();
-    await fetchProxyDef();
+    await loadDefs('mock');
+    await loadDefs('proxy');
     await fetchSettings();
     await fetchUISettings();
 
@@ -60,38 +79,89 @@ const initFunc = async () => {
 
 let lastDefsText = { mock: null, proxy: null };
 
+const defsFile = (type) => type + 'def.json';
+
 const fetchDefsText = async (type) => {
-    const response = await fetch('/moxyadminui/' + type + 'def');
-    return await response.text();
-}
+    const response = await fetch('/moxyadminui/' + type + 'def', { cache: 'no-store' });
+    const text = await response.text();
 
-const fetchMockDef = async () => {
-    try {
-        const text = await fetchDefsText('mock');
-        lastDefsText.mock = text;
-
-        MockDefModule.set(MockDefModule.stringifyPayload(JSON.parse(text)));
-        rerenderDefs('mock');
-    } catch (error) {
-        console.error('Fetch error mockdef:', error);
+    if (!response.ok) {
+        throw new Error('HTTP ' + response.status + ': ' + text.trim());
     }
+
+    return text;
 }
 
-const fetchProxyDef = async () => {
-    try {
-        const text = await fetchDefsText('proxy');
-        lastDefsText.proxy = text;
-
+const applyDefsText = (type, text) => {
+    if(type === 'mock') {
+        MockDefModule.set(MockDefModule.parse(text));
+    } else {
         ProxyDefModule.set(JSON.parse(text));
-        rerenderDefs('proxy');
-    } catch (error) {
-        console.error('Fetch error proxydef:', error);
     }
+
+    lastDefsText[type] = text;
+}
+
+const getDefs = (type) => type === 'mock' ? MockDefModule.get() : ProxyDefModule.get();
+
+const setDefs = (type, defs) => type === 'mock' ? MockDefModule.set(defs) : ProxyDefModule.set(defs);
+
+const loadDefs = async (type) => {
+    try {
+        applyDefsText(type, await fetchDefsText(type));
+    } catch (error) {
+        logError('Could not load ' + defsFile(type) + ', changes will not be saved until it loads: ' + error.message);
+    }
+
+    rerenderDefs(type);
+}
+
+// Saving always starts from what is on disk, so a stale tab or an external edit is never overwritten
+const syncWithDisk = async (type) => {
+    try {
+        const text = await fetchDefsText(type);
+        if(text === lastDefsText[type]) {
+            return 'unchanged';
+        }
+
+        applyDefsText(type, text);
+        rerenderDefs(type);
+
+        return 'changed';
+    } catch (error) {
+        logError('Not saved, could not read ' + defsFile(type) + ': ' + error.message);
+        return null;
+    }
+}
+
+const defsUpToDate = async (type) => {
+    const state = await syncWithDisk(type);
+    if(state === 'changed') {
+        logInfo(defsFile(type) + ' changed on disk \u2014 reloaded, please try again');
+    }
+
+    return state === 'unchanged';
+}
+
+const saveDefs = async (type) => {
+    const body = type === 'mock' ? MockDefModule.toJSON() : JSON.stringify(ProxyDefModule.get());
+
+    if(!await postJSON('/moxyadminui/' + type + 'def', body, defsFile(type))) {
+        return;
+    }
+
+    try {
+        lastDefsText[type] = await fetchDefsText(type);
+    } catch (error) {
+        lastDefsText[type] = null;
+    }
+
+    console.log('Success POST ' + type + 'def');
 }
 
 const normalizeFieldValue = (value) => {
     const parsed = safelyParseJSON(value);
-    return (parsed !== null && typeof parsed === 'object') ? JSON.stringify(parsed) : String(parsed);
+    return (parsed !== null && typeof parsed === 'object') ? JSONText.compact(value) : String(parsed);
 }
 
 // Only keystrokes that are not saved yet are worth protecting from a rebuild
@@ -170,12 +240,11 @@ const reloadDefsFromDisk = async (file) => {
         return type + 'def.json changed on disk &mdash; will reload when you finish editing';
     }
 
-    lastDefsText[type] = text;
-
-    if(type === 'mock') {
-        MockDefModule.set(MockDefModule.stringifyPayload(JSON.parse(text)));
-    } else {
-        ProxyDefModule.set(JSON.parse(text));
+    try {
+        applyDefsText(type, text);
+    } catch (error) {
+        logError(defsFile(type) + ' changed on disk but could not be loaded: ' + error.message);
+        return null;
     }
 
     rerenderDefs(type);
@@ -245,8 +314,10 @@ const renderMockdefs = () => {
 
         let payload = mockEntityData['payload'];
         const jsonPayload = safelyParseJSON(payload);
-        if (typeof jsonPayload === 'object') {
-            payload = JSON.stringify(jsonPayload, null, 2);
+        if (jsonPayload === null) {
+            payload = 'null';
+        } else if (typeof jsonPayload === 'object') {
+            payload = JSONText.pretty(payload);
         }
 
         mockEntity += `
@@ -307,8 +378,13 @@ const renderProxydefs = () => {
 }
 
 const maximizeMock = (index) => {
-    document.getElementById('payload_'+index).style.height = '470px';
-    document.getElementById('payload_'+index).style.width = '680px';
+    const payload = document.getElementById('payload_'+index);
+    if(!payload) {
+        return;
+    }
+
+    payload.style.height = '470px';
+    payload.style.width = '680px';
 }
 
 const showCompactList = (forceActive) => {
@@ -432,11 +508,10 @@ const editFile = async (btnEl, fullPath) => {
 
     const response = await fetch('/moxyadminui/editpayloadfile?file=' + filename, { cache: 'no-store' });
 
-    let data = '';
-    
+    let data = await response.text();
     try {
-        data = await response.json();
-        data = JSON.stringify(data, null, 2);
+        JSON.parse(data);
+        data = JSONText.pretty(data);
     } catch (error) {
         console.warn("Received response could not be parsed as JSON");
     }
@@ -451,21 +526,18 @@ const editFile = async (btnEl, fullPath) => {
 
 const updatePayloadFile = async (el) => {
     const filename = document.getElementById('editfiletitle').innerText;
-    const newPayload = JSON.parse(el.value);
-    
-    try {
-        await fetch('/moxyadminui/editpayloadfile', {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                file: PayloadFromFileModule.getPayloadPath() + filename, 
-                payload: newPayload
-            }),
-        });
 
-        console.log("Success POST editpayloadfile");
+    try {
+        JSON.parse(el.value);
     } catch (error) {
-        console.error('POST error editpayloadfile:', error);
+        logError('Not saved, ' + filename + ' is not valid JSON: ' + error.message);
+        return;
+    }
+
+    const body = '{"file":' + JSON.stringify(PayloadFromFileModule.getPayloadPath() + filename) + ',"payload":' + JSONText.compact(el.value) + '}';
+
+    if(await postJSON('/moxyadminui/editpayloadfile', body, filename)) {
+        console.log("Success POST editpayloadfile");
     }
 }
 
@@ -474,170 +546,154 @@ const closeListPayloadFiles = () => {
     document.getElementById('payload_files_btn_bullet').classList.toggle('action-btn-bullet-active');
 }
 
-const addMock = () => {
-    const mock = {
-        "active": true,
-        "freezetimems": 0,
-        "method": "GET",
-        "payload": '{ "response": "abc123" }',
-        "payloadFromFile": "",
-        "statuscode": 200,
-        "urlpart": "/api/whatever/someendpoint"
-    };
+const addDef = async (type, def) => {
+    if(await syncWithDisk(type) === null) {
+        return;
+    }
 
-    MockDefModule.set([mock, ...MockDefModule.get()]);
-
-    resetAndSync("mock");
+    setDefs(type, [def, ...getDefs(type)]);
+    rerenderDefs(type);
+    await saveDefs(type);
 }
 
-const addProxy = () => {
-    const proxy = {
-        "active": true,
-        "target": "http://localhost:8080",
-        "urlpart": "/api/test123",
-        "verbose": false
-    };
+const addMock = () => addDef('mock', {
+    "active": true,
+    "freezetimems": 0,
+    "method": "GET",
+    "payload": '{ "response": "abc123" }',
+    "payloadFromFile": "",
+    "statuscode": 200,
+    "urlpart": "/api/whatever/someendpoint"
+});
 
-    ProxyDefModule.set([proxy, ...ProxyDefModule.get()]);
+const addProxy = () => addDef('proxy', {
+    "active": true,
+    "target": "http://localhost:8080",
+    "urlpart": "/api/test123",
+    "verbose": false
+});
 
-    resetAndSync("proxy");
+const removeDef = async (type, el) => {
+    if(!await defsUpToDate(type)) {
+        return;
+    }
+
+    const index = Number(el.id.split('_').slice(-1)[0]);
+    if(type === 'mock') {
+        MockDefModule.remove(index);
+    } else {
+        ProxyDefModule.remove(index);
+    }
+
+    rerenderDefs(type);
+    await saveDefs(type);
 }
 
-const removeMock = (evt) => {
-    const index = Number(evt.id.split('_').slice(-1)[0]);
-    MockDefModule.remove(index);
+const removeMock = (el) => removeDef('mock', el);
 
-    resetAndSync("mock");
+const removeProxy = (el) => removeDef('proxy', el);
+
+const updateDef = async (type, index, name, value) => {
+    const state = await syncWithDisk(type);
+    if(state === null) {
+        return;
+    }
+
+    const defs = getDefs(type);
+    if(!defs[index]) {
+        logInfo(defsFile(type) + ' changed on disk \u2014 reloaded, please try again');
+        return;
+    }
+
+    defs[index][name] = value;
+    setDefs(type, defs);
+
+    if(state === 'changed') {
+        rerenderDefs(type);
+        logInfo(defsFile(type) + ' changed on disk \u2014 your edit was applied on top of it');
+    }
+
+    await saveDefs(type);
 }
 
-const removeProxy = (evt) => {
-    const index = Number(evt.id.split('_').slice(-1)[0]);
-    ProxyDefModule.remove(index);
+const mockFieldValue = (el, name) => {
+    const tag = el.tagName.toLowerCase();
 
-    resetAndSync("proxy");
-}
-
-const updateMockdef = async (evt) => {
-    if(evt){
-        const index = Number(evt.id.split('_').slice(-1)[0]);
-        const name = evt.id.split('_')[0];
-
-        const mocks = MockDefModule.get();
-        let mock = mocks[index];
-
-        if(evt.tagName.toLowerCase() === "input") {
-            if(evt.type === "checkbox") {
-                mock[name] = evt.checked;
-            } else if(evt.type === "number") { 
-                mock[name] = parseInt(evt.value);
-            } else if(evt.type === "text") {
-                mock[name] = evt.value;
-            } 
-
-            if(name === "freezetimems" || name === "statuscode") {
-                evt.value = Math.abs(parseInt(evt.value));
-                mock[name] = parseInt(evt.value);
-            }
-            if(name === "statuscode" && (!evt.value || evt.value === "0")) {
-                evt.value = "200";
-                mock[name] = parseInt(evt.value);
-            }
-        } else if(evt.tagName.toLowerCase() === "select") {
-            mock[name] = evt.value;
-        } else if(evt.tagName.toLowerCase() === "textarea") {
-            if(name === "payload" && !isNaN(evt.value) && evt.value !== "") {
-                mock[name] = parseFloat(evt.value);
-            } else if(name === "payloadFromFile" && evt.value.startsWith('~')) {
-                alert('Absolute path cannot start with ~');
-                return;
-            } else {
-                mock[name] = evt.value;
-            }
+    if(tag === "input") {
+        if(el.type === "checkbox") {
+            return el.checked;
         }
 
-        MockDefModule.set(mocks);
-    }
+        if(name === "freezetimems" || name === "statuscode") {
+            el.value = Math.abs(parseInt(el.value));
+            if(name === "statuscode" && (!el.value || el.value === "0")) {
+                el.value = "200";
+            }
 
-    try {
-        const mocksWithJSONPayload = MockDefModule.getWithJSONPayload();
-
-        await fetch('/moxyadminui/mockdef', {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(mocksWithJSONPayload),
-        });
-
-        lastDefsText.mock = await fetchDefsText('mock');
-
-        console.log("Success POST mockdef");
-    } catch (error) {
-        console.error('POST error mockdef:', error);
-    }
-}
-
-const updateProxydef = async (evt) => {
-    if(evt){
-        const index = Number(evt.id.split('_').slice(-1)[0]);
-        const name = evt.id.split('_')[0];
-
-        const proxies = ProxyDefModule.get();
-        let proxy = proxies[index];
-
-        if(evt.tagName.toLowerCase() === "input") {
-            if(evt.type === "checkbox") {
-                proxy[name] = evt.checked;
-            } else if(evt.type === "text") {
-                proxy[name] = evt.value;
-            } 
+            return parseInt(el.value);
         }
 
-        ProxyDefModule.set(proxies);
+        return el.value;
     }
 
-    try {
-        await fetch('/moxyadminui/proxydef', {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(ProxyDefModule.get()),
-        });
+    if(tag === "textarea") {
+        if(name === "payload" && !isNaN(el.value) && el.value !== "") {
+            return parseFloat(el.value);
+        }
 
-        lastDefsText.proxy = await fetchDefsText('proxy');
-
-        console.log("Success POST proxydef");
-    } catch (error) {
-        console.error('POST error proxydef:', error);
+        if(name === "payloadFromFile" && el.value.startsWith('~')) {
+            alert('Absolute path cannot start with ~');
+            return undefined;
+        }
     }
+
+    return el.value;
 }
 
-const moveMock = (evt) => {
-    let mocks = MockDefModule.get();
-    const index = Number(evt.id.split('_').slice(-1)[0]);
-    const way = evt.id.split('_')[1];
-
-    if(moveEntity(evt, mocks)) {
-        MockDefModule.set(mocks);
-
-        const container = document.getElementById('mock-content-container');
-        const targetIndex = way === 'up' ? index - 1 : way === 'down' ? index + 1 : way === 'first' ? 0 : mocks.length - 1;
-
-        animateMove(container, index, targetIndex, () => resetAndSync("mock"));
+const updateMockdef = (el) => {
+    const name = el.id.split('_')[0];
+    const value = mockFieldValue(el, name);
+    if(value === undefined) {
+        return;
     }
+
+    return updateDef('mock', Number(el.id.split('_').slice(-1)[0]), name, value);
 }
 
-const moveProxy = (evt) => {
-    let proxies = ProxyDefModule.get();
-    const index = Number(evt.id.split('_').slice(-1)[0]);
-    const way = evt.id.split('_')[1];
+const updateProxydef = (el) => {
+    const name = el.id.split('_')[0];
+    const value = el.type === "checkbox" ? el.checked : el.value;
 
-    if(moveEntity(evt, proxies)) {
-        ProxyDefModule.set(proxies);
-
-        const container = document.getElementById('proxy-content-container');
-        const targetIndex = way === 'up' ? index - 1 : way === 'down' ? index + 1 : way === 'first' ? 0 : proxies.length - 1;
-
-        animateMove(container, index, targetIndex, () => resetAndSync("proxy"));
-    }
+    return updateDef('proxy', Number(el.id.split('_').slice(-1)[0]), name, value);
 }
+
+const moveDef = async (type, el) => {
+    if(!await defsUpToDate(type)) {
+        return;
+    }
+
+    const defs = getDefs(type);
+    const index = Number(el.id.split('_').slice(-1)[0]);
+    const way = el.id.split('_')[1];
+
+    if(!moveEntity(el, defs)) {
+        return;
+    }
+
+    setDefs(type, defs);
+
+    const container = document.getElementById(type + '-content-container');
+    const targetIndex = way === 'up' ? index - 1 : way === 'down' ? index + 1 : way === 'first' ? 0 : defs.length - 1;
+
+    animateMove(container, index, targetIndex, () => {
+        rerenderDefs(type);
+        saveDefs(type);
+    });
+}
+
+const moveMock = (el) => moveDef('mock', el);
+
+const moveProxy = (el) => moveDef('proxy', el);
 
 const animateMove = (container, fromIndex, toIndex, callback) => {
     const cards = container.querySelectorAll('.proxymock-content');
@@ -754,15 +810,4 @@ const rerenderDefs = (type) => {
     if(compactIsActive) {
         showCompactListProxy(true);
     }
-}
-
-const resetAndSync = (type) => {
-    rerenderDefs(type);
-
-    if(type === "mock") {
-        updateMockdef();
-        return;
-    }
-
-    updateProxydef();
 }

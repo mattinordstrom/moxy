@@ -22,30 +22,41 @@ const MockDefModule = (() => {
         mockDefs.splice(index, 1);
     }
 
-    const stringifyPayload = (data) => {
+    // Payloads are kept as their source text, since parsing them would corrupt big ints, 1.10 and key order
+    const parse = (text) => {
+        const data = JSON.parse(text);
+        const sources = JSONText.elementMembers(text, 'payload');
+
         data.forEach((mock, i) => {
-            if(mock.payload && typeof mock.payload === 'object') {
-                mock.payload = JSON.stringify(mock.payload);
+            if(mock.payload !== null && typeof mock.payload === 'object') {
+                mock.payload = JSONText.pretty(sources[i] ?? JSON.stringify(mock.payload));
+            } else if(typeof mock.payload === 'boolean') {
+                mock.payload = String(mock.payload);
             }
         });
 
         return data;
     }
 
-    const getWithJSONPayload = () => {
-        return MockDefModule.get().map(mock => {
-            if (mock.payload && typeof mock.payload !== 'number') {
-                return {
-                    ...mock,
-                    payload: safelyParseJSON(mock.payload)
-                };
-            } else {
-                return { ...mock };
-            }
-        });
+    const payloadJSON = (payload) => {
+        const parsed = safelyParseJSON(payload);
+        if(parsed !== null && typeof parsed === 'object') {
+            return JSONText.compact(payload);
+        }
+
+        return JSON.stringify(parsed);
     }
 
-    return { set, get, remove, stringifyPayload, getWithJSONPayload };
+    const toJSON = () => '[' + mockDefs.map(({ payload, ...rest }) => {
+        const fields = JSON.stringify(rest);
+        if(payload === undefined) {
+            return fields;
+        }
+
+        return fields.slice(0, -1) + (fields === '{}' ? '' : ',') + '"payload":' + payloadJSON(payload) + '}';
+    }).join(',') + ']';
+
+    return { set, get, remove, parse, toJSON };
 })();
 
 const ProxyDefModule = (() => {

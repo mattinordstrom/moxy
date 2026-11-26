@@ -1,6 +1,7 @@
 package httphandling
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -137,7 +138,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				data = &[]models.Mock{}
 			}
 
-			err = json.Unmarshal(jsonData, &data)
+			err = unmarshalKeepNumbers(jsonData, &data)
 			if err != nil {
 				http.Error(resWriter, err.Error(), http.StatusBadRequest)
 
@@ -174,7 +175,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 
 			var data map[string]any
 
-			err = json.Unmarshal(jsonData, &data)
+			err = unmarshalKeepNumbers(jsonData, &data)
 			if err != nil {
 				http.Error(resWriter, err.Error(), http.StatusBadRequest)
 
@@ -268,7 +269,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 				data = &RequestData{}
 			}
 
-			err = json.Unmarshal(jsonData, &data)
+			err = unmarshalKeepNumbers(jsonData, &data)
 			if err != nil {
 				http.Error(resWriter, err.Error(), http.StatusBadRequest)
 
@@ -355,6 +356,26 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 	default:
 		return
 	}
+}
+
+var errTrailingJSON = errors.New("unexpected data after the JSON value")
+
+// UseNumber keeps big ints and number formatting intact when the keys are re-sorted through a map.
+func unmarshalKeepNumbers(data []byte, target any) error {
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
+
+	err := decoder.Decode(target)
+	if err != nil {
+		return fmt.Errorf("decode json: %w", err)
+	}
+
+	_, err = decoder.Token()
+	if !errors.Is(err, io.EOF) {
+		return errTrailingJSON
+	}
+
+	return nil
 }
 
 var errOutsideArchive = errors.New("path is outside the payload archive")

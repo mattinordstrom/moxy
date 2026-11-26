@@ -228,6 +228,15 @@ const wsSetup = () => {
         document.getElementById('header-ws').innerHTML = 'connected <span class="bullet"></span>';
 
         WSModule.setWSAttempts(0);
+
+        // the files may have changed while we were disconnected or another tab had the connection
+        ['mockdef.json', 'proxydef.json'].forEach((file) => {
+            reloadDefsFromDisk(file).then((result) => {
+                if(result) {
+                    appendLogEntry('<span class="square"></span> ' + result + '<br />');
+                }
+            });
+        });
     };
 
     wSocket.onerror = (error)  => {
