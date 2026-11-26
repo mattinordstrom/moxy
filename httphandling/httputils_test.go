@@ -9,31 +9,13 @@ import (
 	"github.com/mattinordstrom/moxy/httphandling"
 )
 
-func TestRewriteProxyRequestHost(t *testing.T) {
+func TestRewriteProxyRequestUsesTargetHost(t *testing.T) {
 	t.Parallel()
 
-	const (
-		incomingHost = "apps-develop.alfa.fnox.se"
-		targetHost   = "route-utv.fnox.se"
-	)
+	const targetHost = "route-utv.fnox.se"
 
-	tests := []struct {
-		name         string
-		incomingHost string
-		preserveHost bool
-		expectedHost string
-	}{
-		{"target host when not preserving", incomingHost, false, targetHost},
-		{"incoming host when preserving", incomingHost, true, incomingHost},
-		{"incoming host with port when preserving", incomingHost + ":8443", true, incomingHost + ":8443"},
-		{"target host when incoming is localhost", adminHost, true, targetHost},
-		{"target host when incoming is 127.0.0.1", ipv4Host, true, targetHost},
-		{"target host when incoming is ::1", ipv6Host, true, targetHost},
-		{"target host when incoming is empty", "", true, targetHost},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+	for _, incomingHost := range []string{"apps-develop.alfa.fnox.se", adminHost, ""} {
+		t.Run(incomingHost, func(t *testing.T) {
 			t.Parallel()
 
 			req, err := http.NewRequest(http.MethodGet, "/api/common/companysettings", nil)
@@ -41,7 +23,7 @@ func TestRewriteProxyRequestHost(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			req.Host = test.incomingHost
+			req.Host = incomingHost
 			req.Header.Set("X-Token", "abc")
 
 			target, err := url.Parse("http://route-utv.fnox.se/api/common/companysettings")
@@ -50,21 +32,16 @@ func TestRewriteProxyRequestHost(t *testing.T) {
 			}
 
 			proxyReq := &httputil.ProxyRequest{In: req, Out: req.Clone(t.Context())}
-			httphandling.RewriteProxyRequest(proxyReq, target, test.preserveHost)
+			httphandling.RewriteProxyRequest(proxyReq, target)
 			freq := proxyReq.Out
 
 			// An empty Host makes the transport send the target's host
-			gotHost := freq.Host
-			if gotHost == "" {
-				gotHost = freq.URL.Host
-			}
-
-			if gotHost != test.expectedHost {
-				t.Errorf("expected Host %q, got %q", test.expectedHost, gotHost)
+			if freq.Host != "" {
+				t.Errorf("expected the target's Host to be used, got %q", freq.Host)
 			}
 
 			if freq.URL.Host != targetHost {
-				t.Errorf("expected request to be sent to route-utv.fnox.se, got %q", freq.URL.Host)
+				t.Errorf("expected request to be sent to %s, got %q", targetHost, freq.URL.Host)
 			}
 
 			if freq.Header.Get("X-Token") != "abc" {

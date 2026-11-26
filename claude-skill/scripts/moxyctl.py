@@ -52,9 +52,8 @@ def describe_mock(idx, m):
 def describe_proxy(idx, p):
     flag = "on " if p.get("active") else "off"
     verbose = " verbose" if p.get("verbose") else ""
-    preserve_host = " preserve-host" if p.get("preserveHost") else ""
     comment = f"  # {p['comment']}" if p.get("comment") else ""
-    return f"[{idx}] {flag} {p.get('urlpart','')} -> {p.get('target','')}{verbose}{preserve_host}{comment}"
+    return f"[{idx}] {flag} {p.get('urlpart','')} -> {p.get('target','')}{verbose}{comment}"
 
 
 def cmd_list(args):
@@ -128,8 +127,6 @@ def cmd_add_proxy(args):
         "urlpart": args.urlpart,
         "verbose": args.verbose,
     }
-    if args.preserve_host:
-        entry["preserveHost"] = True
     if args.comment:
         entry["comment"] = args.comment
 
@@ -215,7 +212,6 @@ def main():
     p.add_argument("--urlpart", required=True)
     p.add_argument("--target", required=True)
     p.add_argument("--verbose", action="store_true")
-    p.add_argument("--preserve-host", action="store_true")
     p.add_argument("--comment")
     p.add_argument("--at-bottom", action="store_true")
     p.set_defaults(func=cmd_add_proxy)

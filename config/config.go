@@ -15,9 +15,8 @@ type Config struct {
 }
 
 type DefaultConfig struct {
-	DefaultRoute        string `yaml:"route"`
-	DefaultPreserveHost bool   `yaml:"preserveHost"`
-	PayloadArchivePath  string `yaml:"payloadArchivePath"`
+	DefaultRoute       string `yaml:"route"`
+	PayloadArchivePath string `yaml:"payloadArchivePath"`
 }
 type CORSConfig struct {
 	AllowedOrigins []string `yaml:"allowedOrigins"`

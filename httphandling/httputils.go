@@ -33,14 +33,9 @@ func newForwardTransport() *http.Transport {
 
 var forwardedHeaders = []string{"X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto"}
 
-func rewriteProxyRequest(proxyReq *httputil.ProxyRequest, target *url.URL, preserveHost bool) {
+func rewriteProxyRequest(proxyReq *httputil.ProxyRequest, target *url.URL) {
 	proxyReq.Out.URL = target
 	proxyReq.Out.Host = ""
-
-	// Go keeps the incoming Host in req.Host, not in req.Header, so it is lost unless copied explicitly.
-	if preserveHost && proxyReq.In.Host != "" && !isLoopbackHost(proxyReq.In.Host) {
-		proxyReq.Out.Host = proxyReq.In.Host
-	}
 
 	// Rewrite strips these, but moxy has always passed on what the client sent
 	for _, header := range forwardedHeaders {

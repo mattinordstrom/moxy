@@ -22,9 +22,8 @@ import (
 )
 
 var (
-	Port                = 9097
-	DefaultRoute        = ""
-	DefaultPreserveHost = false
+	Port         = 9097
+	DefaultRoute = ""
 )
 
 var (
@@ -201,12 +200,10 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []models.Proxy, reqURL string) {
 	newURL := ""
-	preserveHost := DefaultPreserveHost
 
 	for _, proxyEntity := range objArr {
 		if proxyEntity.Active && urlPartMatches(proxyEntity.URLPart, reqURL) {
 			newURL = strings.TrimRight(proxyEntity.Target, "/") + "/" + strings.TrimLeft(reqURL, "/")
-			preserveHost = proxyEntity.PreserveHost
 
 			if proxyEntity.Verbose {
 				fmt.Println(" ")
@@ -260,10 +257,10 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 		fmt.Println(utils.GetProxyEventString(reqURL, DefaultRoute, "", true))
 	}
 
-	forwardReq(resWriter, req, newURL, preserveHost)
+	forwardReq(resWriter, req, newURL)
 }
 
-func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string, preserveHost bool) {
+func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string) {
 	target, err := url.Parse(newURL)
 	if err != nil || target.Host == "" {
 		utils.LogError("Invalid proxy target "+strconv.Quote(newURL)+":", err)
@@ -277,7 +274,7 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string,
 
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(proxyReq *httputil.ProxyRequest) {
-			rewriteProxyRequest(proxyReq, target, preserveHost)
+			rewriteProxyRequest(proxyReq, target)
 		},
 		Transport: ForwardTransport,
 		// Flush every write so streamed responses reach the client as they arrive
