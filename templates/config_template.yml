@@ -6,7 +6,7 @@ defaults:
 
 admin:
   autoSortJsonKeys: false
-  maxLogEntries: null
+  maxLogEntries: 2000
 
 cors:
   # Origins besides localhost whose pages may call moxy from the browser, e.g. "http://myapp.local:3000"
