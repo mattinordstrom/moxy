@@ -235,6 +235,8 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 		} else {
 			http.ServeFile(resWriter, req, "ui/settings.json")
 		}
+	case "/moxyadminui/log":
+		handleEventLogReq(resWriter, req)
 	case "/moxyadminui/settings":
 		payloadFilesInDir, err := os.ReadDir(config.AppConfig.Defaults.PayloadArchivePath)
 		if err != nil {

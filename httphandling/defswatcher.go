@@ -30,6 +30,7 @@ func watchDefFiles() {
 
 			known[file] = fingerprint
 
+			recordEvent(LogEntry{Type: utils.EventTypeDefsChanged, Message: file + " changed"})
 			updateAdminWithLatest(file+" changed", utils.EventTypeDefsChanged,
 				map[string]any{"file": file})
 		}

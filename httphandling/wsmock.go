@@ -55,6 +55,7 @@ func handleWSMockMessages() {
 		updateAdminWithLatest(string(msg), utils.EventTypeWSMock, map[string]any{})
 
 		lock.Lock()
+		recordEvent(LogEntry{Type: utils.EventTypeWSMock, Message: fmt.Sprintf("%d bytes broadcast to %d clients", len(msg), len(clients))})
 		for client := range clients {
 			err := client.WriteMessage(websocket.TextMessage, msg)
 			if err != nil {

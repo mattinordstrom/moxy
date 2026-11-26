@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
 
@@ -39,6 +40,56 @@ def put_defs(kind, data):
         fail(f"moxy rejected the write: {exc.code} {exc.read().decode().strip()}")
     except urllib.error.URLError as exc:
         fail(f"cannot reach moxy at {url} ({exc}). Is moxy running there?")
+
+
+def get_log(since):
+    url = f"{BASE}/log?since={since}"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as exc:
+        fail(f"moxy has no log endpoint ({exc.code}); update moxy")
+    except urllib.error.URLError as exc:
+        fail(f"cannot reach moxy at {url} ({exc}). Is moxy running there?")
+
+
+def describe_entry(e):
+    parts = [f"#{e['seq']}", e["time"][11:], e["type"]]
+    if e.get("method"):
+        parts.append(e["method"])
+    if e.get("url"):
+        parts.append(e["url"])
+    if e.get("target"):
+        parts.append(f"-> {e['target']}")
+    if e.get("rule"):
+        parts.append(f"[rule {e['rule']}]")
+    if e.get("status"):
+        parts.append(str(e["status"]))
+    if e.get("durationMs") is not None:
+        parts.append(f"{e['durationMs']}ms")
+    if e.get("message"):
+        parts.append(f"- {e['message']}")
+    return " ".join(parts)
+
+
+def cmd_log(args):
+    def wanted(e):
+        return (not args.type or e["type"] == args.type) and (not args.urlpart or args.urlpart in e.get("url", ""))
+
+    def show(entries):
+        for e in entries:
+            print(json.dumps(e) if args.json else describe_entry(e), flush=True)
+
+    entries = get_log(args.since)
+    since = entries[-1]["seq"] if entries else args.since
+    show([e for e in entries if wanted(e)][-args.last:])
+
+    while args.follow:
+        time.sleep(1)
+        entries = get_log(since)
+        if entries:
+            since = entries[-1]["seq"]
+            show([e for e in entries if wanted(e)])
 
 
 def describe_mock(idx, m):
@@ -228,6 +279,15 @@ def main():
     p.add_argument("--index", type=int)
     p.add_argument("--urlpart")
     p.set_defaults(func=cmd_remove)
+
+    p = sub.add_parser("log")
+    p.add_argument("--since", type=int, default=0, help="only entries after this seq")
+    p.add_argument("--last", type=int, default=50, help="show at most this many entries (default 50)")
+    p.add_argument("--type", choices=["mock", "proxy", "error", "wsmock", "defschanged"])
+    p.add_argument("--urlpart", help="only entries whose url contains this")
+    p.add_argument("--follow", action="store_true", help="keep printing new entries")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_log)
 
     p = sub.add_parser("replace")
     p.add_argument("kind", choices=["mock", "proxy"])

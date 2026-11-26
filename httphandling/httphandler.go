@@ -165,6 +165,10 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 	mockObjArr, mockErr := utils.GetMockJSON()
 	if mockErr != nil {
 		utils.LogError("Failed to load mock definitions: ", mockErr)
+		recordEvent(LogEntry{
+			Type: utils.EventTypeError, Method: req.Method, URL: redactURL(req.URL.RequestURI()),
+			Status: http.StatusInternalServerError, Message: "Failed to load mock definitions: " + mockErr.Error(),
+		})
 		resWriter.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(resWriter, "Error loading mock definitions")
 
@@ -174,6 +178,10 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 	proxyObjArr, proxyErr := utils.GetProxyJSON()
 	if proxyErr != nil {
 		utils.LogError("Failed to load proxy definitions: ", proxyErr)
+		recordEvent(LogEntry{
+			Type: utils.EventTypeError, Method: req.Method, URL: redactURL(req.URL.RequestURI()),
+			Status: http.StatusInternalServerError, Message: "Failed to load proxy definitions: " + proxyErr.Error(),
+		})
 		resWriter.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(resWriter, "Error loading proxy definitions")
 
@@ -187,7 +195,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 	// Loop mockdef json obj
 	for _, mockEntity := range mockObjArr {
 		if mockEntity.Active && req.Method == mockEntity.Method && urlPartMatches(mockEntity.URLPart, reqURL) {
-			serveMock(resWriter, mockEntity)
+			serveMock(resWriter, req, mockEntity)
 
 			return
 		}
@@ -200,10 +208,12 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []models.Proxy, reqURL string) {
 	newURL := ""
+	rule := defaultRouteRule
 
 	for _, proxyEntity := range objArr {
 		if proxyEntity.Active && urlPartMatches(proxyEntity.URLPart, reqURL) {
 			newURL = strings.TrimRight(proxyEntity.Target, "/") + "/" + strings.TrimLeft(reqURL, "/")
+			rule = proxyEntity.URLPart
 
 			if proxyEntity.Verbose {
 				fmt.Println(" ")
@@ -257,15 +267,24 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 		fmt.Println(utils.GetProxyEventString(reqURL, DefaultRoute, "", true))
 	}
 
-	forwardReq(resWriter, req, newURL)
+	forwardReq(resWriter, req, newURL, rule)
 }
 
-func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string) {
+func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string, rule string) {
+	start := time.Now()
+	entry := LogEntry{
+		Type: utils.EventTypeProxy, Method: req.Method, URL: redactURL(req.URL.RequestURI()),
+		Rule: rule, Target: redactURL(newURL),
+	}
+
 	target, err := url.Parse(newURL)
 	if err != nil || target.Host == "" {
 		utils.LogError("Invalid proxy target "+strconv.Quote(newURL)+":", err)
 		http.Error(resWriter, "Error: Failed to create request for "+newURL, http.StatusBadGateway)
 		updateAdminWithLatest("Error: Failed to create request for "+newURL, utils.EventTypeError, map[string]any{})
+
+		entry.Type, entry.Status, entry.Message = utils.EventTypeError, http.StatusBadGateway, "Invalid proxy target"
+		recordEvent(entry)
 
 		return
 	}
@@ -280,6 +299,9 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 		// Flush every write so streamed responses reach the client as they arrive
 		FlushInterval: -1,
 		ModifyResponse: func(res *http.Response) error {
+			entry.Status, entry.DurationMS = res.StatusCode, millisSince(start)
+			recordEvent(entry)
+
 			// Browsers reject responses with two CORS values, so moxy's own CORS headers win
 			for key := range res.Header {
 				if strings.HasPrefix(key, "Access-Control-") && resWriter.Header().Get(key) != "" {
@@ -290,13 +312,21 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string)
 			return nil
 		},
 		ErrorHandler: func(resWriter http.ResponseWriter, req *http.Request, err error) {
+			entry.DurationMS = millisSince(start)
+
 			if errors.Is(req.Context().Err(), context.Canceled) {
+				entry.Message = "Client cancelled before the target answered"
+				recordEvent(entry)
+
 				return
 			}
 
 			utils.LogError("", err)
 			http.Error(resWriter, "Error: No response from "+newURL, http.StatusBadGateway)
 			updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError, map[string]any{})
+
+			entry.Type, entry.Status, entry.Message = utils.EventTypeError, http.StatusBadGateway, "No response: "+err.Error()
+			recordEvent(entry)
 		},
 		ErrorLog: log.New(io.Discard, "", 0),
 	}
@@ -345,6 +375,7 @@ func compileURLPattern(pattern string) *regexp.Regexp {
 	regex, err := regexp.Compile(pattern)
 	if err != nil {
 		utils.LogError("Ignoring def with invalid urlpart regex "+strconv.Quote(pattern)+":", err)
+		recordEvent(LogEntry{Type: utils.EventTypeError, Rule: pattern, Message: "Ignoring def with invalid urlpart regex: " + err.Error()})
 		updateAdminWithLatest("Ignoring def with invalid urlpart regex "+strconv.Quote(pattern)+": "+err.Error(),
 			utils.EventTypeError, map[string]any{})
 	}
@@ -359,7 +390,10 @@ const (
 	maxStatusCode = 999
 )
 
-func serveMock(resWriter http.ResponseWriter, mockEntity models.Mock) {
+func serveMock(resWriter http.ResponseWriter, req *http.Request, mockEntity models.Mock) {
+	start := time.Now()
+	entry := LogEntry{Type: utils.EventTypeMock, Method: req.Method, URL: redactURL(req.URL.RequestURI()), Rule: mockEntity.URLPart}
+
 	if mockEntity.FreezeTimeMS > 0 {
 		time.Sleep(time.Duration(mockEntity.FreezeTimeMS) * time.Millisecond)
 	}
@@ -370,7 +404,7 @@ func serveMock(resWriter http.ResponseWriter, mockEntity models.Mock) {
 
 	// WriteHeader panics outside this range
 	if mockEntity.StatusCode < minStatusCode || mockEntity.StatusCode > maxStatusCode {
-		reportMockError(resWriter, fmt.Errorf("%w %d in mock for %s", errInvalidStatusCode,
+		reportMockError(resWriter, entry, fmt.Errorf("%w %d in mock for %s", errInvalidStatusCode,
 			mockEntity.StatusCode, mockEntity.URLPart))
 
 		return
@@ -378,7 +412,7 @@ func serveMock(resWriter http.ResponseWriter, mockEntity models.Mock) {
 
 	body, logPayload, err := mockBody(mockEntity)
 	if err != nil {
-		reportMockError(resWriter, err)
+		reportMockError(resWriter, entry, err)
 
 		return
 	}
@@ -392,6 +426,9 @@ func serveMock(resWriter http.ResponseWriter, mockEntity models.Mock) {
 
 		return
 	}
+
+	entry.Status, entry.DurationMS = mockEntity.StatusCode, millisSince(start)
+	recordEvent(entry)
 
 	updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, logPayload), utils.EventTypeMock, map[string]any{})
 	fmt.Println(utils.GetMockEventString(mockEntity, true, logPayload))
@@ -417,7 +454,10 @@ func mockBody(mockEntity models.Mock) ([]byte, string, error) {
 	return body, mockEntity.PayloadFromFile, nil
 }
 
-func reportMockError(resWriter http.ResponseWriter, err error) {
+func reportMockError(resWriter http.ResponseWriter, entry LogEntry, err error) {
+	entry.Type, entry.Status, entry.Message = utils.EventTypeError, http.StatusInternalServerError, err.Error()
+	recordEvent(entry)
+
 	utils.LogError("Error:", err)
 	updateAdminWithLatest(err.Error(), utils.EventTypeError, map[string]any{})
 	http.Error(resWriter, err.Error(), http.StatusInternalServerError)

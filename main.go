@@ -57,15 +57,22 @@ func main() {
 	fmt.Println(bullet + " WS mock        " + "ws://localhost:" + strconv.Itoa(hh.Port) + "/moxywsmock")
 	fmt.Println(bullet + " Default route: " + hh.DefaultRoute)
 	fmt.Println(bullet + " Admin UI:      " + protocol + "://localhost:" + strconv.Itoa(hh.Port) + "/moxyadminui")
+	fmt.Println(bullet + " Log file:      " + eventLogFile)
 	fmt.Println(" ")
 	fmt.Println(" ")
 
 	PrintInitSetup()
 
 	if !*lFlag {
+		if err := hh.OpenEventLogFile(eventLogFile); err != nil {
+			ut.LogError("Not logging to "+eventLogFile+":", err)
+		}
+
 		hh.CreateHTTPListener(*sFlag, *aFlag)
 	}
 }
+
+const eventLogFile = "moxy.log"
 
 func PrintInitSetup() {
 	// Mockdef

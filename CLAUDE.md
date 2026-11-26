@@ -44,6 +44,7 @@ golangci-lint run -v
 
 **Key packages:**
 - `httphandling/` — Core HTTP handler, admin API/WebSocket endpoints, WebSocket mock handler
+- `httphandling/eventlog.go` — Redacted request/error log (memory + `moxy.log`, served at `/moxyadminui/log`); never add headers, bodies, payloads or query values to it
 - `models/` — Mock and Proxy struct definitions
 - `config/` — YAML config loader (global `AppConfig`)
 - `utils/` — JSON file reading with 1.5s TTL cache, console formatting, file helpers

@@ -135,6 +135,7 @@ func reportBlockedOrigin(origin string) {
 
 	msg := fmt.Sprintf("Blocked request from origin %q, add it to cors.allowedOrigins in config.yml to allow it", origin)
 	log.Println(msg) //nolint:gosec // %q escapes control characters
+	recordEvent(LogEntry{Type: utils.EventTypeError, Message: msg})
 	updateAdminWithLatest(msg, utils.EventTypeError, nil)
 }
 

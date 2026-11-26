@@ -9,3 +9,4 @@ ui/tests/test-results/
 https/moxyserver.crt
 https/moxyserver.key
 ui/settings.json
+moxy.log*
