@@ -1,5 +1,7 @@
 package httphandling
 
+import "sync"
+
 var RewriteProxyRequest = rewriteProxyRequest
 
 var (
@@ -34,3 +36,9 @@ func ResetEventLog(cleaner interface{ Cleanup(f func()) }) {
 }
 
 var ForwardReq = forwardReq
+
+var startWSMockBroadcaster sync.Once
+
+func StartWSMockBroadcaster() {
+	startWSMockBroadcaster.Do(func() { go handleWSMockMessages() })
+}
