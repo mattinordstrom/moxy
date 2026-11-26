@@ -14,6 +14,7 @@ import (
 	"github.com/mattinordstrom/moxy/config"
 	hh "github.com/mattinordstrom/moxy/httphandling"
 	ut "github.com/mattinordstrom/moxy/utils"
+	"github.com/mattinordstrom/moxy/version"
 )
 
 var bullet = "\u2022"
@@ -23,8 +24,15 @@ func main() {
 	lFlag := flag.Bool("l", false, "List redirects without starting server")
 	sFlag := flag.Bool("s", false, "Run on https")
 	aFlag := flag.Bool("a", false, "Listen on all network interfaces (default: localhost only)")
+	vFlag := flag.Bool("v", false, "Print version and exit")
 
 	flag.Parse()
+
+	if *vFlag {
+		fmt.Println("moxy v" + version.Version)
+
+		return
+	}
 
 	hh.Port = *pFlag
 
@@ -43,7 +51,7 @@ func main() {
 		protocol = "https"
 	}
 
-	fmt.Println(ut.ColorBold + "::::::::::::::: MOXY :::::::::::::::" + ut.ColorReset)
+	fmt.Println(ut.ColorBold + "::::::::::::::: MOXY v" + version.Version + " :::::::::::::::" + ut.ColorReset)
 	fmt.Println(ut.ColorGray + "mocking and proxying requests on localhost" + ut.ColorReset)
 	fmt.Println(" ")
 	fmt.Println(bullet + " Run on:        " + protocol + "://localhost:" + strconv.Itoa(hh.Port))

@@ -47,6 +47,10 @@ hr {
     font-size: 12px;
 }
 
+#header-version {
+    color: #666;
+}
+
 .header-logo {
     display: flex;
     justify-content: space-between;

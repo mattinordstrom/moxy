@@ -197,6 +197,7 @@ const fetchSettings = async () => {
 
         const data = await response.json();
 
+        document.getElementById('header-version').textContent = data['version'] ? 'v' + data['version'] : '';
         document.getElementById('header-port').textContent = data['port'];
         document.getElementById('header-route').textContent = data['defaultRoute'] + (data['defaultPreserveHost'] ? ' (preserve host)' : '');
 

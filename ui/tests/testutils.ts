@@ -49,6 +49,7 @@ async function setupRoutes(page: Page): Promise<void> {
       contentType: 'application/json',
       body: JSON.stringify({
         port: 9097,
+        version: '2.0.0',
         defaultRoute: 'http://localhost:8089',
         payloadFiles: ['/home/testuser/projects/moxyarchive/payloads/example.json'],
         payloadPath: '/home/testuser/projects/moxyarchive/payloads/',

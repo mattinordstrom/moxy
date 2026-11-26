@@ -16,6 +16,7 @@ import (
 	"github.com/mattinordstrom/moxy/config"
 	"github.com/mattinordstrom/moxy/models"
 	"github.com/mattinordstrom/moxy/utils"
+	"github.com/mattinordstrom/moxy/version"
 )
 
 type WebSocketMessage struct {
@@ -32,6 +33,7 @@ type Settings struct {
 	PayloadFiles  []string `json:"payloadFiles"`
 	PayloadPath   string   `json:"payloadPath"`
 	MaxLogEntries *int     `json:"maxLogEntries"`
+	Version       string   `json:"version"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -219,6 +221,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 			PayloadFiles:  payloadFiles,
 			PayloadPath:   config.AppConfig.Defaults.PayloadArchivePath,
 			MaxLogEntries: config.AppConfig.Admin.MaxLogEntries,
+			Version:       version.Version,
 		}
 
 		jsonResponse, err := json.Marshal(data)

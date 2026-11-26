@@ -40,6 +40,12 @@ $ moxy -a
 ```  
   
     
+#### Show version    
+```sh
+$ moxy -v
+```  
+  
+    
 #### See help    
 ```sh
 $ moxy -h
@@ -122,3 +128,11 @@ $ cd ui/tests && npm i
 ```sh
 $ pre-commit run --all-files
 ```  
+
+<br>
+
+## Releasing:
+1. Bump `Version` in `version/version.go` and commit.
+2. Tag the commit and push the tag, e.g. `git tag v2.0.1 && git push origin v2.0.1`.
+
+The release workflow checks that the tag matches `version.Version`, then creates the GitHub release with the commit messages since the previous tag as release notes.

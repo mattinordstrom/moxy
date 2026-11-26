@@ -15,6 +15,15 @@ go run main.go -p 8080  # Custom port
 go run main.go -s       # HTTPS mode
 go run main.go -l       # List redirects without starting server
 go run main.go -a       # Listen on all interfaces (default: localhost only)
+go run main.go -v       # Print version and exit
+```
+
+### Release
+The version lives in `version/version.go` and is shown in the terminal banner and the admin UI header.
+```bash
+# 1. Bump version.Version and commit
+# 2. Tag and push; .github/workflows/release.yml checks the tag matches version.Version and creates the GitHub release
+git tag v2.0.0 && git push origin v2.0.0
 ```
 
 ### Test
