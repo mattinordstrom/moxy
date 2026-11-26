@@ -34,7 +34,7 @@ $ moxy -p 9098
   
     
 #### Listen on all network interfaces    
-By default moxy only accepts connections from this machine (127.0.0.1 and ::1). Use `-a` to make it reachable from other devices, containers or VMs. This also lets other devices reach the admin UI, so only use it on networks you trust.
+By default moxy only accepts connections from this machine (127.0.0.1 and ::1). Use `-a` to make it reachable from other devices or VMs. This also lets other devices reach the admin UI, so only use it on networks you trust.
 ```sh
 $ moxy -a
 ```  
