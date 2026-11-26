@@ -667,82 +667,44 @@ const updateProxydef = (el) => {
     return updateDef('proxy', Number(el.id.split('_').slice(-1)[0]), name, value);
 }
 
-const renderVersion = { mock: 0, proxy: 0 };
-const moveIndexMaps = { mock: new Map(), proxy: new Map() };
-const moveQueue = { mock: Promise.resolve(), proxy: Promise.resolve() };
+const moving = { mock: false, proxy: false };
 
-// Quick clicks are queued; a click on a list that an earlier move has since re-rendered gets its index translated, so the moves add up instead of undoing each other
-const moveDef = (type, el) => {
-    const click = { index: Number(el.id.split('_').slice(-1)[0]), way: el.id.split('_')[1], version: renderVersion[type] };
-
-    moveQueue[type] = moveQueue[type]
-        .then(() => runMove(type, click))
-        .catch((error) => logError('Move failed: ' + error.message));
-
-    return moveQueue[type];
-}
-
-const currentIndex = (type, click) => {
-    let index = click.index;
-    for (let version = click.version; version < renderVersion[type]; version++) {
-        const map = moveIndexMaps[type].get(version);
-        if (!map) {
-            return null;
-        }
-        index = map(index);
+// A click before the previous move is saved would act on the old list and undo that move, so it is ignored
+const moveDef = async (type, el) => {
+    if(moving[type]) {
+        return;
     }
+    moving[type] = true;
 
-    return index;
-}
-
-const moveTarget = (way, index, length) => {
-    const target = way === 'up' ? index - 1 : way === 'down' ? index + 1 : way === 'first' ? 0 : length - 1;
-    return Math.min(Math.max(target, 0), length - 1);
-}
-
-const shiftedIndex = (index, from, to) => {
-    if (index === from) return to;
-    if (from < to && index > from && index <= to) return index - 1;
-    if (from > to && index >= to && index < from) return index + 1;
-    return index;
-}
-
-const runMove = async (type, click) => {
     if(!await defsUpToDate(type)) {
+        moving[type] = false;
         return;
     }
 
-    const index = currentIndex(type, click);
     const defs = getDefs(type);
-    if(index === null || index >= defs.length) {
+    const index = Number(el.id.split('_').slice(-1)[0]);
+    const way = el.id.split('_')[1];
+
+    if(!moveEntity(el, defs)) {
+        moving[type] = false;
         return;
     }
 
-    const targetIndex = moveTarget(click.way, index, defs.length);
-    if(targetIndex === index) {
-        return;
-    }
-
-    const [item] = defs.splice(index, 1);
-    defs.splice(targetIndex, 0, item);
     setDefs(type, defs);
 
-    await animateMoveDone(document.getElementById(type + '-content-container'), index, targetIndex);
+    const container = document.getElementById(type + '-content-container');
+    const targetIndex = way === 'up' ? index - 1 : way === 'down' ? index + 1 : way === 'first' ? 0 : defs.length - 1;
 
-    moveIndexMaps[type].set(renderVersion[type], (i) => shiftedIndex(i, index, targetIndex));
-    rerenderDefs(type);
-    await saveDefs(type);
+    animateMove(container, index, targetIndex, async () => {
+        rerenderDefs(type);
+        await saveDefs(type);
+        moving[type] = false;
+    });
 }
 
 const moveMock = (el) => moveDef('mock', el);
 
 const moveProxy = (el) => moveDef('proxy', el);
-
-// transitionend never fires for a hidden list, and the move queue must not wait for it forever
-const animateMoveDone = (container, fromIndex, toIndex) => new Promise((resolve) => {
-    animateMove(container, fromIndex, toIndex, resolve);
-    setTimeout(resolve, 600);
-});
 
 const animateMove = (container, fromIndex, toIndex, callback) => {
     const cards = container.querySelectorAll('.proxymock-content');
@@ -808,9 +770,39 @@ const animateMove = (container, fromIndex, toIndex, callback) => {
     });
 }
 
-const rerenderDefs = (type) => {
-    renderVersion[type]++;
+const moveEntity = (evt, arr) => {
+    const index = Number(evt.id.split('_').slice(-1)[0]);
+    const way = evt.id.split('_')[1];
+    let changed = false;
 
+    if(way === 'up') {
+        if (index > 0) {
+            [arr[index], arr[index - 1]] = [arr[index - 1], arr[index]];
+            changed = true;
+        }
+    } else if (way === 'down') {
+        if (index < arr.length - 1) {
+            [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
+            changed = true;
+        }
+    } else if (way === 'first') {
+        if (index > 0) {
+            const [item] = arr.splice(index, 1);
+            arr.unshift(item);
+            changed = true;
+        }
+    } else if (way === 'last'){
+        if (index < arr.length - 1) {
+            const [item] = arr.splice(index, 1);
+            arr.push(item);
+            changed = true;
+        }
+    }
+
+    return changed;
+}
+
+const rerenderDefs = (type) => {
     if(type === "mock") {
         document.getElementById('mock-content-container').innerHTML = "";
         renderMockdefs();
