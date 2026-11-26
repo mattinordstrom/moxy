@@ -46,7 +46,7 @@ func TestAdminWriteRejectsOtherOrigins(t *testing.T) {
 
 	tests := map[string]map[string]string{
 		"other site":           {headerOrigin: "https://evil.example"},
-		"other localhost port": {headerOrigin: "http://localhost:3000"},
+		"other localhost port": {headerOrigin: appOrigin},
 		"null origin":          {headerOrigin: "null"},
 		"cross-site fetch":     {headerFetch: "cross-site"},
 		"same-site fetch":      {headerFetch: "same-site"},
@@ -92,7 +92,7 @@ func TestCORSOnlyOnMockAndProxyRoutes(t *testing.T) {
 	preflight := func(path string) *httptest.ResponseRecorder {
 		req := httptest.NewRequestWithContext(t.Context(), http.MethodOptions, path, nil)
 		req.Host = adminHost
-		req.Header.Set(headerOrigin, "http://localhost:3000")
+		req.Header.Set(headerOrigin, appOrigin)
 
 		res := httptest.NewRecorder()
 		httphandling.RootHandler(res, req)
@@ -100,7 +100,7 @@ func TestCORSOnlyOnMockAndProxyRoutes(t *testing.T) {
 		return res
 	}
 
-	if res := preflight("/api/anything"); res.Header().Get("Access-Control-Allow-Origin") != "http://localhost:3000" {
+	if res := preflight("/api/anything"); res.Header().Get("Access-Control-Allow-Origin") != appOrigin {
 		t.Errorf("mock/proxy route: expected CORS for the app's origin, got %q", res.Header().Get("Access-Control-Allow-Origin"))
 	}
 

@@ -15,6 +15,9 @@ func createReqFromReq(req *http.Request, newURL string, preserveHost bool) (*htt
 		return nil, fmt.Errorf("failed to create forward request: %w", reqerror)
 	}
 
+	// Without this the body is sent chunked, which some upstreams reject
+	freq.ContentLength = req.ContentLength
+
 	freq.Header = make(http.Header)
 	maps.Copy(freq.Header, req.Header)
 

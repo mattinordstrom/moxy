@@ -364,6 +364,11 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string,
 	defer fresp.Body.Close()
 
 	for key, values := range fresp.Header {
+		// Browsers reject responses with two CORS values, so moxy's own CORS headers win
+		if strings.HasPrefix(key, "Access-Control-") && resWriter.Header().Get(key) != "" {
+			continue
+		}
+
 		for _, value := range values {
 			resWriter.Header().Add(key, value)
 		}

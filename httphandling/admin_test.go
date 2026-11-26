@@ -21,6 +21,7 @@ const (
 	ipv6Host       = "[::1]:9097"
 	headerOrigin   = "Origin"
 	headerFetch    = "Sec-Fetch-Site"
+	appOrigin      = "http://localhost:3000"
 )
 
 func setupArchive(t *testing.T) (string, string) {
