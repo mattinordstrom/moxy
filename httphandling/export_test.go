@@ -1,3 +1,3 @@
 package httphandling
 
-var CreateReqFromReq = createReqFromReq
+var RewriteProxyRequest = rewriteProxyRequest

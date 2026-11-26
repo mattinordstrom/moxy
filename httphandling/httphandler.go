@@ -1,7 +1,7 @@
 package httphandling
 
 import (
-	"crypto/tls"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -73,16 +75,7 @@ func CreateHTTPListener(sFlag bool, allInterfaces bool) {
 
 	fmt.Printf("Now listening on %s...\n", strings.Join(addrs, ", "))
 
-	transp := &http.Transport{
-		// #nosec G402
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	ForwardClient = &http.Client{
-		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-		Transport: transp,
-	}
+	ForwardTransport = newForwardTransport()
 
 	fs := http.FileServer(http.Dir("ui/static"))
 	http.Handle("/ui/static/", http.StripPrefix("/ui/static/", revalidate(fs)))
@@ -181,7 +174,8 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	reqURL := fmt.Sprint(req.URL)
+	// RequestURI, since a proxy-style absolute URL would otherwise end up inside the target URL
+	reqURL := req.URL.RequestURI()
 
 	////////////////////////////////////////
 	// Loop mockdef json obj
@@ -263,61 +257,54 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 }
 
 func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string, preserveHost bool) {
-	freq, err := createReqFromReq(req, newURL, preserveHost)
-	if err != nil {
-		utils.LogError("", err)
+	target, err := url.Parse(newURL)
+	if err != nil || target.Host == "" {
+		utils.LogError("Invalid proxy target "+strconv.Quote(newURL)+":", err)
 		http.Error(resWriter, "Error: Failed to create request for "+newURL, http.StatusBadGateway)
 		updateAdminWithLatest("Error: Failed to create request for "+newURL, utils.EventTypeError, map[string]any{})
 
 		return
 	}
 
-	fresp, resperr := ForwardClient.Do(freq) //nolint:gosec // SSRF is intentional — Moxy is a proxy that forwards to configured targets
-	if resperr != nil {
-		utils.LogError("", resperr)
-		http.Error(resWriter, "Error: No response from "+newURL, http.StatusBadGateway)
+	clearWriteDeadline(resWriter)
 
-		updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError, map[string]any{})
+	proxy := &httputil.ReverseProxy{
+		Rewrite: func(proxyReq *httputil.ProxyRequest) {
+			rewriteProxyRequest(proxyReq, target, preserveHost)
+		},
+		Transport: ForwardTransport,
+		// Flush every write so streamed responses reach the client as they arrive
+		FlushInterval: -1,
+		ModifyResponse: func(res *http.Response) error {
+			// Browsers reject responses with two CORS values, so moxy's own CORS headers win
+			for key := range res.Header {
+				if strings.HasPrefix(key, "Access-Control-") && resWriter.Header().Get(key) != "" {
+					res.Header.Del(key)
+				}
+			}
 
-		return
+			return nil
+		},
+		ErrorHandler: func(resWriter http.ResponseWriter, req *http.Request, err error) {
+			if errors.Is(req.Context().Err(), context.Canceled) {
+				return
+			}
+
+			utils.LogError("", err)
+			http.Error(resWriter, "Error: No response from "+newURL, http.StatusBadGateway)
+			updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError, map[string]any{})
+		},
+		ErrorLog: log.New(io.Discard, "", 0),
 	}
 
-	defer fresp.Body.Close()
+	proxy.ServeHTTP(resWriter, req)
+}
 
-	for key, values := range fresp.Header {
-		// Browsers reject responses with two CORS values, so moxy's own CORS headers win
-		if strings.HasPrefix(key, "Access-Control-") && resWriter.Header().Get(key) != "" {
-			continue
-		}
-
-		for _, value := range values {
-			resWriter.Header().Add(key, value)
-		}
-	}
-
-	resWriter.WriteHeader(fresp.StatusCode)
-
-	// NOTE: Use this to temporarily log response body for specific URL
-	urlMatchForLogging := "api/someurl-test-123-test"
-	if strings.Contains(newURL, urlMatchForLogging) {
-		bodyBytes, err := io.ReadAll(fresp.Body)
-		if err != nil {
-			utils.LogError("Failed to read response body: ", err)
-			updateAdminWithLatest("Failed to read response body", utils.EventTypeError, map[string]any{})
-
-			return
-		}
-
-		fmt.Printf("\n\x1b[36m[Response body for %s]\x1b[0m\n", urlMatchForLogging)
-		fmt.Println(string(bodyBytes))
-
-		if _, err := resWriter.Write(bodyBytes); err != nil {
-			utils.LogError("Failed to write response body: ", err)
-			updateAdminWithLatest("Failed to write response body", utils.EventTypeError, map[string]any{})
-		}
-	} else if _, err := io.Copy(resWriter, fresp.Body); err != nil {
-		utils.LogError("Failed to copy response body: ", err)
-		updateAdminWithLatest("Failed to copy response body", utils.EventTypeError, map[string]any{})
+// Event streams and dev-server sockets stay open far longer than the server's write timeout.
+func clearWriteDeadline(resWriter http.ResponseWriter) {
+	err := http.NewResponseController(resWriter).SetWriteDeadline(time.Time{})
+	if err != nil && !errors.Is(err, http.ErrNotSupported) {
+		utils.LogError("Error clearing write deadline:", err)
 	}
 }
 

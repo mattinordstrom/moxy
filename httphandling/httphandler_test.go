@@ -31,12 +31,10 @@ func TestProxyResponseFail(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	orig := httphandling.ForwardClient
-	httphandling.ForwardClient = &http.Client{
-		Transport: &mockTransport{},
-	}
+	orig := httphandling.ForwardTransport
+	httphandling.ForwardTransport = &mockTransport{}
 
-	t.Cleanup(func() { httphandling.ForwardClient = orig })
+	t.Cleanup(func() { httphandling.ForwardTransport = orig })
 
 	resRecorder := testhelper.GetRecorder(req)
 

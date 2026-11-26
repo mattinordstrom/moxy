@@ -33,15 +33,21 @@ func startUpstream(t *testing.T) *upstreamSeen {
 	}))
 	t.Cleanup(upstream.Close)
 
-	origRoute, origClient := httphandling.DefaultRoute, httphandling.ForwardClient
-	httphandling.DefaultRoute = upstream.URL
-	httphandling.ForwardClient = upstream.Client()
-
-	t.Cleanup(func() {
-		httphandling.DefaultRoute, httphandling.ForwardClient = origRoute, origClient
-	})
+	useUpstream(t, upstream)
 
 	return seen
+}
+
+func useUpstream(t *testing.T, upstream *httptest.Server) {
+	t.Helper()
+
+	origRoute, origTransport := httphandling.DefaultRoute, httphandling.ForwardTransport
+	httphandling.DefaultRoute = upstream.URL
+	httphandling.ForwardTransport = upstream.Client().Transport
+
+	t.Cleanup(func() {
+		httphandling.DefaultRoute, httphandling.ForwardTransport = origRoute, origTransport
+	})
 }
 
 //nolint:paralleltest // swaps the global default route and forward client

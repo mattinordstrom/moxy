@@ -2,12 +2,14 @@ package httphandling_test
 
 import (
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"testing"
 
 	"github.com/mattinordstrom/moxy/httphandling"
 )
 
-func TestCreateReqFromReqHost(t *testing.T) {
+func TestRewriteProxyRequestHost(t *testing.T) {
 	t.Parallel()
 
 	const (
@@ -42,13 +44,23 @@ func TestCreateReqFromReqHost(t *testing.T) {
 			req.Host = test.incomingHost
 			req.Header.Set("X-Token", "abc")
 
-			freq, err := httphandling.CreateReqFromReq(req, "http://route-utv.fnox.se/api/common/companysettings", test.preserveHost)
+			target, err := url.Parse("http://route-utv.fnox.se/api/common/companysettings")
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if freq.Host != test.expectedHost {
-				t.Errorf("expected Host %q, got %q", test.expectedHost, freq.Host)
+			proxyReq := &httputil.ProxyRequest{In: req, Out: req.Clone(t.Context())}
+			httphandling.RewriteProxyRequest(proxyReq, target, test.preserveHost)
+			freq := proxyReq.Out
+
+			// An empty Host makes the transport send the target's host
+			gotHost := freq.Host
+			if gotHost == "" {
+				gotHost = freq.URL.Host
+			}
+
+			if gotHost != test.expectedHost {
+				t.Errorf("expected Host %q, got %q", test.expectedHost, gotHost)
 			}
 
 			if freq.URL.Host != targetHost {
