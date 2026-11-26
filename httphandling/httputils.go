@@ -9,7 +9,10 @@ import (
 	"time"
 )
 
-var ForwardTransport http.RoundTripper
+var (
+	ForwardTransport         http.RoundTripper = newForwardTransport(false)
+	InsecureForwardTransport http.RoundTripper = newForwardTransport(true)
+)
 
 const (
 	dialTimeout         = 10 * time.Second
@@ -17,7 +20,7 @@ const (
 )
 
 // No overall timeout: a request stays open as long as the client waits, and is cancelled when it gives up.
-func newForwardTransport() *http.Transport {
+func newForwardTransport(insecure bool) *http.Transport {
 	transport, ok := http.DefaultTransport.(*http.Transport)
 	if !ok {
 		transport = &http.Transport{}
@@ -26,7 +29,10 @@ func newForwardTransport() *http.Transport {
 	transport = transport.Clone()
 	transport.DialContext = (&net.Dialer{Timeout: dialTimeout}).DialContext
 	transport.TLSHandshakeTimeout = tlsHandshakeTimeout
-	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //nolint:gosec // dev targets often use self-signed certs
+
+	if insecure {
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //nolint:gosec // opt-in per proxy for self-signed dev targets
+	}
 
 	return transport
 }

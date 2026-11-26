@@ -2,6 +2,7 @@ package httphandling
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -22,8 +23,9 @@ import (
 )
 
 var (
-	Port         = 9097
-	DefaultRoute = ""
+	Port            = 9097
+	DefaultRoute    = ""
+	DefaultInsecure = false
 )
 
 var (
@@ -72,8 +74,6 @@ func CreateHTTPListener(sFlag bool, allInterfaces bool) {
 	}
 
 	fmt.Printf("Now listening on %s...\n", strings.Join(addrs, ", "))
-
-	ForwardTransport = newForwardTransport()
 
 	fs := http.FileServer(http.Dir("ui/static"))
 	http.Handle("/ui/static/", http.StripPrefix("/ui/static/", revalidate(fs)))
@@ -209,11 +209,13 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []models.Proxy, reqURL string) {
 	newURL := ""
 	rule := defaultRouteRule
+	insecure := DefaultInsecure
 
 	for _, proxyEntity := range objArr {
 		if proxyEntity.Active && urlPartMatches(proxyEntity.URLPart, reqURL) {
 			newURL = strings.TrimRight(proxyEntity.Target, "/") + "/" + strings.TrimLeft(reqURL, "/")
 			rule = proxyEntity.URLPart
+			insecure = proxyEntity.Insecure
 
 			if proxyEntity.Verbose {
 				fmt.Println(" ")
@@ -267,10 +269,10 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 		fmt.Println(utils.GetProxyEventString(reqURL, DefaultRoute, "", true))
 	}
 
-	forwardReq(resWriter, req, newURL, rule)
+	forwardReq(resWriter, req, newURL, rule, insecure)
 }
 
-func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string, rule string) {
+func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string, rule string, insecure bool) {
 	start := time.Now()
 	entry := LogEntry{
 		Type: utils.EventTypeProxy, Method: req.Method, URL: redactURL(req.URL.RequestURI()),
@@ -291,11 +293,16 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string,
 
 	clearWriteDeadline(resWriter)
 
+	transport := ForwardTransport
+	if insecure {
+		transport = InsecureForwardTransport
+	}
+
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(proxyReq *httputil.ProxyRequest) {
 			rewriteProxyRequest(proxyReq, target)
 		},
-		Transport: ForwardTransport,
+		Transport: transport,
 		// Flush every write so streamed responses reach the client as they arrive
 		FlushInterval: -1,
 		ModifyResponse: func(res *http.Response) error {
@@ -322,16 +329,34 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string,
 			}
 
 			utils.LogError("", err)
-			http.Error(resWriter, "Error: No response from "+newURL, http.StatusBadGateway)
-			updateAdminWithLatest("Error: No response from "+newURL, utils.EventTypeError, map[string]any{})
 
-			entry.Type, entry.Status, entry.Message = utils.EventTypeError, http.StatusBadGateway, "No response: "+err.Error()
+			msg := "Error: No response from " + newURL
+			entry.Message = "No response: " + err.Error()
+
+			if certErr, ok := errors.AsType[*tls.CertificateVerificationError](err); ok {
+				hint := insecureHint(rule)
+				msg = "Error: Untrusted certificate from " + newURL + ": " + certErr.Err.Error() + ". " + hint
+				entry.Message = "Untrusted certificate: " + certErr.Err.Error() + ". " + hint
+			}
+
+			http.Error(resWriter, msg, http.StatusBadGateway)
+			updateAdminWithLatest(msg, utils.EventTypeError, map[string]any{})
+
+			entry.Type, entry.Status = utils.EventTypeError, http.StatusBadGateway
 			recordEvent(entry)
 		},
 		ErrorLog: log.New(io.Discard, "", 0),
 	}
 
 	proxy.ServeHTTP(resWriter, req)
+}
+
+func insecureHint(rule string) string {
+	if rule == defaultRouteRule {
+		return "If you trust it, set insecure: true under defaults in config.yml"
+	}
+
+	return `If you trust it, set "insecure": true on the proxy for ` + rule
 }
 
 // Event streams and dev-server sockets stay open far longer than the server's write timeout.

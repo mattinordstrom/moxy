@@ -180,6 +180,8 @@ def cmd_add_proxy(args):
     }
     if args.comment:
         entry["comment"] = args.comment
+    if args.insecure:
+        entry["insecure"] = True
 
     proxies = get_defs("proxy")
     if args.at_bottom:
@@ -263,6 +265,7 @@ def main():
     p.add_argument("--urlpart", required=True)
     p.add_argument("--target", required=True)
     p.add_argument("--verbose", action="store_true")
+    p.add_argument("--insecure", action="store_true", help="skip the TLS certificate check")
     p.add_argument("--comment")
     p.add_argument("--at-bottom", action="store_true")
     p.set_defaults(func=cmd_add_proxy)

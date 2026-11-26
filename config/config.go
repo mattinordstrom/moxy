@@ -16,6 +16,7 @@ type Config struct {
 
 type DefaultConfig struct {
 	DefaultRoute       string `yaml:"route"`
+	DefaultInsecure    bool   `yaml:"insecure"`
 	PayloadArchivePath string `yaml:"payloadArchivePath"`
 }
 type CORSConfig struct {

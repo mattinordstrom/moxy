@@ -44,6 +44,7 @@ func main() {
 	}
 
 	hh.DefaultRoute = config.AppConfig.Defaults.DefaultRoute
+	hh.DefaultInsecure = config.AppConfig.Defaults.DefaultInsecure
 
 	protocol := "http"
 	if *sFlag {
@@ -55,7 +56,12 @@ func main() {
 	fmt.Println(" ")
 	fmt.Println(bullet + " Run on:        " + protocol + "://localhost:" + strconv.Itoa(hh.Port))
 	fmt.Println(bullet + " WS mock        " + "ws://localhost:" + strconv.Itoa(hh.Port) + "/moxywsmock")
-	fmt.Println(bullet + " Default route: " + hh.DefaultRoute)
+	defaultRouteInfo := hh.DefaultRoute
+	if hh.DefaultInsecure {
+		defaultRouteInfo += " (insecure TLS)"
+	}
+
+	fmt.Println(bullet + " Default route: " + defaultRouteInfo)
 	fmt.Println(bullet + " Admin UI:      " + protocol + "://localhost:" + strconv.Itoa(hh.Port) + "/moxyadminui")
 	fmt.Println(bullet + " Log file:      " + eventLogFile)
 	fmt.Println(" ")
@@ -109,8 +115,13 @@ func PrintInitSetup() {
 	fmt.Println(ut.ColorGreen + "-------- Proxydef --------" + ut.ColorReset)
 
 	for _, proxyEntity := range proxyObjArr {
+		insecureStr := ""
+		if proxyEntity.Insecure {
+			insecureStr = " (insecure TLS)"
+		}
+
 		fmt.Println(ut.GetProxyEventString(proxyEntity.URLPart, proxyEntity.Target, "", false) +
-			getInactiveStr(proxyEntity.Active))
+			insecureStr + getInactiveStr(proxyEntity.Active))
 	}
 
 	fmt.Println(ut.ColorGreen + "--------------------------\n" + ut.ColorReset)

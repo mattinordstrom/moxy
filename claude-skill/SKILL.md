@@ -139,10 +139,17 @@ responses, and dynamic/templated payloads. A mock is one fixed body per `urlpart
 
 ```json
 { "active": true, "comment": "optional",
-  "target": "http://localhost:8080", "urlpart": "/api/whatever", "verbose": false }
+  "target": "http://localhost:8080", "urlpart": "/api/whatever", "verbose": false,
+  "insecure": false }
 ```
 
 `verbose` on a proxy logs headers and body and enables "copy as curl" in the admin UI.
+
+moxy checks the TLS certificate of `https` targets. A self-signed or otherwise untrusted
+certificate gives a 502 with "Untrusted certificate" (also in `moxyctl.py log --type error`).
+Only if the user confirms they trust that server, set `"insecure": true` on the proxy
+(`add-proxy --insecure`), or `insecure: true` under `defaults` in `config.yml` for the
+default route. Never turn it on just to make an error go away.
 
 Forwarded requests always get the target's `Host` header. moxy has no option to keep the
 incoming Host; clients pointing at moxy send `localhost:9097` anyway.

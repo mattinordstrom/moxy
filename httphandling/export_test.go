@@ -32,3 +32,5 @@ func ResetEventLog(cleaner interface{ Cleanup(f func()) }) {
 	reset()
 	cleaner.Cleanup(reset)
 }
+
+var ForwardReq = forwardReq

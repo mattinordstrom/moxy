@@ -87,6 +87,7 @@ See [claude-skill/README.md](claude-skill/README.md) for how to install it.
 - If payload and payloadFromFile are both defined payload will be used
 - .* can be used in urlpart in mocks and proxies
 - Want to run on https? Check out the README in the https directory
+- Proxies check the TLS certificate of https targets. For a dev server with a self-signed certificate, set `"insecure": true` on the proxy (or `insecure: true` under `defaults` in config.yml for the default route). This skips the check, so anyone between you and that server could read or change the traffic
 - Every mock hit, proxied request and error is also written to `moxy.log` (rotated at 5 MB) and served at `/moxyadminui/log`, without headers, bodies or query values, so it is safe to share with tools like Claude
 - Want to copy a request as curl? Click on the small square in the log next to the request (Note that Verbose must be checked)
 - Browser pages on localhost (any port) can call moxy. Pages on other origins get 403 unless listed under `cors.allowedOrigins` in config.yml, e.g. `allowedOrigins: ["http://myapp.local:3000"]`. `"*"` allows any website you visit to read mock and proxied responses

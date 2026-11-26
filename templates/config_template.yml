@@ -1,5 +1,7 @@
 defaults:
   route: "http://localhost:8099"
+  # true skips the TLS certificate check for the default route, so anyone between you and it could read or change the traffic
+  insecure: false
   payloadArchivePath: "/absolute_path_to_proj_dir/moxy/archive/"
 
 admin:
