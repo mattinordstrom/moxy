@@ -5,6 +5,7 @@ var RewriteProxyRequest = rewriteProxyRequest
 var (
 	UpdateAdminWithLatest = updateAdminWithLatest
 	HandleAdminWebSocket  = handleWebSocket
+	HandleWSMock          = handleWebSocketWSMock
 )
 
 func HasAdminConnection() bool {

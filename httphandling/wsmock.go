@@ -10,9 +10,7 @@ import (
 )
 
 var upgraderWSMock = websocket.Upgrader{
-	CheckOrigin: func(_ *http.Request) bool {
-		return true
-	},
+	CheckOrigin: wsMockOriginAllowed,
 }
 
 var (

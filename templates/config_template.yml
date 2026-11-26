@@ -6,4 +6,8 @@ defaults:
 admin:
   autoSortJsonKeys: false
   maxLogEntries: null
-  
+
+cors:
+  # Origins besides localhost whose pages may call moxy from the browser, e.g. "http://myapp.local:3000"
+  # "*" lets any website you visit read mock and proxied responses
+  allowedOrigins: []

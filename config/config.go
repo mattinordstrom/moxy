@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Defaults DefaultConfig `yaml:"defaults"`
 	Admin    AdminConfig   `yaml:"admin"`
+	CORS     CORSConfig    `yaml:"cors"`
 }
 
 type DefaultConfig struct {
@@ -18,6 +19,10 @@ type DefaultConfig struct {
 	DefaultPreserveHost bool   `yaml:"preserveHost"`
 	PayloadArchivePath  string `yaml:"payloadArchivePath"`
 }
+type CORSConfig struct {
+	AllowedOrigins []string `yaml:"allowedOrigins"`
+}
+
 type AdminConfig struct {
 	AutoSortJSONKeys bool `yaml:"autoSortJsonKeys"`
 	MaxLogEntries    *int `yaml:"maxLogEntries"`

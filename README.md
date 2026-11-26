@@ -89,6 +89,7 @@ See [claude-skill/README.md](claude-skill/README.md) for how to install it.
 - Want to run on https? Check out the README in the https directory
 - Want to copy a request as curl? Click on the small square in the log next to the request (Note that Verbose must be checked)
 - Forwarded requests get the target's Host header by default. Set `preserveHost` on a proxy (or `preserveHost: true` under `defaults` in config.yml for the default route) to forward the incoming Host instead, e.g. when the target routes on Host and the client sets it explicitly. A loopback Host (localhost:9097 etc.) is never forwarded
+- Browser pages on localhost (any port) can call moxy. Pages on other origins get 403 unless listed under `cors.allowedOrigins` in config.yml, e.g. `allowedOrigins: ["http://myapp.local:3000"]`. `"*"` allows any website you visit to read mock and proxied responses
   
 <br>  
 <br>

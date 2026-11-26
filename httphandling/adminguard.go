@@ -8,6 +8,10 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
+
+	"github.com/mattinordstrom/moxy/config"
+	"github.com/mattinordstrom/moxy/utils"
 )
 
 var AllInterfaces = false
@@ -97,6 +101,45 @@ func guardAdminRequest(resWriter http.ResponseWriter, req *http.Request) bool {
 	}
 
 	http.Error(resWriter, "Forbidden: "+err.Error(), status)
+
+	return false
+}
+
+var blockedOrigins sync.Map
+
+// Reflecting any origin would let every website you visit read mock and proxied responses.
+func originAllowed(origin string, host string) bool {
+	originURL, err := url.Parse(origin)
+	if err == nil && originURL.Host != "" && (isLoopbackHost(originURL.Host) || strings.EqualFold(originURL.Host, host)) {
+		return true
+	}
+
+	for _, allowed := range config.AppConfig.CORS.AllowedOrigins {
+		if allowed == "*" || strings.EqualFold(strings.TrimSuffix(allowed, "/"), origin) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func reportBlockedOrigin(origin string) {
+	if _, seen := blockedOrigins.LoadOrStore(origin, true); seen {
+		return
+	}
+
+	msg := fmt.Sprintf("Blocked request from origin %q, add it to cors.allowedOrigins in config.yml to allow it", origin)
+	log.Println(msg) //nolint:gosec // %q escapes control characters
+	updateAdminWithLatest(msg, utils.EventTypeError, nil)
+}
+
+func wsMockOriginAllowed(req *http.Request) bool {
+	origin := req.Header.Get("Origin")
+	if origin == "" || originAllowed(origin, req.Host) {
+		return true
+	}
+
+	reportBlockedOrigin(origin)
 
 	return false
 }

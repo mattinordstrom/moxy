@@ -120,12 +120,20 @@ func RootHandler(resWriter http.ResponseWriter, req *http.Request) {
 	}
 
 	origin := req.Header.Get("Origin")
-	if origin != "" {
-		resWriter.Header().Set("Access-Control-Allow-Origin", origin)
-	} else {
-		resWriter.Header().Set("Access-Control-Allow-Origin", "*")
+	if origin == "" {
+		HTTPHandler(resWriter, req)
+
+		return
 	}
 
+	if !originAllowed(origin, req.Host) {
+		reportBlockedOrigin(origin)
+		http.Error(resWriter, "Forbidden: origin "+origin+" is not in cors.allowedOrigins in config.yml", http.StatusForbidden)
+
+		return
+	}
+
+	resWriter.Header().Set("Access-Control-Allow-Origin", origin)
 	resWriter.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
 	resWriter.Header().Set("Access-Control-Allow-Headers", "*")
 	resWriter.Header().Set("Access-Control-Allow-Credentials", "true")
