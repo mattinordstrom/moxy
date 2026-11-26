@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/mattinordstrom/moxy/models"
 )
@@ -141,7 +142,28 @@ func getJSONResultBytes(filename string, absolutePath bool) ([]byte, error) {
 }
 
 func LogError(str string, err error) {
-	log.Println(ColorRed + str + " " + err.Error() + ColorReset)
+	if err != nil {
+		str += " " + err.Error()
+	}
+
+	log.Println(ColorRed + SanitizeTerminal(str) + ColorReset)
+}
+
+// SanitizeTerminal stops request data and WS mock messages from moving the cursor, recoloring or rewriting earlier terminal output.
+func SanitizeTerminal(str string) string {
+	var sBuilder strings.Builder
+
+	for _, char := range str {
+		if char == '\n' || char == '\t' || !unicode.IsControl(char) {
+			sBuilder.WriteRune(char)
+
+			continue
+		}
+
+		fmt.Fprintf(&sBuilder, "\\x%02x", char)
+	}
+
+	return sBuilder.String()
 }
 
 func CopyFile(src, dst string) (bool, error) {

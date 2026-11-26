@@ -208,6 +208,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []models.Proxy, reqURL string) {
 	newURL := ""
+	termURL := utils.SanitizeTerminal(reqURL)
 	rule := defaultRouteRule
 	insecure := DefaultInsecure
 
@@ -219,7 +220,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 
 			if proxyEntity.Verbose {
 				fmt.Println(" ")
-				fmt.Println(utils.GetProxyEventString(reqURL, proxyEntity.Target, req.Method+" ", false))
+				fmt.Println(utils.GetProxyEventString(termURL, proxyEntity.Target, utils.SanitizeTerminal(req.Method)+" ", false))
 				// headers
 				var sBuilder strings.Builder
 
@@ -233,7 +234,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 					headerString = headerString[:len(headerString)-2]
 				}
 
-				fmt.Printf("\x1B[3m%s\x1B[23m\n", headerString)
+				fmt.Printf("\x1B[3m%s\x1B[23m\n", utils.SanitizeTerminal(headerString))
 
 				// body
 				bodyBytes, err := io.ReadAll(req.Body)
@@ -244,7 +245,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 				}
 
 				bodyStr := string(bodyBytes)
-				fmt.Println(bodyStr)
+				fmt.Println(utils.SanitizeTerminal(bodyStr))
 
 				extras := map[string]any{"body": bodyStr, "headers": headerString, "httpMethod": req.Method}
 
@@ -256,7 +257,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 				fmt.Println(" ")
 			} else {
 				updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy, map[string]any{})
-				fmt.Println(utils.GetProxyEventString(reqURL, proxyEntity.Target, "", false))
+				fmt.Println(utils.GetProxyEventString(termURL, proxyEntity.Target, "", false))
 			}
 
 			break
@@ -266,7 +267,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 	if newURL == "" {
 		newURL = DefaultRoute + reqURL
 		updateAdminWithLatest(reqURL+utils.RightArrow+newURL, utils.EventTypeProxy, map[string]any{})
-		fmt.Println(utils.GetProxyEventString(reqURL, DefaultRoute, "", true))
+		fmt.Println(utils.GetProxyEventString(termURL, DefaultRoute, "", true))
 	}
 
 	forwardReq(resWriter, req, newURL, rule, insecure)

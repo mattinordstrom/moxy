@@ -51,7 +51,7 @@ func handleWSMockMessages() {
 	for {
 		msg := <-broadcast
 
-		fmt.Print(utils.ColorYellow + string(msg) + utils.ColorReset + "\n")
+		fmt.Print(utils.ColorYellow + utils.SanitizeTerminal(string(msg)) + utils.ColorReset + "\n")
 		updateAdminWithLatest(string(msg), utils.EventTypeWSMock, map[string]any{})
 
 		lock.Lock()
