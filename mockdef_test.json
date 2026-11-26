@@ -1,5 +1,27 @@
 [
   {
+    "comment": "Invalid regex in an inactive mock must not break other mocks",
+    "freezetimems": 0,
+    "method": "GET",
+    "payload": {
+      "response": "edge case"
+    },
+    "active": false,
+    "statuscode": 200,
+    "urlpart": "/api/(inactive.*"
+  },
+  {
+    "comment": "Invalid regex in an active mock must not break other mocks",
+    "freezetimems": 0,
+    "method": "GET",
+    "payload": {
+      "response": "edge case"
+    },
+    "active": true,
+    "statuscode": 200,
+    "urlpart": "/api/(active.*"
+  },
+  {
     "active": true,
     "comment": "This is used only for tests",
     "freezetimems": 0,
@@ -51,5 +73,35 @@
     },
     "statuscode": 200,
     "urlpart": "/api/testactive/"
+  },
+  {
+    "comment": "Mock without statuscode defaults to 200",
+    "freezetimems": 0,
+    "method": "GET",
+    "payload": {
+      "response": "edge case"
+    },
+    "active": true,
+    "urlpart": "/api/edge/nostatus"
+  },
+  {
+    "comment": "Mock with a statuscode WriteHeader would panic on",
+    "freezetimems": 0,
+    "method": "GET",
+    "payload": {
+      "response": "edge case"
+    },
+    "active": true,
+    "statuscode": 42,
+    "urlpart": "/api/edge/badstatus"
+  },
+  {
+    "active": true,
+    "comment": "Mock whose payloadFromFile does not exist",
+    "freezetimems": 0,
+    "method": "GET",
+    "payloadFromFile": "/nonexistent/moxy/payload.json",
+    "statuscode": 201,
+    "urlpart": "/api/edge/missingfile"
   }
 ]

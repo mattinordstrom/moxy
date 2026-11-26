@@ -3,6 +3,7 @@ package httphandling
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/mattinordstrom/moxy/models"
@@ -154,6 +156,13 @@ func revalidate(next http.Handler) http.Handler {
 }
 
 func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
+	// Before loading the defs, so a broken mockdef.json can still be fixed from the admin UI
+	if isAdminPath(req) {
+		handleAdminReq(resWriter, req)
+
+		return
+	}
+
 	mockObjArr, mockErr := utils.GetMockJSON()
 	if mockErr != nil {
 		utils.LogError("Failed to load mock definitions: ", mockErr)
@@ -174,84 +183,11 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 	reqURL := fmt.Sprint(req.URL)
 
-	if isAdminPath(req) {
-		handleAdminReq(resWriter, req)
-
-		return
-	}
-
 	////////////////////////////////////////
 	// Loop mockdef json obj
 	for _, mockEntity := range mockObjArr {
-		trimmedURL := strings.TrimRight(strings.TrimLeft(mockEntity.URLPart, "/"), "/")
-		isActiveAndMethodMatch := mockEntity.Active && (req.Method == mockEntity.Method)
-		isMatch := isActiveAndMethodMatch && strings.Contains(reqURL, trimmedURL)
-
-		if strings.Contains(trimmedURL, ".*") && !isMatch {
-			regex, err := regexp.Compile(trimmedURL)
-			if err != nil {
-				utils.LogError("Error compiling regex: ", err)
-				http.Error(resWriter, "Error compiling regex in mock definition", http.StatusInternalServerError)
-
-				return
-			}
-
-			isMatch = isActiveAndMethodMatch && regex.MatchString(reqURL)
-		}
-
-		if isMatch {
-			freezetime := mockEntity.FreezeTimeMS
-			if freezetime != 0 {
-				dur, _ := time.ParseDuration(strconv.Itoa(freezetime) + "ms")
-				time.Sleep(dur)
-			}
-
-			resWriter.Header().Set("Content-Type", "application/json")
-			resWriter.WriteHeader(mockEntity.StatusCode)
-
-			if !utils.UsePayloadFromFile(mockEntity) {
-				jsonPayload, err := json.Marshal(mockEntity.Payload)
-				if err != nil {
-					utils.LogError("Error occurred during marshalling: ", err)
-
-					return
-				}
-
-				_, wErr := resWriter.Write(jsonPayload)
-				if wErr != nil {
-					utils.LogError("Error occurred during write: ", wErr)
-
-					return
-				}
-
-				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, string(jsonPayload)),
-					utils.EventTypeMock, map[string]any{})
-
-				fmt.Println(utils.GetMockEventString(mockEntity, true, string(jsonPayload)))
-			} else {
-				// Payload is a json from separate file
-				payloadPath := mockEntity.PayloadFromFile
-
-				payloadFromFile, err := utils.GetJSONPayloadFromAbsolutePath(payloadPath)
-				if err != nil {
-					utils.LogError("Error: ", err)
-					updateAdminWithLatest(err.Error(), utils.EventTypeError, map[string]any{})
-
-					return
-				}
-
-				_, wErr := resWriter.Write(payloadFromFile)
-				if wErr != nil {
-					utils.LogError("Error occurred during write (payloadFromFile): ", wErr)
-
-					return
-				}
-
-				updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, payloadPath),
-					utils.EventTypeMock, map[string]any{})
-
-				fmt.Println(utils.GetMockEventString(mockEntity, true, payloadPath))
-			}
+		if mockEntity.Active && req.Method == mockEntity.Method && urlPartMatches(mockEntity.URLPart, reqURL) {
+			serveMock(resWriter, mockEntity)
 
 			return
 		}
@@ -267,22 +203,7 @@ func useProxyForReq(resWriter http.ResponseWriter, req *http.Request, objArr []m
 	preserveHost := DefaultPreserveHost
 
 	for _, proxyEntity := range objArr {
-		trimmedURL := strings.TrimRight(strings.TrimLeft(proxyEntity.URLPart, "/"), "/")
-		isMatch := proxyEntity.Active && strings.Contains(reqURL, trimmedURL)
-
-		if strings.Contains(trimmedURL, ".*") && !isMatch {
-			regex, err := regexp.Compile(trimmedURL)
-			if err != nil {
-				utils.LogError("Error compiling regex (proxy): ", err)
-				http.Error(resWriter, "Error compiling regex in proxy definition", http.StatusInternalServerError)
-
-				return
-			}
-
-			isMatch = proxyEntity.Active && regex.MatchString(reqURL)
-		}
-
-		if isMatch {
+		if proxyEntity.Active && urlPartMatches(proxyEntity.URLPart, reqURL) {
 			newURL = strings.TrimRight(proxyEntity.Target, "/") + "/" + strings.TrimLeft(reqURL, "/")
 			preserveHost = proxyEntity.PreserveHost
 
@@ -398,4 +319,115 @@ func forwardReq(resWriter http.ResponseWriter, req *http.Request, newURL string,
 		utils.LogError("Failed to copy response body: ", err)
 		updateAdminWithLatest("Failed to copy response body", utils.EventTypeError, map[string]any{})
 	}
+}
+
+var (
+	urlPatterns   = map[string]*regexp.Regexp{}
+	urlPatternsMu sync.Mutex
+)
+
+func urlPartMatches(urlPart string, reqURL string) bool {
+	trimmedURL := strings.TrimRight(strings.TrimLeft(urlPart, "/"), "/")
+	if strings.Contains(reqURL, trimmedURL) {
+		return true
+	}
+
+	if !strings.Contains(trimmedURL, ".*") {
+		return false
+	}
+
+	regex := compileURLPattern(trimmedURL)
+
+	return regex != nil && regex.MatchString(reqURL)
+}
+
+// An invalid pattern only disables its own def, and is reported once instead of on every request.
+func compileURLPattern(pattern string) *regexp.Regexp {
+	urlPatternsMu.Lock()
+	defer urlPatternsMu.Unlock()
+
+	regex, known := urlPatterns[pattern]
+	if known {
+		return regex
+	}
+
+	regex, err := regexp.Compile(pattern)
+	if err != nil {
+		utils.LogError("Ignoring def with invalid urlpart regex "+strconv.Quote(pattern)+":", err)
+		updateAdminWithLatest("Ignoring def with invalid urlpart regex "+strconv.Quote(pattern)+": "+err.Error(),
+			utils.EventTypeError, map[string]any{})
+	}
+
+	urlPatterns[pattern] = regex
+
+	return regex
+}
+
+const (
+	minStatusCode = 100
+	maxStatusCode = 999
+)
+
+func serveMock(resWriter http.ResponseWriter, mockEntity models.Mock) {
+	if mockEntity.FreezeTimeMS > 0 {
+		time.Sleep(time.Duration(mockEntity.FreezeTimeMS) * time.Millisecond)
+	}
+
+	if mockEntity.StatusCode == 0 {
+		mockEntity.StatusCode = http.StatusOK
+	}
+
+	// WriteHeader panics outside this range
+	if mockEntity.StatusCode < minStatusCode || mockEntity.StatusCode > maxStatusCode {
+		reportMockError(resWriter, fmt.Errorf("%w %d in mock for %s", errInvalidStatusCode,
+			mockEntity.StatusCode, mockEntity.URLPart))
+
+		return
+	}
+
+	body, logPayload, err := mockBody(mockEntity)
+	if err != nil {
+		reportMockError(resWriter, err)
+
+		return
+	}
+
+	resWriter.Header().Set("Content-Type", "application/json")
+	resWriter.WriteHeader(mockEntity.StatusCode)
+
+	_, err = resWriter.Write(body)
+	if err != nil {
+		utils.LogError("Error occurred during write: ", err)
+
+		return
+	}
+
+	updateAdminWithLatest(utils.GetMockEventString(mockEntity, false, logPayload), utils.EventTypeMock, map[string]any{})
+	fmt.Println(utils.GetMockEventString(mockEntity, true, logPayload))
+}
+
+var errInvalidStatusCode = errors.New("invalid statuscode")
+
+func mockBody(mockEntity models.Mock) ([]byte, string, error) {
+	if !utils.UsePayloadFromFile(mockEntity) {
+		body, err := json.Marshal(mockEntity.Payload)
+		if err != nil {
+			return nil, "", fmt.Errorf("invalid payload in mock for %s: %w", mockEntity.URLPart, err)
+		}
+
+		return body, string(body), nil
+	}
+
+	body, err := utils.GetJSONPayloadFromAbsolutePath(mockEntity.PayloadFromFile)
+	if err != nil {
+		return nil, "", fmt.Errorf("payloadFromFile in mock for %s: %w", mockEntity.URLPart, err)
+	}
+
+	return body, mockEntity.PayloadFromFile, nil
+}
+
+func reportMockError(resWriter http.ResponseWriter, err error) {
+	utils.LogError("Error:", err)
+	updateAdminWithLatest(err.Error(), utils.EventTypeError, map[string]any{})
+	http.Error(resWriter, err.Error(), http.StatusInternalServerError)
 }

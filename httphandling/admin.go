@@ -154,7 +154,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 
 			const filePermission = 0o600
 
-			errr := os.WriteFile(jsonName+".json", jsonData, filePermission)
+			errr := utils.WriteFileAtomic(jsonName+".json", jsonData, filePermission)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
 
@@ -191,7 +191,7 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 
 			const filePermission = 0o600
 
-			errr := os.WriteFile("ui/settings.json", jsonData, filePermission)
+			errr := utils.WriteFileAtomic("ui/settings.json", jsonData, filePermission)
 			if errr != nil {
 				http.Error(resWriter, errr.Error(), http.StatusInternalServerError)
 
@@ -331,6 +331,8 @@ func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
 
 				return
 			}
+
+			utils.ForgetCache()
 		} else {
 			queryParams := req.URL.Query()
 

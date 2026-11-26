@@ -24,17 +24,19 @@ func TestMain(m *testing.M) {
 	testhelper.SetupTest(m)
 }
 
+//nolint:paralleltest // swaps the global forward client
 func TestProxyResponseFail(t *testing.T) {
-	t.Parallel()
-
 	req, err := http.NewRequest(http.MethodGet, "/api/test123", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	orig := httphandling.ForwardClient
 	httphandling.ForwardClient = &http.Client{
 		Transport: &mockTransport{},
 	}
+
+	t.Cleanup(func() { httphandling.ForwardClient = orig })
 
 	resRecorder := testhelper.GetRecorder(req)
 
