@@ -1,3 +1,15 @@
 package httphandling
 
 var RewriteProxyRequest = rewriteProxyRequest
+
+var (
+	UpdateAdminWithLatest = updateAdminWithLatest
+	HandleAdminWebSocket  = handleWebSocket
+)
+
+func HasAdminConnection() bool {
+	connMutex.Lock()
+	defer connMutex.Unlock()
+
+	return currentWSConnection != nil
+}

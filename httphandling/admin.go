@@ -49,53 +49,81 @@ var (
 )
 
 type WebSocketConnection struct {
-	Conn  *websocket.Conn
-	Send  chan []byte
-	mutex sync.Mutex
+	// Only writePump writes to Conn, since gorilla/websocket allows a single concurrent writer
+	Conn        *websocket.Conn
+	send        chan []byte
+	done        chan struct{}
+	closeOnce   sync.Once
+	closeReason string
 }
 
 func NewWebSocketConnection(conn *websocket.Conn) *WebSocketConnection {
 	return &WebSocketConnection{
 		Conn: conn,
-		Send: make(chan []byte, wsSendBuffer),
+		send: make(chan []byte, wsSendBuffer),
+		done: make(chan struct{}),
 	}
 }
 
 func (wc *WebSocketConnection) enqueueMessage(message []byte) {
 	select {
-	case wc.Send <- message:
+	case <-wc.done:
+	case wc.send <- message:
 	default:
 		log.Println("Send channel is full, dropping message")
 	}
 }
 
+func (wc *WebSocketConnection) close(reason string) {
+	wc.closeOnce.Do(func() {
+		wc.closeReason = reason
+		close(wc.done)
+	})
+}
+
 func (wc *WebSocketConnection) writePump() {
+	defer wc.Conn.Close()
+
 	for {
-		message, ok := <-wc.Send
-		if !ok {
-			// Channel closed, stop the goroutine
+		select {
+		case <-wc.done:
+			if wc.closeReason != "" {
+				writeCloseMessage(wc.Conn, wc.closeReason)
+			}
+
 			return
-		}
+		case message := <-wc.send:
+			if err := wc.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
+				wc.close("")
+				forgetWSConnection(wc)
 
-		wc.mutex.Lock()
-		err := wc.Conn.WriteMessage(websocket.TextMessage, message)
-		wc.mutex.Unlock()
-
-		if err != nil {
-			break
+				return
+			}
 		}
 	}
 }
 
-func handleWebSocket(resWriter http.ResponseWriter, req *http.Request) {
-	connMutex.Lock()
-	oldConn := currentWSConnection
-	connMutex.Unlock()
+// Reading is what notices a closed tab, and it also handles the client's ping and close frames.
+func (wc *WebSocketConnection) readPump() {
+	for {
+		if _, _, err := wc.Conn.ReadMessage(); err != nil {
+			wc.close("")
+			forgetWSConnection(wc)
 
-	if oldConn != nil {
-		closeConnectionWithMessage(oldConn.Conn, "ws_takeover")
+			return
+		}
 	}
+}
 
+func forgetWSConnection(wc *WebSocketConnection) {
+	connMutex.Lock()
+	if currentWSConnection == wc {
+		currentWSConnection = nil
+	}
+	connMutex.Unlock()
+}
+
+func handleWebSocket(resWriter http.ResponseWriter, req *http.Request) {
 	conn, err := upgrader.Upgrade(resWriter, req, nil)
 	if err != nil {
 		utils.LogError("WS connection error: ", err)
@@ -103,11 +131,19 @@ func handleWebSocket(resWriter http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	connMutex.Lock()
+	wsConn := NewWebSocketConnection(conn)
 
-	currentWSConnection = NewWebSocketConnection(conn)
-	go currentWSConnection.writePump()
+	connMutex.Lock()
+	oldConn := currentWSConnection
+	currentWSConnection = wsConn
 	connMutex.Unlock()
+
+	if oldConn != nil {
+		oldConn.close("ws_takeover")
+	}
+
+	go wsConn.writePump()
+	go wsConn.readPump()
 }
 
 func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
@@ -416,22 +452,14 @@ func writeArchivePathError(resWriter http.ResponseWriter, err error) {
 	http.Error(resWriter, "Invalid archive path", http.StatusInternalServerError)
 }
 
-func closeConnectionWithMessage(conn *websocket.Conn, message string) {
-	msg := websocket.FormatCloseMessage(websocket.CloseNormalClosure, message)
-
+func writeCloseMessage(conn *websocket.Conn, reason string) {
+	msg := websocket.FormatCloseMessage(websocket.CloseNormalClosure, reason)
 	deadline := time.Now().Add(time.Second * time.Duration(closeMessageDeadLine))
 
-	err := conn.SetWriteDeadline(deadline)
-	if err != nil {
-		utils.LogError("Error SetWriteDeadline: ", err)
-	}
-
-	err = conn.WriteMessage(websocket.CloseMessage, msg)
+	err := conn.WriteControl(websocket.CloseMessage, msg, deadline)
 	if err != nil {
 		utils.LogError("Error WriteMessage close msg: ", err)
 	}
-
-	conn.Close()
 }
 
 func updateAdminWithLatest(evtStr string, evtType string, extras map[string]any) {
