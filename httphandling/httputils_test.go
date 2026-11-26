@@ -24,9 +24,9 @@ func TestCreateReqFromReqHost(t *testing.T) {
 		{"target host when not preserving", incomingHost, false, targetHost},
 		{"incoming host when preserving", incomingHost, true, incomingHost},
 		{"incoming host with port when preserving", incomingHost + ":8443", true, incomingHost + ":8443"},
-		{"target host when incoming is localhost", "localhost:9097", true, targetHost},
-		{"target host when incoming is 127.0.0.1", "127.0.0.1:9097", true, targetHost},
-		{"target host when incoming is ::1", "[::1]:9097", true, targetHost},
+		{"target host when incoming is localhost", adminHost, true, targetHost},
+		{"target host when incoming is 127.0.0.1", ipv4Host, true, targetHost},
+		{"target host when incoming is ::1", ipv6Host, true, targetHost},
 		{"target host when incoming is empty", "", true, targetHost},
 	}
 

@@ -15,6 +15,7 @@ const saveUISettings = async () => {
     try {
         await fetch('/moxyadminui/uisettings', {
             method: "POST",
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(uiSettings),
         });
     } catch (error) {
@@ -188,7 +189,7 @@ const fetchSettings = async () => {
         if (!response.ok) {
             const text = await response.text();
             
-            const logMsg = '<span class="square square-red"></span> ' + text + '<br />';
+            const logMsg = '<span class="square square-red"></span> ' + escapeHTML(text) + '<br />';
             document.getElementById("footer-log").insertAdjacentHTML('afterbegin', logMsg);
 
             throw new Error('Error ' + response.status + ': ' + text);
@@ -196,8 +197,8 @@ const fetchSettings = async () => {
 
         const data = await response.json();
 
-        document.getElementById('header-port').innerHTML = data['port'];
-        document.getElementById('header-route').innerHTML = data['defaultRoute'] + (data['defaultPreserveHost'] ? ' (preserve host)' : '');
+        document.getElementById('header-port').textContent = data['port'];
+        document.getElementById('header-route').textContent = data['defaultRoute'] + (data['defaultPreserveHost'] ? ' (preserve host)' : '');
 
         PayloadFromFileModule.setPayloadPath(data['payloadPath']);
         PayloadFromFileModule.setPayloadFiles(data['payloadFiles']);
@@ -222,7 +223,7 @@ const renderMockdefs = () => {
             <div class="proxymock-content">
                 <div class="proxymock-entity">
                     <div style="display:flex">
-                        <div><input placeholder="comment here" onchange="updateMockdef(this)" class="comment-input" type="text" spellcheck="false" name="comment_mock_${i}" id="comment_mock_${i}" value="${mockEntityData['comment'] || ""}"></input></div>
+                        <div><input placeholder="comment here" onchange="updateMockdef(this)" class="comment-input" type="text" spellcheck="false" name="comment_mock_${i}" id="comment_mock_${i}" value="${escapeHTML(mockEntityData['comment'] || "")}"></input></div>
                         <div><button class="small-btn" onclick="moveMock(this)" id="movemock_first_btn_${i}"><i class="fa-solid fa-angles-up"></i></button></div>
                         <div><button class="small-btn" onclick="moveMock(this)" id="movemock_up_btn_${i}"><i class="fa-solid fa-angle-up"></i></button></div>
                         <div><button class="small-btn" onclick="moveMock(this)" id="movemock_down_btn_${i}"><i class="fa-solid fa-angle-down"></i></button></div>
@@ -231,7 +232,7 @@ const renderMockdefs = () => {
                     </div>
                 </div>
                 <div class="mock-obj"><label for="active_mock_${i}">active:</label><input onclick="updateMockdef(this)" class="cbox" type="checkbox" name="active_mock_${i}" id="active_mock_${i}" ${mockEntityData['active'] ? "checked" : ""}></input></div>
-                <div class="mock-obj mock_compact_exclude"><label for="freezetimems_${i}">freezetimems:</label><input onchange="updateMockdef(this)" type="number" name="freezetimems_${i}" id="freezetimems_${i}" value="${mockEntityData['freezetimems']}"></input></div>
+                <div class="mock-obj mock_compact_exclude"><label for="freezetimems_${i}">freezetimems:</label><input onchange="updateMockdef(this)" type="number" name="freezetimems_${i}" id="freezetimems_${i}" value="${escapeHTML(mockEntityData['freezetimems'])}"></input></div>
                 <div class="mock-obj"><label for="method_${i}">method:</label><select onchange="updateMockdef(this)" class="slct" name="method_${i}" id="method_${i}">
                     <option value="GET" ${mockEntityData['method'] === "GET" ? "selected" : ""}>GET</option>
                     <option value="POST" ${mockEntityData['method'] === "POST" ? "selected" : ""}>POST</option>
@@ -250,7 +251,7 @@ const renderMockdefs = () => {
         mockEntity += `
                 <div class="mock-obj mock_compact_exclude">
                     <label for="payload_${i}">payload:</label>
-                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="20" cols="60" name="payload_${i}" id="payload_${i}">${payload}</textarea>
+                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="20" cols="60" name="payload_${i}" id="payload_${i}">${escapeHTML(payload)}</textarea>
                 </div>`;
 
         mockEntity += `
@@ -258,7 +259,7 @@ const renderMockdefs = () => {
                     <label style="display:flex; flex-direction: column" for="payloadFromFile_${i}">
                         payloadFromFile:
                     </label>
-                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="45" class="fixed-textarea" name="payloadFromFile_${i}" id="payloadFromFile_${i}">${mockEntityData['payloadFromFile']}</textarea>
+                    <textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="45" class="fixed-textarea" name="payloadFromFile_${i}" id="payloadFromFile_${i}">${escapeHTML(mockEntityData['payloadFromFile'])}</textarea>
                     <button class="mock-file-edit payload-files-btn small-btn" id="mock_file_edit_${i}" onclick="editFileFromMock(this)">
                         <i class="fa-solid fa-pen"></i>
                     </button>
@@ -267,11 +268,11 @@ const renderMockdefs = () => {
         mockEntity += `
                 <div class="mock-obj mock_compact_exclude">
                     <label for="statuscode_${i}">statuscode:</label>
-                    <input onchange="updateMockdef(this)" type="number" name="statuscode_${i}" id="statuscode_${i}" value="${mockEntityData['statuscode']}"></input>
+                    <input onchange="updateMockdef(this)" type="number" name="statuscode_${i}" id="statuscode_${i}" value="${escapeHTML(mockEntityData['statuscode'])}"></input>
                 </div>
                 <div class="mock-obj">
                     <label for="urlpart_mock_${i}"><b>urlpart:</b></label>
-                    <input onchange="updateMockdef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_mock_${i}" id="urlpart_mock_${i}" value="${mockEntityData['urlpart']}"></input>
+                    <input onchange="updateMockdef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_mock_${i}" id="urlpart_mock_${i}" value="${escapeHTML(mockEntityData['urlpart'])}"></input>
                 </div>
             </div>`;
 
@@ -285,7 +286,7 @@ const renderProxydefs = () => {
             <div class="proxymock-content">
                 <div class="proxymock-entity">
                     <div style="display:flex">
-                        <div><input placeholder="comment here" onchange="updateProxydef(this)" class="comment-input" type="text" spellcheck="false" name="comment_proxy_${i}" id="comment_proxy_${i}" value="${proxyEntityData['comment'] || ""}"></input></div>
+                        <div><input placeholder="comment here" onchange="updateProxydef(this)" class="comment-input" type="text" spellcheck="false" name="comment_proxy_${i}" id="comment_proxy_${i}" value="${escapeHTML(proxyEntityData['comment'] || "")}"></input></div>
                         <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_first_btn_${i}"><i class="fa-solid fa-angles-up"></i></button></div>
                         <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_up_btn_${i}"><i class="fa-solid fa-angle-up"></i></button></div>
                         <div><button class="small-btn" onclick="moveProxy(this)" id="moveproxy_down_btn_${i}"><i class="fa-solid fa-angle-down"></i></button></div>
@@ -294,8 +295,8 @@ const renderProxydefs = () => {
                     </div>
                 </div>
                 <div class="proxy-obj"><label for="active_proxy_${i}">active:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="active_proxy_${i}" id="active_proxy_${i}" ${proxyEntityData['active'] ? "checked" : ""}></input></div>    
-                <div class="proxy-obj proxy_compact_exclude"><label for="target_${i}">target:</label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="target_${i}" id="target_${i}" value="${proxyEntityData['target']}"></input></div>
-                <div class="proxy-obj"><label for="urlpart_proxy_${i}"><b>urlpart:</b></label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_proxy_${i}" id="urlpart_proxy_${i}" value="${proxyEntityData['urlpart']}"></input></div>
+                <div class="proxy-obj proxy_compact_exclude"><label for="target_${i}">target:</label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="target_${i}" id="target_${i}" value="${escapeHTML(proxyEntityData['target'])}"></input></div>
+                <div class="proxy-obj"><label for="urlpart_proxy_${i}"><b>urlpart:</b></label><input onchange="updateProxydef(this)" spellcheck="false" class="input-wide" type="text" name="urlpart_proxy_${i}" id="urlpart_proxy_${i}" value="${escapeHTML(proxyEntityData['urlpart'])}"></input></div>
                 <div class="proxy-obj proxy_compact_exclude"><label for="verbose_${i}">verbose:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="verbose_${i}" id="verbose_${i}" ${proxyEntityData['verbose'] ? "checked" : ""}></input></div> 
                 <div class="proxy-obj proxy_compact_exclude"><label for="preserveHost_${i}" title="Forward the incoming Host header instead of the target's (never for localhost)">preserveHost:</label><input onclick="updateProxydef(this)" class="cbox" type="checkbox" name="preserveHost_${i}" id="preserveHost_${i}" ${proxyEntityData['preserveHost'] ? "checked" : ""}></input></div>
             </div>`;
@@ -397,15 +398,15 @@ const listPayloadFiles = async (evtSource) => {
     PayloadFromFileModule.setPayloadFiles(data['payloadFiles']);
 
     document.getElementById('payloadFiles').style.display = 'block';
-    document.getElementById('payloadFilesPath').innerHTML = `<br />${PayloadFromFileModule.getPayloadPath()}<hr /><br />`;
+    document.getElementById('payloadFilesPath').innerHTML = `<br />${escapeHTML(PayloadFromFileModule.getPayloadPath())}<hr /><br />`;
 
     let filesListHtml = '<div>';
     PayloadFromFileModule.getPayloadFiles().forEach((file) => {
         filesListHtml += `
             <div style="display:flex">
-                <div style="min-width:275px">${file}</div>
-                &nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(\'${PayloadFromFileModule.getPayloadPath() + file}\')">Copy full path</button>
-                &nbsp;&nbsp;<button onclick="editFile(this, \'${PayloadFromFileModule.getPayloadPath() + file}\')">Edit file</button>
+                <div style="min-width:275px">${escapeHTML(file)}</div>
+                &nbsp;&nbsp;<button onclick="navigator.clipboard.writeText(${escapeHTML(JSON.stringify(PayloadFromFileModule.getPayloadPath() + file))})">Copy full path</button>
+                &nbsp;&nbsp;<button onclick="editFile(this, ${escapeHTML(JSON.stringify(PayloadFromFileModule.getPayloadPath() + file))})">Edit file</button>
             </div><br />
         `;
     });
@@ -439,8 +440,8 @@ const editFile = async (btnEl, fullPath) => {
         console.warn("Received response could not be parsed as JSON");
     }
 
-    document.getElementById('editfiletitle').innerHTML = filename;
-    document.getElementById('editfilecopybtn').innerHTML = `<button onclick="navigator.clipboard.writeText(\'${PayloadFromFileModule.getPayloadPath() + filename}\')">Copy full path</button>`;
+    document.getElementById('editfiletitle').textContent = filename;
+    document.getElementById('editfilecopybtn').innerHTML = `<button onclick="navigator.clipboard.writeText(${escapeHTML(JSON.stringify(PayloadFromFileModule.getPayloadPath() + filename))})">Copy full path</button>`;
 
     document.getElementById('payloadedit').disabled = false;
 
@@ -454,6 +455,7 @@ const updatePayloadFile = async (el) => {
     try {
         await fetch('/moxyadminui/editpayloadfile', {
             method: "POST",
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 file: PayloadFromFileModule.getPayloadPath() + filename, 
                 payload: newPayload
@@ -560,6 +562,7 @@ const updateMockdef = async (evt) => {
 
         await fetch('/moxyadminui/mockdef', {
             method: "POST",
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(mocksWithJSONPayload),
         });
 
@@ -593,6 +596,7 @@ const updateProxydef = async (evt) => {
     try {
         await fetch('/moxyadminui/proxydef', {
             method: "POST",
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(ProxyDefModule.get()),
         });
 

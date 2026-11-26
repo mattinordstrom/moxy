@@ -35,9 +35,7 @@ type Settings struct {
 }
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(_ *http.Request) bool {
-		return true
-	},
+	CheckOrigin: adminWebSocketAllowed,
 }
 
 var (
@@ -110,6 +108,10 @@ func handleWebSocket(resWriter http.ResponseWriter, req *http.Request) {
 }
 
 func handleAdminReq(resWriter http.ResponseWriter, req *http.Request) {
+	if !guardAdminRequest(resWriter, req) {
+		return
+	}
+
 	reqURL := req.URL.Path
 
 	switch reqURL {

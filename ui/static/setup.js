@@ -107,6 +107,7 @@ const clickEvtSetup = () => {
 
 const getCurlString = (evtJson, consolelog) => {
     const NEWLINE = consolelog ? "\n" : "<br/>";
+    const esc = consolelog ? (s) => s : escapeHTML;
     /*
     const curlString = 
         "curl --request PUT --location 'localhost:9097/api/test' \\"  + NEWLINE +
@@ -117,7 +118,7 @@ const getCurlString = (evtJson, consolelog) => {
     */
 
     const targetUrl = evtJson.message.substring(evtJson.message.lastIndexOf(' http') + 1)
-    let curlString = "curl --request " + evtJson.extras.httpMethod + " --location '" + targetUrl + "' \\" + NEWLINE;
+    let curlString = "curl --request " + esc(evtJson.extras.httpMethod) + " --location '" + esc(targetUrl) + "' \\" + NEWLINE;
 
     let headers = evtJson.extras.headers.split(" | ");
     for(let i = 0; i < headers.length; i++) {
@@ -127,10 +128,10 @@ const getCurlString = (evtJson, consolelog) => {
             }
         }
 
-        curlString += "--header '" + headers[i] + "' \\" + NEWLINE;
+        curlString += "--header '" + esc(headers[i]) + "' \\" + NEWLINE;
     }
 
-    curlString += "--data '" + evtJson.extras.body.replace(/'/g, "'\\''") + "'";
+    curlString += "--data '" + esc(evtJson.extras.body.replace(/'/g, "'\\''")) + "'";
 
     return curlString;
 }
@@ -187,32 +188,35 @@ const wsSetup = () => {
         if(evtJson.type === 'defschanged') {
             reloadDefsFromDisk(evtJson.extras && evtJson.extras.file).then((result) => {
                 if(result) {
-                    appendLogEntry('<span class="square"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + result + '<br />');
+                    appendLogEntry('<span class="square"></span> <span class="timestamp-small">' + escapeHTML(evtJson.timestamp) + ' </span>' + result + '<br />');
                 }
             });
             return;
         }
 
+        const timestamp = escapeHTML(evtJson.timestamp);
+        const message = escapeHTML(evtJson.message);
+
         let logMsg = '';
         if(evtJson.type === 'mock' || evtJson.type === 'proxy') {
-            let output = evtJson.message;
+            let output = message;
             if(evtJson.type === 'mock') {
-                logMsg = '<span class="square square-purple"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + output + '<br />';
+                logMsg = '<span class="square square-purple"></span> <span class="timestamp-small">' + timestamp + ' </span>' + output + '<br />';
             } else {
                 if(evtJson.extras && evtJson.extras.httpMethod !== "") {
-                    output = "<br/>"+evtJson.extras.httpMethod + " " + evtJson.message +
-                        "<br/><i>"+evtJson.extras.headers+"</i><br/>"+evtJson.extras.body+"<br/>";
+                    output = "<br/>" + escapeHTML(evtJson.extras.httpMethod) + " " + message +
+                        "<br/><i>" + escapeHTML(evtJson.extras.headers) + "</i><br/>" + escapeHTML(evtJson.extras.body) + "<br/>";
 
                         const dataString = encodeURIComponent(event.data).replace(/'/g, '%27');
-                    logMsg = `<span style="cursor:pointer" class="square" onclick="showCurl(this, '${dataString}')"></span>  <span class="timestamp-small">${evtJson.timestamp} </span>${output}<br />`;
+                    logMsg = `<span style="cursor:pointer" class="square" onclick="showCurl(this, '${dataString}')"></span>  <span class="timestamp-small">${timestamp} </span>${output}<br />`;
                 } else {
-                    logMsg = '<span class="square"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + output + '<br />'; 
+                    logMsg = '<span class="square"></span> <span class="timestamp-small">' + timestamp + ' </span>' + output + '<br />'; 
                 }
             }
         } else if(evtJson.type === 'wsmock') {
-            logMsg = '<span class="square square-yellow"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + evtJson.message + '<br />';
+            logMsg = '<span class="square square-yellow"></span> <span class="timestamp-small">' + timestamp + ' </span>' + message + '<br />';
         } else if(evtJson.type === 'error') {
-            logMsg = '<span class="square square-red"></span> <span class="timestamp-small">' + evtJson.timestamp + ' </span>' + evtJson.message + '<br />';
+            logMsg = '<span class="square square-red"></span> <span class="timestamp-small">' + timestamp + ' </span>' + message + '<br />';
         }
 
         appendLogEntry(logMsg);

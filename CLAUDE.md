@@ -40,7 +40,7 @@ golangci-lint run -v
 - `utils/` — JSON file reading with 1.5s TTL cache, console formatting, file helpers
 - `testhelpers/` — Shared test setup utilities
 
-**Admin UI** (`ui/`): Vanilla JS served at `/moxyadminui`. Communicates with backend via WebSocket at `/moxyws`. UI tests use Playwright with a static server on port 9099 that mocks backend endpoints.
+**Admin UI** (`ui/`): Vanilla JS served at `/moxyadminui`. The admin API and `/moxyws` are guarded in `httphandling/adminguard.go`: localhost `Host` only (unless `-a`), same-origin and `application/json` for writes, and no CORS headers. Mock/proxy routes and `/moxywsmock` stay open to other origins for the apps under test. The UI must escape anything it inserts as HTML with `escapeHTML`. Communicates with backend via WebSocket at `/moxyws`. UI tests use Playwright with a static server on port 9099 that mocks backend endpoints.
 
 **WebSocket mock** at `/moxywsmock`: Broadcasts messages to all connected clients.
 

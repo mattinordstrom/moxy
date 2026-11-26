@@ -106,12 +106,8 @@ const WSModule = (() => {
             wSocket = null;
         }
 
-        if(location.protocol.startsWith("https")) {
-            wSocket = new WebSocket("wss://localhost:"+Number(location.port)+"/moxyws");
-            return;
-        }
-
-        wSocket = new WebSocket("ws://localhost:"+Number(location.port)+"/moxyws");
+        const scheme = location.protocol.startsWith("https") ? "wss://" : "ws://";
+        wSocket = new WebSocket(scheme + location.host + "/moxyws");
     }
 
     const getWSocket = () => wSocket;

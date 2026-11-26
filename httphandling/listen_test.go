@@ -14,7 +14,7 @@ func TestListenAddrs(t *testing.T) {
 
 	t.Cleanup(func() { httphandling.Port = orig })
 
-	if got, want := httphandling.ListenAddrs(false), []string{"127.0.0.1:9097", "[::1]:9097"}; !slices.Equal(got, want) {
+	if got, want := httphandling.ListenAddrs(false), []string{ipv4Host, ipv6Host}; !slices.Equal(got, want) {
 		t.Errorf("localhost only: got %v, want %v", got, want)
 	}
 

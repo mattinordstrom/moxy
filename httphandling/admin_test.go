@@ -14,7 +14,14 @@ import (
 	testhelper "github.com/mattinordstrom/moxy/testhelpers"
 )
 
-const payloadFileURL = "/moxyadminui/editpayloadfile"
+const (
+	payloadFileURL = "/moxyadminui/editpayloadfile"
+	adminHost      = "localhost:9097"
+	ipv4Host       = "127.0.0.1:9097"
+	ipv6Host       = "[::1]:9097"
+	headerOrigin   = "Origin"
+	headerFetch    = "Sec-Fetch-Site"
+)
 
 func setupArchive(t *testing.T) (string, string) {
 	t.Helper()
@@ -56,6 +63,7 @@ func getPayloadFile(t *testing.T, file string) *httptest.ResponseRecorder {
 	t.Helper()
 
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, payloadFileURL+"?file="+url.QueryEscape(file), nil)
+	req.Host = adminHost
 
 	return testhelper.GetRecorder(req)
 }
@@ -65,6 +73,9 @@ func postPayloadFile(t *testing.T, file string) *httptest.ResponseRecorder {
 
 	body := `{"file":` + strconv.Quote(file) + `,"payload":{"written":true}}`
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, payloadFileURL, strings.NewReader(body))
+	req.Host = adminHost
+	req.Header.Set(headerOrigin, "http://"+adminHost)
+	req.Header.Set("Content-Type", "application/json")
 
 	return testhelper.GetRecorder(req)
 }

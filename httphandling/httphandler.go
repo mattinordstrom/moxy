@@ -61,6 +61,7 @@ func listen(allInterfaces bool) []net.Listener {
 }
 
 func CreateHTTPListener(sFlag bool, allInterfaces bool) {
+	AllInterfaces = allInterfaces
 	listeners := listen(allInterfaces)
 
 	addrs := make([]string, 0, len(listeners))
@@ -92,28 +93,7 @@ func CreateHTTPListener(sFlag bool, allInterfaces bool) {
 	go watchDefFiles()
 
 	// http.HandleFunc("/", HTTPHandler)
-	http.HandleFunc("/", func(resWriter http.ResponseWriter, req *http.Request) {
-		// Add CORS headers
-		origin := req.Header.Get("Origin")
-		if origin != "" {
-			resWriter.Header().Set("Access-Control-Allow-Origin", origin)
-		} else {
-			resWriter.Header().Set("Access-Control-Allow-Origin", "*")
-		}
-
-		resWriter.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
-		resWriter.Header().Set("Access-Control-Allow-Headers", "*")
-		resWriter.Header().Set("Access-Control-Allow-Credentials", "true")
-
-		// Handle preflight
-		if req.Method == http.MethodOptions {
-			resWriter.WriteHeader(http.StatusOK)
-
-			return
-		}
-
-		HTTPHandler(resWriter, req)
-	})
+	http.HandleFunc("/", RootHandler)
 
 	server := &http.Server{
 		ReadTimeout:  time.Duration(ServerReadTimeout) * time.Second,
@@ -134,6 +114,35 @@ func CreateHTTPListener(sFlag bool, allInterfaces bool) {
 	}
 
 	log.Fatalf("Server stopped: %v", <-serveErrs)
+}
+
+func RootHandler(resWriter http.ResponseWriter, req *http.Request) {
+	// The admin API must never get CORS headers, other sites could then read and change it
+	if isAdminPath(req) {
+		HTTPHandler(resWriter, req)
+
+		return
+	}
+
+	origin := req.Header.Get("Origin")
+	if origin != "" {
+		resWriter.Header().Set("Access-Control-Allow-Origin", origin)
+	} else {
+		resWriter.Header().Set("Access-Control-Allow-Origin", "*")
+	}
+
+	resWriter.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
+	resWriter.Header().Set("Access-Control-Allow-Headers", "*")
+	resWriter.Header().Set("Access-Control-Allow-Credentials", "true")
+
+	// Handle preflight
+	if req.Method == http.MethodOptions {
+		resWriter.WriteHeader(http.StatusOK)
+
+		return
+	}
+
+	HTTPHandler(resWriter, req)
 }
 
 // Without this the browser heuristically caches the admin UI js and silently runs a stale build.
@@ -165,7 +174,7 @@ func HTTPHandler(resWriter http.ResponseWriter, req *http.Request) {
 
 	reqURL := fmt.Sprint(req.URL)
 
-	if strings.HasPrefix(reqURL, "/moxyadminui") {
+	if isAdminPath(req) {
 		handleAdminReq(resWriter, req)
 
 		return

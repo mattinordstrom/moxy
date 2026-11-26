@@ -1,3 +1,7 @@
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
+
 const safelyParseJSON = (data) => {
     if (data === "null") return null;
     if (data === "true") return true;
@@ -11,7 +15,7 @@ const safelyParseJSON = (data) => {
     try {
         return JSON.parse(data);
     } catch (e) {
-        const errorMsg = "FRONTEND ERROR! Could not parse json. " + typeof data + " ("+e+")";
+        const errorMsg = "FRONTEND ERROR! Could not parse json. " + typeof data + " (" + escapeHTML(e) + ")";
 
         console.error(errorMsg);
         
