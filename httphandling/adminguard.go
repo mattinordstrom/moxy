@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"mime"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -14,10 +15,9 @@ import (
 	"github.com/mattinordstrom/moxy/utils"
 )
 
-var AllInterfaces = false
-
 var (
 	errHostNotAllowed   = errors.New("host is not localhost")
+	errRemoteNotLocal   = errors.New("admin is only reachable from this machine")
 	errCrossOrigin      = errors.New("cross-origin request")
 	errContentTypeNotOK = errors.New("content type must be application/json")
 )
@@ -26,13 +26,18 @@ func isAdminPath(req *http.Request) bool {
 	return strings.HasPrefix(fmt.Sprint(req.URL), "/moxyadminui")
 }
 
-// Rejecting non-localhost hosts stops DNS rebinding from reaching the admin API.
+// The admin API can read and write files, so it stays local even with -a; the Host check stops DNS rebinding.
 func checkAdminHost(req *http.Request) error {
-	if AllInterfaces || isLoopbackHost(req.Host) {
-		return nil
+	remoteHost, _, err := net.SplitHostPort(req.RemoteAddr)
+	if remoteIP := net.ParseIP(remoteHost); err != nil || remoteIP == nil || !remoteIP.IsLoopback() {
+		return fmt.Errorf("%w: %s", errRemoteNotLocal, req.RemoteAddr)
 	}
 
-	return fmt.Errorf("%w: %s", errHostNotAllowed, req.Host)
+	if !isLoopbackHost(req.Host) {
+		return fmt.Errorf("%w: %s", errHostNotAllowed, req.Host)
+	}
+
+	return nil
 }
 
 func checkSameOrigin(req *http.Request) error {

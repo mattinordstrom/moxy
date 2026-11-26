@@ -22,6 +22,7 @@ const (
 	headerOrigin   = "Origin"
 	headerFetch    = "Sec-Fetch-Site"
 	appOrigin      = "http://localhost:3000"
+	localRemote    = "127.0.0.1:50000"
 )
 
 func setupArchive(t *testing.T) (string, string) {
@@ -64,6 +65,7 @@ func getPayloadFile(t *testing.T, file string) *httptest.ResponseRecorder {
 	t.Helper()
 
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, payloadFileURL+"?file="+url.QueryEscape(file), nil)
+	req.RemoteAddr = localRemote
 	req.Host = adminHost
 
 	return testhelper.GetRecorder(req)
@@ -80,6 +82,7 @@ func postPayloadFileContent(t *testing.T, file, payload string) *httptest.Respon
 
 	body := `{"file":` + strconv.Quote(file) + `,"payload":` + payload + `}`
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, payloadFileURL, strings.NewReader(body))
+	req.RemoteAddr = localRemote
 	req.Host = adminHost
 	req.Header.Set(headerOrigin, "http://"+adminHost)
 	req.Header.Set("Content-Type", "application/json")

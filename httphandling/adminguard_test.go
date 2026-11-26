@@ -17,6 +17,7 @@ func adminRequest(t *testing.T, method, host string, headers map[string]string) 
 
 	req := httptest.NewRequestWithContext(t.Context(), method, mockdefURL, strings.NewReader("not json"))
 	req.Host = host
+	req.RemoteAddr = localRemote
 
 	for name, value := range headers {
 		req.Header.Set(name, value)
@@ -91,6 +92,7 @@ func TestCORSOnlyOnMockAndProxyRoutes(t *testing.T) {
 
 	preflight := func(path string) *httptest.ResponseRecorder {
 		req := httptest.NewRequestWithContext(t.Context(), http.MethodOptions, path, nil)
+		req.RemoteAddr = localRemote
 		req.Host = adminHost
 		req.Header.Set(headerOrigin, appOrigin)
 
@@ -111,5 +113,48 @@ func TestCORSOnlyOnMockAndProxyRoutes(t *testing.T) {
 
 	if res.Code != http.StatusForbidden {
 		t.Errorf("admin route: expected cross-origin preflight to get 403, got %d", res.Code)
+	}
+}
+
+func TestAdminOnlyReachableFromThisMachine(t *testing.T) {
+	t.Parallel()
+
+	request := func(remote string) *httptest.ResponseRecorder {
+		req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, mockdefURL, nil)
+		req.Host = adminHost
+		req.RemoteAddr = remote
+
+		return testhelper.GetRecorder(req)
+	}
+
+	for _, remote := range []string{"192.168.1.20:50000", "10.0.0.5:50000", "[fe80::1]:50000", "", "garbage"} {
+		if res := request(remote); res.Code != http.StatusForbidden {
+			t.Errorf("remote %q: expected 403, got %d", remote, res.Code)
+		}
+	}
+
+	for _, remote := range []string{localRemote, "[::1]:50000", "[::ffff:127.0.0.1]:50000"} {
+		if res := request(remote); res.Code == http.StatusForbidden {
+			t.Errorf("remote %q: expected to be allowed, got 403", remote)
+		}
+	}
+}
+
+func TestAdminWebSocketOnlyFromThisMachine(t *testing.T) {
+	t.Parallel()
+
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/moxyws", nil)
+	req.Host = adminHost
+	req.RemoteAddr = "192.168.1.20:50000"
+	req.Header.Set("Connection", "Upgrade")
+	req.Header.Set("Upgrade", "websocket")
+	req.Header.Set("Sec-WebSocket-Version", "13")
+	req.Header.Set("Sec-WebSocket-Key", "dGhlIHNhbXBsZSBub25jZQ==")
+
+	res := httptest.NewRecorder()
+	httphandling.HandleAdminWebSocket(res, req)
+
+	if res.Code != http.StatusForbidden {
+		t.Errorf("expected 403, got %d", res.Code)
 	}
 }

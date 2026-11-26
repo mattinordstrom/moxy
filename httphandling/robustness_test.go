@@ -83,6 +83,7 @@ func TestAdminWorksWithBrokenMockdef(t *testing.T) {
 	}
 
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/moxyadminui/settings", nil)
+	req.RemoteAddr = localRemote
 	req.Host = adminHost
 
 	if res := testhelper.GetRecorder(req); res.Code != http.StatusOK {

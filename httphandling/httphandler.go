@@ -65,7 +65,6 @@ func listen(allInterfaces bool) []net.Listener {
 }
 
 func CreateHTTPListener(sFlag bool, allInterfaces bool) {
-	AllInterfaces = allInterfaces
 	listeners := listen(allInterfaces)
 
 	addrs := make([]string, 0, len(listeners))
