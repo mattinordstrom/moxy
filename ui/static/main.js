@@ -320,17 +320,17 @@ const renderMockdefs = () => {
             payload = JSONText.pretty(payload);
         }
 
+        const useFile = usesPayloadFromFile(mockEntityData);
+
         mockEntity += `
-                <div class="mock-obj mock_compact_exclude">
-                    <label for="payload_${i}">payload:</label>
+                <div class="mock-obj mock_compact_exclude${useFile ? ' payload-unused' : ''}" id="payloadobj_${i}">
+                    <label for="payload_${i}">${payloadSourceRadio(i, 'payload', !useFile)}payload:</label>
                     <textarea onchange="updateMockdef(this)" spellcheck="false" rows="20" cols="60" name="payload_${i}" id="payload_${i}">${escapeHTML(payload)}</textarea>
                 </div>`;
 
         mockEntity += `
-                <div class="mock-obj mock_compact_exclude">
-                    <label style="display:flex; flex-direction: column" for="payloadFromFile_${i}">
-                        payloadFromFile:
-                    </label>
+                <div class="mock-obj mock_compact_exclude${useFile ? '' : ' payload-unused'}" id="payloadfromfileobj_${i}">
+                    <label for="payloadFromFile_${i}">${payloadSourceRadio(i, 'file', useFile)}payloadFromFile:</label>
                     <textarea onchange="updateMockdef(this)" spellcheck="false" rows="4" cols="45" class="fixed-textarea" name="payloadFromFile_${i}" id="payloadFromFile_${i}">${escapeHTML(mockEntityData['payloadFromFile'])}</textarea>
                     <button class="mock-file-edit payload-files-btn small-btn" id="mock_file_edit_${i}" onclick="editFileFromMock(this)">
                         <i class="fa-solid fa-pen"></i>
@@ -562,6 +562,7 @@ const addMock = () => addDef('mock', {
     "method": "GET",
     "payload": '{ "response": "abc123" }',
     "payloadFromFile": "",
+    "usePayloadFromFile": false,
     "statuscode": 200,
     "urlpart": "/api/whatever/someendpoint"
 });
@@ -603,6 +604,11 @@ const updateDef = async (type, index, name, value) => {
     if(!defs[index]) {
         logInfo(defsFile(type) + ' changed on disk \u2014 reloaded, please try again');
         return;
+    }
+
+    // Pin a mock without the toggle to the source it was shown with, so editing payload doesn't silently switch it
+    if(type === 'mock' && typeof defs[index].usePayloadFromFile !== 'boolean') {
+        defs[index].usePayloadFromFile = usesPayloadFromFile(defs[index]);
     }
 
     defs[index][name] = value;
@@ -658,6 +664,19 @@ const updateMockdef = (el) => {
     }
 
     return updateDef('mock', Number(el.id.split('_').slice(-1)[0]), name, value);
+}
+
+const payloadSourceRadio = (i, source, checked) =>
+    `<input type="radio" class="payload-source" onchange="setPayloadSource(this)" name="payloadsource_${i}" id="payloadsource_${source}_${i}" value="${source}" title="Respond with this" ${checked ? "checked" : ""}></input>`;
+
+const setPayloadSource = (el) => {
+    const index = Number(el.id.split('_').slice(-1)[0]);
+    const useFile = el.value === 'file';
+
+    document.getElementById('payloadobj_' + index).classList.toggle('payload-unused', useFile);
+    document.getElementById('payloadfromfileobj_' + index).classList.toggle('payload-unused', !useFile);
+
+    return updateDef('mock', index, 'usePayloadFromFile', useFile);
 }
 
 const updateProxydef = (el) => {

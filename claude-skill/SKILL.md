@@ -66,7 +66,8 @@ These are the rules the request actually follows, and most surprises come from t
 - An active proxy with `urlpart: "/"` matches **every** request (the slashes are stripped,
   leaving an empty string), so it hides the default route and everything below it. When
   requests land on the wrong backend, look for such a catch-all first.
-- `payload` beats `payloadFromFile`; the file is only read when `payload` is null or empty.
+- `usePayloadFromFile` picks the response: `false` sends `payload` (even `null`), `true` reads the file.
+  Without it, the file is only read when `payload` is null or empty.
   `payloadFromFile` must be an **absolute path** and is read by moxy, not by you.
 - Mock responses are always sent as `application/json`.
 
@@ -131,7 +132,7 @@ responses, and dynamic/templated payloads. A mock is one fixed body per `urlpart
 
 ```json
 { "active": true, "comment": "optional", "freezetimems": 0, "method": "GET",
-  "payload": { "any": "json" }, "payloadFromFile": "", "statuscode": 200,
+  "payload": { "any": "json" }, "payloadFromFile": "", "usePayloadFromFile": false, "statuscode": 200,
   "urlpart": "/api/whatever" }
 ```
 

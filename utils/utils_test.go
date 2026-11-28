@@ -3,7 +3,6 @@ package utils_test
 import (
 	"encoding/json"
 	"log"
-	"strconv"
 	"testing"
 
 	"github.com/mattinordstrom/moxy/models"
@@ -54,27 +53,27 @@ func TestGetProxyEventString(t *testing.T) {
 func TestUsePayloadFromFile(t *testing.T) {
 	t.Parallel()
 
-	var testData models.Mock
-	testData.Method = "GET"
-	testData.URLPart = "/api/test/someendpoint"
-	testData.StatusCode = 200
-	testData.FreezeTimeMS = 0
-
-	// Test with only payloadFromFile
-	testData.PayloadFromFile = "/home/test/archive/somefile.json"
-	res := utils.UsePayloadFromFile(testData)
-	expected := true
-
-	if res != expected {
-		testhelper.PrintAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res), "")
+	tests := map[string]struct {
+		mock string
+		want bool
+	}{
+		"only payloadFromFile":             {`{"payloadFromFile":"/a.json"}`, true},
+		"empty payload":                    {`{"payload":"","payloadFromFile":"/a.json"}`, true},
+		"null payload without toggle":      {`{"payload":null,"payloadFromFile":"/a.json"}`, true},
+		"both without toggle":              {`{"payload":{"a":1},"payloadFromFile":"/a.json"}`, false},
+		"no file":                          {`{"payload":null}`, false},
+		"toggle on":                        {`{"payload":{"a":1},"payloadFromFile":"/a.json","usePayloadFromFile":true}`, true},
+		"toggle off serves a null payload": {`{"payload":null,"payloadFromFile":"/a.json","usePayloadFromFile":false}`, false},
 	}
 
-	// Test with both
-	testData.Payload = json.RawMessage(`{"response":"test123"}`)
-	res = utils.UsePayloadFromFile(testData)
-	expected = false
+	for name, test := range tests {
+		var mock models.Mock
+		if err := json.Unmarshal([]byte(test.mock), &mock); err != nil {
+			t.Fatal(err)
+		}
 
-	if res != expected {
-		testhelper.PrintAssertError(t, strconv.FormatBool(expected), strconv.FormatBool(res), "")
+		if got := utils.UsePayloadFromFile(mock); got != test.want {
+			t.Errorf("%s: got %v, want %v", name, got, test.want)
+		}
 	}
 }

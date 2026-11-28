@@ -92,10 +92,17 @@ def cmd_log(args):
             show([e for e in entries if wanted(e)])
 
 
+# Must match utils.UsePayloadFromFile in moxy
+def uses_payload_file(m):
+    if isinstance(m.get("usePayloadFromFile"), bool):
+        return m["usePayloadFromFile"]
+    return bool(m.get("payloadFromFile")) and m.get("payload") in (None, "")
+
+
 def describe_mock(idx, m):
     flag = "on " if m.get("active") else "off"
     freeze = f" {m['freezetimems']}ms" if m.get("freezetimems") else ""
-    src = "file:" + m["payloadFromFile"] if not m.get("payload") and m.get("payloadFromFile") else "inline"
+    src = "file:" + m.get("payloadFromFile", "") if uses_payload_file(m) else "inline"
     comment = f"  # {m['comment']}" if m.get("comment") else ""
     return f"[{idx}] {flag} {m.get('method','?'):6} {m.get('statuscode','?')}{freeze} {m.get('urlpart','')} ({src}){comment}"
 
@@ -154,6 +161,7 @@ def cmd_add_mock(args):
         "method": args.method.upper(),
         "payload": payload,
         "payloadFromFile": args.payload_from_file or "",
+        "usePayloadFromFile": args.payload is None and args.payload_file is None,
         "statuscode": args.status,
         "urlpart": args.urlpart,
     }

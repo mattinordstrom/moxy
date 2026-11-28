@@ -123,6 +123,15 @@ const JSONText = (() => {
     };
 })();
 
+// Must match utils.UsePayloadFromFile in Go
+const usesPayloadFromFile = (mock) => {
+    if(typeof mock.usePayloadFromFile === 'boolean') {
+        return mock.usePayloadFromFile;
+    }
+
+    return !!mock.payloadFromFile && [undefined, null, '', 'null'].includes(mock.payload);
+}
+
 const safelyParseJSON = (data) => {
     if (data === "null") return null;
     if (data === "true") return true;

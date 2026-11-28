@@ -9,6 +9,8 @@ type Mock struct {
 	Method          string          `json:"method"`
 	Payload         json.RawMessage `json:"payload"`
 	PayloadFromFile string          `json:"payloadFromFile"`
-	StatusCode      int             `json:"statuscode"`
-	URLPart         string          `json:"urlpart"`
+	// Nil means the mock predates the toggle, so the old "file when payload is empty" rule applies
+	UsePayloadFromFile *bool  `json:"usePayloadFromFile,omitempty"`
+	StatusCode         int    `json:"statuscode"`
+	URLPart            string `json:"urlpart"`
 }

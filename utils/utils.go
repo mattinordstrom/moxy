@@ -39,17 +39,16 @@ var (
 )
 
 func UsePayloadFromFile(mockEntity models.Mock) bool {
-	payload := mockEntity.Payload
-	payloadFromFile := mockEntity.PayloadFromFile
-
-	usePayloadFromFile := false
-	payloadFromFileSet := payloadFromFile != ""
-
-	if (payload == nil || string(payload) == "" || string(payload) == "\"\"") && payloadFromFileSet {
-		usePayloadFromFile = true
+	if mockEntity.UsePayloadFromFile != nil {
+		return *mockEntity.UsePayloadFromFile
 	}
 
-	return usePayloadFromFile
+	switch string(mockEntity.Payload) {
+	case "", `""`, "null":
+		return mockEntity.PayloadFromFile != ""
+	default:
+		return false
+	}
 }
 
 func GetMockEventString(mockEntity models.Mock, withColor bool, payload string) string {

@@ -84,7 +84,7 @@ See [claude-skill/README.md](claude-skill/README.md) for how to install it.
 - Json files are read from top to bottom and request is processed at first match.
 - If no match is found in Json the "Default route" will be used
 - URLs will be matched "if contains", so the order and precision in the json urlpart is important
-- If payload and payloadFromFile are both defined payload will be used
+- `usePayloadFromFile` picks what a mock responds with: `false` sends `payload` (which may be `null`), `true` sends the file in `payloadFromFile`. Mocks without it use the file only when `payload` is empty or `null`
 - .* can be used in urlpart in mocks and proxies
 - Want to run on https? Check out the README in the https directory
 - Proxies check the TLS certificate of https targets. For a dev server with a self-signed certificate, set `"insecure": true` on the proxy (or `insecure: true` under `defaults` in config.yml for the default route). This skips the check, so anyone between you and that server could read or change the traffic

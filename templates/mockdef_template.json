@@ -8,6 +8,7 @@
       "response": "abc123"
     },
     "payloadFromFile": "",
+    "usePayloadFromFile": false,
     "statuscode": 404,
     "urlpart": "/api/whatever/someendpoint"
   },
@@ -20,6 +21,7 @@
       "response": "abc123"
     },
     "payloadFromFile": "",
+    "usePayloadFromFile": false,
     "statuscode": 200,
     "urlpart": "/api/whatever/someendpoint/.*/meta"
   },
@@ -29,6 +31,7 @@
     "method": "GET",
     "payload": null,
     "payloadFromFile": "/absolute_path_to_proj_dir/moxy/archive/example.json",
+    "usePayloadFromFile": true,
     "statuscode": 200,
     "urlpart": "/api/entities"
   }
