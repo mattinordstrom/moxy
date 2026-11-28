@@ -20,6 +20,9 @@ go run main.go -v       # Print version and exit
 
 ### Release
 The version lives in `version/version.go` and is shown in the terminal banner and the admin UI header.
+
+When finishing a user-facing change (feature, fix, config or mockdef format change), ask whether to bump the version and release, and suggest the semver level: patch for fixes, minor for features or new optional fields, major for breaking changes. Never bump, tag or release without being asked.
+
 ```bash
 # 1. Bump version.Version and commit
 # 2. Tag and push; .github/workflows/release.yml checks the tag matches version.Version and creates the GitHub release
